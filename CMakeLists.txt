@@ -19,8 +19,8 @@ include( SetupWarnLevel )
 ## we have to play some tricks to get install
 ## path to "stick" in Windows
 ##------------------------------------------------
-set( MIRO_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/../${ARCHITECTURE}" CACHE PATH "Miro install path")
-set( CMAKE_INSTALL_PREFIX ${MIRO_INSTALL_PREFIX} CACHE INTERNAL "" )
+#set( MIRO_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/../${ARCHITECTURE}" CACHE PATH "Miro install path")
+#set( CMAKE_INSTALL_PREFIX ${MIRO_INSTALL_PREFIX} CACHE INTERNAL "" )
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
@@ -92,10 +92,6 @@ add_build_switch( tests    BUILD_DEFAULT_TRUE )
 # install the export file
 #------------------------------------
 install_export()
-
-# package script
-#------------------------------------
-include( CMakePack.txt )
 
 #------------------------------------
 print_build_switches()
