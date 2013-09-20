@@ -1,5 +1,17 @@
 This is the README file for the Miro software package.
 
+Miro depends on 
+  ACE 5.7.2 or greater
+      http://www.cs.wustl.edu/~schmidt/ACE.html
+  Qt4 with Qt3Support library
+      http://qt-project.org/
+
+and optionally depends on 
+  TAO 1.7.2 or greater
+      http://www.cs.wustl.edu/~schmidt/TAO.html
+  JsonCPP
+      http://sourceforge.net/projects/jsoncpp/
+      
 The layout of this this software is organized as follows:
 
 $(MIRO_ROOT)/
