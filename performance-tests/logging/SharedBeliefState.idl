@@ -1,0 +1,423 @@
+// -*- idl -*- ///////////////////////////////////////////////////////////////
+//
+// This file is part of Miro (The Middleware for Robots)
+// Copyright (C) 1999-2005
+// Department of Neuroinformatics, University of Ulm, Germany
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation; either version 2, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+// $Id$
+//
+#ifndef SharedBeliefState_idl
+#define SharedBeliefState_idl
+
+#include "orbsvcs/TimeBase.idl"
+
+//! Namespace of definitions for the RoboCup F2000 legue.
+module MSL
+{
+  //! Type representing an object identifer.
+  typedef unsigned long ObjectID;
+
+  //! Namespace holding the observabel objects and their super-classes.
+  module Item
+  {
+    //! The observed object is something. - Surprise, surprise!
+    const ObjectID ANY_OBJECT = 0;
+    //! The observed object is a static object.
+    /** 
+     * Static objects are mainly usefull for localization issues.
+     *
+     * But exchanging observations about static objects can be used to
+     * localize dynamic objects (like the ball) relative to static
+     * ones. - Which in turn can be used to enhance the precision of
+     * the location of an observation, as well as for consistency
+     * checks.
+     */
+    const ObjectID STATIC_OBJECT = 1;
+    //! The observed object is a corner flags.
+    const ObjectID CORNER_FLAG = 2;
+    //! The observe object is an own corner flags.
+    const ObjectID CORNER_FLAG_TEAM = 3;
+    //! The observe object is an own right corner flags.
+    const ObjectID CORNER_FLAG_TEAM_RIGHT = 4;
+    //! The observe object is an own left corner flags.
+    const ObjectID CORNER_FLAG_TEAM_LEFT = 5;
+    //! The observe object is an opponents corner flags.
+    const ObjectID CORNER_FLAG_OPPONENT = 6;
+    //! The observe object is an opponents right corner flags.
+    const ObjectID CORNER_FLAG_OPPONENT_RIGHT = 7;
+    //! The observe object is an opponents left corner flags.
+    const ObjectID CORNER_FLAG_OPPONENT_LEFT = 8;
+    //! The observed object is a goal posts.
+    /** 
+     * The left and right goal posts can be distinguished
+     * without further context.
+     */
+    const ObjectID GOAL_POST = 9;
+    //! The observed object is an own goal posts.
+    const ObjectID GOAL_POST_TEAM = 10;
+    //! The observed object is the own right goal posts.
+    const ObjectID GOAL_POST_TEAM_RIGHT = 11;
+    //! The observed object is the own left goal posts.
+    const ObjectID GOAL_POST_TEAM_LEFT = 12;
+    //! The observed object is an opponents goal posts.
+    const ObjectID GOAL_POST_OPPONENT = 13;
+    //! The observed object is the opponents right goal posts.
+    const ObjectID GOAL_POST_OPPONENT_RIGHT = 14;
+    //! The observed object is the opponents left goal posts.
+    const ObjectID GOAL_POST_OPPONENT_LEFT = 15;
+    const ObjectID DYNAMIC_OBJECT = 16;
+    //! The observed object is the ball.
+    const ObjectID BALL = 17;
+    //! The observed object is a robot.
+    const ObjectID ROBOT = 18;
+    //! The observed object is a robots of the own team.
+    const ObjectID ROBOT_TEAM = 19;
+    //! The observed object is the own goalie.
+    const ObjectID ROBOT_TEAM_GOALIE = 20;
+    const ObjectID ROBOT_TEAM_1 = 21;
+    const ObjectID ROBOT_TEAM_2 = 22;
+    const ObjectID ROBOT_TEAM_3 = 23;
+    const ObjectID ROBOT_TEAM_4 = 24;
+    const ObjectID ROBOT_TEAM_5 = 25;
+    //! The observed object is a robots of the opponents team.
+    const ObjectID ROBOT_OPPONENT = 26;
+    //! The observed object is the opponents goalie.
+    const ObjectID ROBOT_OPPONENT_GOALIE = 27;
+    const ObjectID ROBOT_OPPONENT_1 = 28;
+    const ObjectID ROBOT_OPPONENT_2 = 29;
+    const ObjectID ROBOT_OPPONENT_3 = 30;
+    const ObjectID ROBOT_OPPONENT_4 = 31;
+    const ObjectID ROBOT_OPPONENT_5 = 32;
+  };
+
+  //! A time value. 
+  /** 
+   * Note that there are conversion methods to and from ACE_Time_Value
+   * and ACE_hrtime_t in <orbsvcs/Time_Utilities.h>
+   */
+  typedef TimeBase::TimeT TimeT;
+
+  //! The estimated validity of an observation.
+  /**
+   * Given as probability: 0. ... 1. 
+   *
+   * A probability of zero indicates, the object was not detected.
+   * A probability of one indicates, the object was detected, but we
+   * have no knowledge about the reliability of this detection.
+   *
+   * Any other value represents the probability, that the object
+   * is of the specified kind.
+   * 
+   * The precision of a single precision floating point value should
+   * be sufficient.
+   */
+  typedef float Probability;
+
+  //! Struct holding an object classification.
+  /**
+   * As we model a multi modal classificator, we have a vector of
+   * probabilities, holding an entry for each possible classification.
+   * As this probaility vector should be filled sparsely, we record
+   * only the none null values.
+   */
+  struct Classification
+  {
+    //! The identity of the classification result.
+    ObjectID id;
+    //! The probability that the observation actually represents the denoted object.
+    Probability certainty;
+  };
+
+  //! An angular value.
+  /** 
+   * Value given in radiant.
+   * If possible normalized to  -PI < alpha <= PI.
+   * Exceptions have to be made for things 
+   * like an angular velocity.
+   *
+   * For accuracy, a single precision floating point value should be
+   * sufficient.
+   */
+  typedef float Angle;
+
+  //! A probability vairance.
+  /**
+   * For accuracy, a single precision floating point value should be
+   * sufficient.
+   */
+  typedef float Variance;
+
+  //! A two dimensional covariance matrix.
+  struct Covar2d
+  {
+    //! Varance of the x dimension.
+    Variance xx;
+    //! Covariance of xy dimensions.
+    Variance xy;
+    //! Variance of the y dimension.
+    Variance yy;
+  };
+
+  //! A three dimensional covariance matrix.
+  /**
+   * The third dimension is actually an angular variance.
+   */
+  struct Covar3d
+  {
+    //! Variance of the x dimension.
+    Variance xx;
+    //! Covariance of xy dimensions.
+    Variance xy;
+    //! Variance of the xa dimension.
+    /** The dimension a of a pose is an angular value. */
+    Variance xa;
+    //! Variance of the y dimension.
+    Variance yy;
+    //! Variance of the ya dimension.
+    /** The dimension a of a pose is an angular value. */
+    Variance ya;
+    //! Covariance of the a dimension.
+    /** The dimension a of a pose is an angular value. */
+    Variance aa;
+  };
+
+  //! A 2D vector.
+  /**
+   * We use mm resolution and integer types.
+   * The resolution should be accurate enough for a long time.
+   * The range covers about 4.000km which should cover the
+   * range of current sensor ranges.
+   *
+   * Using doubles would also double the memory footprint.
+   * Using floats would buy us nothing.
+   *
+   * The only issue might be, that int <-> double conversions
+   * for local calculations are processor time consuming.
+   */
+  struct Vector2d
+  {
+    //! mm
+    long x;
+    //! mm
+    long y;
+  };
+
+
+  //! A pose consiting of a 2D coordinate and an orientation.
+  struct Pose3d
+  {
+    //! mm
+    long x;
+    //! mm
+    long y;
+    //! The orientation.
+    Angle alpha;
+  };
+
+  //! Struct holding the state of an object.
+  /** 
+   * The state is defined as the pose as well as the velocity of an
+   * object. For static objects, the velocity of the object is
+   * expected to be zero. For most observed objects, the rotational
+   * velocity is unobservable. In this case, the rotational velocity
+   * should be set to zero.
+   *
+   * The covariance of the pose is provided, the covariance of the
+   * velocity currently is not.
+   */
+  struct ObjectState01
+  {
+    //! The pose estimation of the object.
+    Pose3d pose;
+    //! The velocity estimation of the object.
+    /**
+     * We do not model the precision of these values explicitly.
+     * 
+     * The measures are redefined:
+     * - mm -> mm/s
+     * - ° -> °/s
+     */
+    Pose3d velocity;
+    //! Variance of the robots pose.
+    /** A three-dimensional normal distribution is assumed. */
+    Covar3d poseCovar;
+  };
+
+  //! Sequence holding a set of classifications.
+  /**
+   * The vector is ordered ascendingly by the object id.
+   */
+  typedef sequence<Classification> ClassificationVector;
+  
+  //! Struct holding an observation.
+  /**
+   * Versioning of complex structs is necessary to make different versions
+   * destinguishable in logged data streams.
+   */
+  struct Observation01
+  {
+    //! The observed objects state.
+    ObjectState01 state;
+    //! The observed objects identity probability distribution.
+    ClassificationVector classification;
+  };
+
+  //! Sequence holding a set of observations.
+  typedef sequence<Observation01> ObservationVector01;
+
+  //! An observed free area.
+  /**
+   * This forms a triagle with the robot position (0,0).
+   *
+   * Versioning of complex structs is necessary to make different versions
+   * destinguishable in logged data streams.
+   */
+  struct FreeArea01
+  {
+    //! The validity of the observation.
+    Probability certainty;
+
+    //! Observed right end of the area.
+    Vector2d right;
+    //! Observed left end of the area.
+    Vector2d left;
+    //! Covariance matrix of the right side.
+    /** A two-dimensional normal distribution is assumed. */
+    Covar2d rightCovar;
+    //! Covariance matrix of the left side.
+    /** A two-dimensional normal distribution is assumed. */
+    Covar2d leftCovar;
+  };
+
+  //! Sequence holding a set of free areas.
+  typedef sequence<FreeArea01, 2> AreaVector01;
+
+  //! Description of the egocentric world view of a robot.
+  /**
+   * The position of the robot in this world view is allways (0, 0, 0) 
+   * for (x, y, theta).
+   *
+   * Versioning of complex structs is necessary to make different versions
+   * destinguishable in logged data streams.
+   */
+  struct EgocentricBeliefState01
+  {
+    //! Free areas in the opponents goal.
+    /**
+     * To score a goal, we do not need to know where any robots are,
+     * but where no robots are within the goal.
+     *
+     * We supply two areas. There might be more then two free 
+     * areas within the goal. In this case the robot can choose
+     * which two to tell the other team mates. The two biggest
+     * are best to coordinate an attack.
+     */
+    AreaVector01 oppGoal;
+    //! Free areas in the own goal.
+    /**
+     * To defend the goal, we do not need to know where any robots are,
+     * but where no robots are within the goal.
+     *
+     * We supply two areas. There might be more then two free 
+     * areas within the goal. In this case the robot can choose
+     * which two to tell the other team mates. The two biggest
+     * are best to coordinate a defence.
+     */
+    AreaVector01 ownGoal;
+
+    //! The set of observed objects.
+    ObservationVector01 observation;
+  };
+
+  //! The complete status of the mobile base at a discrete time.
+  /**
+   * Struct representing an Odometry event as passed via the 
+   * NotificationService.
+   *
+   * Versioning of complex structs is necessary to make different versions
+   * destinguishable in logged data streams.
+   */
+  struct AutoBeliefState01
+  {
+    //! Estimated validity of the pose.
+    /** 
+     * If the robot knows, that it is currently not localized,
+     * it can indicate this to the other robots by this
+     * value.
+     */
+    Probability certainty;
+    //! Current pose of the robot.
+    Pose3d pose;
+    //! Variance of the robots pose.
+    /** A three-dimensional normal distribution is assumed. */
+    Covar3d poseCovar;
+
+    //! Current egocentric velocity of the robot.
+    /**
+     * We do not model the certainty and precision of these
+     * values explicitly.
+     * 
+     * The measures are redefined:
+     * - mm -> mm/s
+     * - ° -> °/s
+     */
+    Pose3d velocity;
+  };
+
+  //! Struct holding the belief state of a robot for team communication.
+  /**
+   * Note that this is not the fused belief state, but only the information
+   * shared with other robots.
+   * The idea is to share the egocentric world view of each robot with
+   * the whole team. Together with the motion status of each robot,
+   * this should be enough for each robot to construct a global "shared"
+   * world model. This information can then be used for cooperation 
+   * among robots.
+   *
+   * Network bandwidth should allow for a minimum of 10Hz.
+   * (Well, we have to calculate this accurately for the NotifyMulticast
+   * protocol of Miro...)
+   *
+   * If each robot is localized no packages are dropped, this will 
+   * give a consistent world model of all team members. An explicit or 
+   * even a central role assignement should not be necessary, but each 
+   * robot can determine his (and the other robots) role from the unified
+   * world model.
+   *
+   * But even with
+   * partial failure, this information can still be used for team 
+   * coordination. I.e. a robot that is not localized but is seeing the ball
+   * can interfere from the egocentric ball positions of the other
+   * robots, whether he should go for the ball or not.
+   *
+   * The identity of the sending robot is given in the message header and
+   * is therefore not coded within the message itself.
+   *
+   * Versioning of complex structs is necessary to make different versions
+   * destinguishable in logged data streams.
+   */
+  struct SharedBeliefState01
+  {
+    //! The Time, the belief state was collected.
+    TimeT time;
+    //! The current state of the robot.
+    AutoBeliefState01 state;
+    //! The observations of the robot.
+    EgocentricBeliefState01 egoBelief;
+  };
+};
+#endif // SharedBeliefState_idl

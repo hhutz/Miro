@@ -1,0 +1,784 @@
+\chapter{Behaviour Engine}
+\label{sec:BAP}
+
+Controlling the actuators of an autonomous mobile robot is one of the
+central aspects of mobile robot research. As \miro exposes the
+interfaces to the motor controllers etc. of the mobile platform it
+enables researchers to easily evaluate new approaches to model sensor
+actor control loops. Be aware that at this point the latencies
+introduced by various levels of the robot architecture can become a
+critical issue. To eliminate the network latency and prevent yourself
+from occasional network bandwidth problems we recommend that you run
+your control programs collocated on the same computer with the service
+that accesses the actuators device.
+
+\miro supports the behavioural control paradigm introduced by Brooks
+\cite{Brooks} by its own behaviour engine. It is designed to allow for
+a quick start into behaviour robotics writing your own behaviours. Yet,
+due to its open and extensible design it is also capable of handling
+sophisticated control tasks as demonstrated by its use within the
+RoboCup-scenario by our \sparrow an \sparrowIII robots.
+
+\section{The Concept of Behaviours}
+
+The basic idea of the behaviour approach to robot control is as
+follows. Instead of the sense-plan-act paradigm of classical AI, the
+task is splited into a set of reactive behaviours, that each try to
+fulfill a small subtask of the problem set. For each of the tasks only
+a very limited part of world modeling is needed (often, even raw
+sensor readings are sufficient). By combining the output of the
+various behaviours by an arbiter, the emergent higher level behaviour
+of the system is achieved, solving the recommended high level task.
+
+An accepted bottleneck of this approach is the arbitration and
+calibration of large sets of behaviours necessary to fulfill different
+aspects of a high level task. Therefore in the \miro framework the
+behaviour engine also support the hierarchical decomposition of
+behaviour sets by allowing them to be grouped in so called action
+patterns that can be activated alternately by so called transition
+messages. A set of action patterns is called a policy within the \miro
+framework. 
+
+There do exist two different kinds of transitions within the behaviour
+framework: local and global transitions. Local transitions are emitted
+by the behaviours by name. For example a transition named
+``GoalReached'' might be emitted by a behaviour when it decides, it
+has fulfilled its task. Within an action pattern a transition is
+linked to the successor pattern, that will be activated as the
+transition message occurs. That way totally different action patterns
+can be activated, when the behaviour emits the ``GoalReached''
+transition message within different action patterns. Global
+transitions are somehow simpler. They contain directly the action
+pattern, that is to be activated next. This mechanism is designed for
+modules of the robot, that are external to the behaviour framework.
+For example if a task planner decided it would be time for the robot
+to go home, it might activate the ``GoHome'' pattern just by issuing a
+global ``GoHome'' transition. The robot will then switch to its GoHome
+pattern regardless of what it was doing before.
+
+\section{Introductory Examples}
+
+Lets look at the simple action pattern, who's high level task is to
+explore the environment by performing a random walk. This is easily
+splited into two distinct behaviours. The first subtask is not to
+collide with the environment. This can be achieved by an avoid
+behaviour, that reads the front sonar sensors to determine how far it
+is away from the nearest obstacle. If the minimal distance is below
+some threshold, it tells the arbiter to turn away into another
+direction. The second behaviour would be a wander behaviour. It selects
+from time to time just randomly some translational and rotational
+velocity, making the robot move around. It does not have to care about
+obstacles, since those are taken care of by the avoid behaviour.
+
+The task of choosing the actual velocities to be applied to the motors
+is performed by the arbiter. It therefore plays a central role in the
+behaviour approach. There exist various kinds of arbiters, all
+choosing different policies for this task. But a simple priority based
+arbiter suffices for many scenarios. In \miro there currently just
+exists a priority based arbiter, but since it is an extensible
+framework you can easily plug in your own one. The priorities in this
+example could be applied straight forward. The avoid behaviour has
+higher priority as the wander behaviour.
+
+Note the easy extensibility of this approach. For example, if we have
+some bump sensors that indicate collisions with the environment. We
+could just add another, let's call it ``EmergencyStop'' behaviour and
+assign it the highest priority.  If one of the bumpers is pressed it
+makes the robot stop and wait for rescue by one of the operators.
+
+As a further extension we assume we have two tasks. The first is the
+random walk described above, the second would be a wall following
+behaviour, that simply is capable to drive the robot in a defined
+distance along a wall. The decision what to do is provided by an
+external source, say, a button located on the robot and pressed by the
+operator when demonstrating the management the capabilities of the
+newly bought autonomous mobile robot. The second action pattern looks
+quite like the first one, except that the wander behaviour is
+exchanged by a wall following behaviour, that drives the robot along
+the wall. (Note that this behaviour does not have to care about walls
+thar are blocking the way at the end of the corridor, since this can
+be taken care of by the avoid behaviour.) These two action patterns
+now form a policy. The pressing of the button sends a transition
+message, that disables the currently running action pattern and
+enables the other one.
+
+The action pattern / transition message mechanism also fits naturally
+for coupling reactive behavioural control with deliberative planning
+architectures. The transition could also be raised by a path planner
+and the corresponding action patterns could be 'move to point', 'drive
+through door' or 'dock at power supply'. Indeed this was already done
+within \cite{Hans-Diplom}.
+
+
+\section{Example Usage}
+
+As an example of the behaviour framework in use,
+let us start the obstacle avoid demo.
+\begin{itemize}
+\item
+  Start all the robot main services from within {\tt \$MIRO\_ROOT/bin/}
+  with: \\
+  {\tt PioneerBase} \\
+  This server has to run on the robot.
+\item
+  Start the Behaviours, specifying the policy at the command line: \\
+  {\tt Behaviours ../examples/behaviours/PpbStraight.xml} \\
+  This client can run on any computer, however,
+  it is a good idea to run the behaviours on the robot,
+  to avoid that network latencies stop the control loop.
+\item
+  Start the policy controller GUI from within
+  {\tt \$MIRO\_ROOT/bin/} with: \\
+  {\tt PolicyController} \\
+  to start and stop the policy run by Behaviours.
+  Run this from any computer.
+\end{itemize}
+
+\subsection{The Behaviour Control Loops}
+
+The core of the behaviour framework gets instantiated and initialized
+in the file {\tt Behaviours.cpp} in {\tt
+  \$MIRO\_ROOT/examples/behaviours/} with its {\tt main()} procedure.
+It instantiates all available behaviours and arbiters starts a thread
+for the timer service (ACE\_Reactor) needed by timed behaviours (see
+section \ref{SEC:MIRO_TIMED_BEHAVIOUR}) and runs the CORBA event loop
+for its BehaviourEngine interface, as well as for the event consumers
+like event behaviours (see section \ref{SEC:MIRO_EVENT_BEHAVIOUR})
+that get pushed by {\tt PioneerBase} for instance.  Behaviours
+themselves do not have an own {\tt main} procedure.  They are
+implemented in the {\tt action()} method of ordinary C++ objects which
+have to be known in {\tt Behaviours.cpp}.  Necessarily, all behaviours
+run on one computer.
+
+\begin{figure}[!ht]
+  \includegraphics[width=\textwidth]{Miro_behaviours}
+  \caption{The Behaviour Architecture Overview}
+  \label{FIG_BEHAVIOUR_ARCHITECTURE}
+\end{figure}
+
+
+As seen in Fig.~\ref{FIG_BEHAVIOUR_ARCHITECTURE}, {\tt Behaviours.cpp}
+runs two loops synchronously: the timer loop for timed behaviours and
+the CORBA loop.
+The timer loop is started in a separate thread (invoked by the command
+"task$\rightarrow$open(NULL);").
+It schedules the timed behaviours
+by invoking their {\tt action()} methods one after another. 
+
+The CORBA loop of {\tt Behaviours.cpp} (invoked by the command
+"server.run(5);").  processes requests for the BehaviourEngine
+interface (which it registers under the name "BehaviourEngine" at the
+CORBA Naming Service) from the PolicyController, as well as it
+administers all CORBA requests from {\tt PioneerBase} and invokes the
+event behaviours.  The {\tt action()} method of an event behaviour is
+invoked whenever the CORBA notification service publishes an event to
+which the behaviour has subscribed.  Events are subscribed to by their
+names, e.g. "Tactile" or "Sonar" (see {\tt TactileStop.cpp} or 
+{\tt SonarNotify.cpp}). The published sensory events and their associated
+payload are described in section \ref{SEC:ASYNCHRONOUS_SENSORY_INFORMATION}.
+
+Invocation of an {\tt action()} method by the event "Tactile"
+is reminiscent of a call to a server registered as "Tactile" by a client,
+e.g.\ {\tt PioneerBase}. However, there are a few differences:
+{\sl (i)} the event "Tactile" calls not a program with its own
+{\tt main()}, but only an {\tt action()} method,
+{\sl (ii)} not one unique method is invoked,
+but all {\tt action()} methods which have subscribed to that event and
+{\sl (iii)} unlike proper services, the TAO {\tt nslist} utility does
+not list these event consumers,
+because they cannot be meaningfully invoked by an external program.
+
+
+The Behaviour Engine Implementation loads an XML Policy File into a
+policy instance and starts and stops the policy. On activation of an
+action pattern, all behaviour that are part of the action pattern get
+connected to the event chanel or the timer respectively.
+
+\section{Arbiters and Messages}
+
+Arbiters select the action from all the suggestions the behaviours of
+an action pattern make. The behaviours make a suggestions by sending
+an arbitration message to the arbiter. Each arbiter has its own
+arbitration message format, depending on the arbitration scheme used
+and the actuatory device(s) it controls.
+
+In \miro currently exist three arbiters. The {\tt MotionArbiter} used
+in all examples, the specialized {\tt PowerArbiter}, that uses the
+SparrowMotion interface and the experimental {\tt WindowArbiter}.
+
+\subsection{MotionArbiter}
+
+The arbiter acts only on the motor output of the behaviours:
+instead of sending motor commands directly to the {\tt Motion} interface,
+the behaviours invoke the method arbitrate() of the arbiter,
+passing it a message.
+
+The {\tt MotionArbiter} uses a simple fixed priority, winner
+takes all, arbitration scheme. That is, each behaviour has a fixed
+priority that corresponds with the order the behaviours are defined
+within the action pattern. In the {\tt MotionArbiterMessage}, that is,
+the parameter passed by the {\tt arbitrate()} call, the behaviour can
+specify whether it wants to suggest the arbiter an action or not. The
+action is defined by the translational and rotational velocity for the
+motion. The arbiter then decides whether to transform the content of
+the message into motor commands or whether to issue the motor commands
+of another, conflicting behaviour which has a higher priority.
+
+Note that the arbitration of messages before conversion into motor
+commands, however, is only for the wheels of the robot by the {\tt
+  MotionArbiter}.  The other actuators, for instance the camera
+pan-tilt unit or the grippers, are to be controlled directly in this
+case. No arbiter has to be defined for them, as long as a only single
+behaviour is expected to control them.
+
+\section{Implementing a Behaviour}
+
+All behaviours are derived from the base class {\tt Miro::Behaviour}.
+The central method of this class is the method {\tt action()}.
+It is to be overwritten by the programmer
+and has to contain the behavioural code.
+The method becomes invoked by the behaviour control file,
+i.e.\ {\tt Behaviours.cpp}, which includes the behaviour header files
+and which links the behaviours to their corresponding control loops.
+However, if only a new policy is combined from existing behaviours,
+then {\tt Behaviours.cpp} does not need to be modified.
+
+The behaviours' {\tt action()} method is expected to call an arbitration
+method or send a transition message. Note the inversion of control flow.
+A behaviour is not allowed to jump into some infinite loop,
+but the {\tt action()} method is called continously
+as long as the behaviour is active within some action pattern.
+So every {\tt action()} method must return quickly enough after its
+invocation to give time to the others. This implements the idea of
+simple reactive behaviours rather than complex strategies.
+If it is necessary to run a behaviour continuously in parallel to other
+behaviours, then own threads have to be created, e.g. using ACE.
+
+Only one instance of each behaviour object is used within the behaviour
+engine, even for different action patterns.  Therefore data that needs
+to be stored between subsequent {\tt action()} method invocations can
+be easily stored within member variables.
+
+From an implementation perspective, there are three kinds of
+behaviours, depending on how the data, the behaviour bases its
+decisions on, is delivered.
+
+\subsection{Miro::TimedBehaviour}
+\label{SEC:MIRO_TIMED_BEHAVIOUR}
+
+This is the base class for a timer scheduled behaviour. A behaviour
+derived from this class runs with all its brothers and sisters
+cooperatively multi-threaded in one thread of control. The pace at
+which its {\tt action()} method is called is selectable by a parameter of
+the base class.
+
+This is the most simple form of behaviour design and in many cases most
+straight forward. It is especially suitable for behaviours that poll
+their sensory information of the world model, like for instance the
+current scan of the laser range finder for collision avoidance. Also
+the above mentioned wander behaviour - which doesn't use any sensory
+information would be best implemented as a child of the
+{\tt Miro::TimedBehaviour} class.
+
+See {\tt \$MIRO\_ROOT/examples/behaviours/simple/Wander.cpp|h} for a
+complete source code example.
+
+\subsection{Miro::EventBehaviour}
+\label{SEC:MIRO_EVENT_BEHAVIOUR}
+
+This is the base class behaviours using asynchronous sensory
+information published by the Notification Service. It subscribes for
+the events it likes to get pushed and the action method is called
+whenever a new message arrives. A pointer to the current structured
+event is then available as member variable.
+
+The emergency stop behaviour described
+above would be a good candidate for such a behaviour, since it would
+have to poll excessively as a timed behaviour in order to minimize the
+latency between a bumper pressing a the actual stop, while it would
+only need to call an arbitration method in very rare occasions.
+
+See {\tt \$MIRO\_ROOT/examples/behaviours/simple/TactileStop.cpp|h} for a
+complete source code example.
+
+\subsection{Miro::TaskBehaviour}
+\label{SEC:MIRO_TASK_BEHAVIOUR}
+
+Behaviours derived from this calls run within their own thread of
+control, not blocking others even if they need fairly long for their
+decisions. Note that such a behaviour is likely to be miss designed,
+since it contradicts the behavioural approach to need excessive time
+to come to a decision. But if you have need for something like this,
+since you are doing something we didn't think of, this is the class to
+base your behaviour on. Note however, that since behaviours are shut
+down cooperatively, also a task behaviour is not allowed to loop
+indefinitely within its action method. If the behaviour is still part
+of the currently running action pattern, its action method will be
+call immediately after giving control back to the behaviour framework.
+
+\subsection{Behaviour Parameters}
+
+Behaviours usually get used within different action patterns. But they
+are often expected to behave slightly different within each
+constellation. Therefore each behaviour has an associated {\tt
+  BehaviourParameters} class which is designed to hold the different
+parameter sets for the different use cases of a behaviour. These
+parameter classes become initialized on startup of the behaviour
+framework and are expected to be static and constant during the run of
+an entire policy. (How to handle dynamic parameters like destination
+coordinates of a 'move to position' behaviour is explained in section
+\ref{SEC:DYNAMIC_PARAMETERS})
+
+Behaviours, which subclass the {\tt BehaviourParameters} class,
+need to have their own {\tt BehaviourParameters}
+subclass factory methods, for dynamic instantiation. This is captured by
+the two macros:
+\begin{itemize}
+\item BEHAVIOUR\_PARAMETERS\_FACTORY(X)
+\item BEHAVIOUR\_PARAMETERS\_FACTORY\_IMPL(Y, X)
+\end{itemize}
+X denotes the name of the behaviour parameters class and Y denotes the
+name of the behaviour class. The first macro has to be placed within
+the class definition and the second within the cpp-file containing the
+behaviour implementation.
+
+The behaviour parameters classes are handled by the parameters
+framework described in the previous chapter. Section
+\ref{sec:BehaviourDescription} covers the details for parameter
+classes for behaviours.
+
+\subsection{Behaviour Initialization}
+\label{sec:init}
+
+Before an action pattern becomes activated all its behaviours {\tt
+  init()} methods are called successively. This allows behaviours to
+initialize their per task parameters (like destination coordinates) in
+a convenient way. Note however, that the {\tt init()} method can be
+called while the behaviour is already active (see section
+\ref{sec:active-inactive}) and so its {\tt action()} method can be
+concurrently running. Therefore a mutex is needed to avoid race
+conditions. For an example see:
+
+{\tt \$MIRO\_ROOT/examples/behaviours/simple/Timer.cpp|h}
+
+Parameters that are valid for the whole lifetime of a behaviour, such
+as references to the robots services or other objects within the
+behaviours address space are best to be passed during construction
+of the behaviour, forming a so called initializing constructor.
+
+\subsection{Behaviour Activation and Deactivation}
+\label{sec:active-inactive}
+
+When a behaviour is to become active due to it being part of an action
+pattern its {\tt open()} method is called. If the behaviour is no longer
+part of the next to be running action pattern its {\tt close()} method is
+called. If a transition from one action pattern to another is
+performed and the behaviour is part of both behaviour sets, then no
+calls to {\tt close()} and {\tt open()} methods will be issued. Only the
+behaviours {\tt init()} method will be called, to allow it to update its
+parameter sets. This is useful to avoid unnecessary behaviour
+shutdown.
+
+Note also, that the {\tt close()} method can be called while the behaviour
+is concurrently within the {\tt action()} method. --- Its call to the
+arbiter will then just be ignored. On the call of {\tt open()} however it
+is guaranteed that the behaviour currently is not running.
+
+\subsection{Changing Behaviour Parameters within an Action Pattern}
+\label{SEC:DYNAMIC_PARAMETERS}
+
+Another way for interaction with the behaviour framework from outside
+is by changing the parameters of a behaviour within an action pattern
+during execution of the behaviour engine. In this case the behaviour
+name as well as the action pattern it belongs to has to be known. You
+can then query as well as set the behaviour parameters instance via
+the interface of the policy.
+
+However there are some issues that have to be take care of. First, the
+type of the derived behaviour parameters struct has to be known, as
+you get a pointer to a BehaviourParameters instance, that has to be
+down casted appropriately. Second, to avoid memory leaks and
+segmentation faults, the memory handling has to be understood. When
+querying the parameters, the caller takes ownership of the object
+returned. When setting the parameters, the action pattern takes
+ownership of the passed parameters instance. - Therefore the object
+has to be allocated on the heap (that is, with {\tt new}). But
+actually that's not too much of a problem, if you stick to the
+intended protocol: 
+If you first retrieve the parameters instance by querying the policy,
+change the parameters and write them back by the set method,
+everything works okay.
+
+A similar interface exists for the behaviours themselves. But they only
+can query and set the parameters of behaviours in action patterns that
+are linked to the current action pattern by a local transition. The
+behaviours can therefore only query the parameters by the transition
+name instead of the action pattern name.
+
+\section{Arbiters}
+
+The arbiter framework is similar to the behaviour classes. It will be
+explained in more detail as soon as we do some more work on arbiters.
+
+\section{Building Action Patterns}
+
+``Now I built all my behaviours. What code do I have to write to make
+them an action pattern?'' Well, you don't have to write code. Action
+patterns and policies are defined within an XML file. Allowing for
+fast and convenient modifications. Which is especially cool when
+debugging. An Instance of each arbiter and behaviour has to be
+registered within repositories. Afterwards, the policy can configure
+the action patterns and transitions by parsing the XML file. 
+To make live easier, the editing of action patterns, transitions and
+behaviour parameters can also be done using the GUI based PolicyEditor
+(see section \ref{SEC:POLICY_EDITOR}), but
+let us first take a look at how those things are put together in the
+XML syntax.
+
+\subsection{The Policy File}
+
+A policy file can have the following tags and attributes:
+
+$<$!--MiroPolicyDocument--$>$
+
+\begin{description}
+  \item[policy]
+    One file always describes one entire policy. A policy defines a
+    state machine that consists of a set of action patterns. Each
+    action pattern describing one state of the machine.
+  
+  \begin{description}
+  \item[actionpattern]
+    An action pattern describes a set of behaviours, that can run
+    simultaneously and produce some emergent higher level behaviour.
+    
+
+    Attributes:
+    \begin{itemize}
+    \item \textit{name} The name of the action pattern.  
+    \item \textit{start (true/false)} The action pattern to be active
+      at startup is to be marked true, the others false or unmarked.
+    \item \textit{x, y} For GUI purpose, just ignore them.
+    \end{itemize}
+  
+    \begin{description}
+    \item[behaviour]
+      That's what all the chapter is about. Read it again.
+
+      Attributes: 
+      \begin{itemize}
+      \item \textit{name} Name of the behaviour.
+      \end{itemize}  
+
+      \begin{description}
+      \item[parameter]
+        Behaviours parameters can be specified within the policy file
+        for each action pattern. 
+
+        Attributes: 
+        \begin{itemize}
+        \item \textit{name} Name of the parameter.  
+        \item \textit{value} The value of the parameter.
+        \end{itemize}
+      
+      \end{description}  
+
+    \item[transition]
+      Message that triggers a transition to another
+      action pattern.  
+
+      Attributes: 
+      \begin{itemize}
+      \item \textit{target} The action pattern to activate next.
+      \end{itemize}  
+
+    \item[arbiter]
+      To decide which action to choose from the different outputs of
+      the different behaviours one needs to arbitrate one way or the other.
+
+      Attributes: 
+      \begin{itemize}
+      \item \textit{name} The name of the arbiter to use.
+      \end{itemize}
+    \end{description}
+  \end{description}
+\end{description}
+
+\subsection{The Repositories}
+
+A policy can be built on the basis of an XML description. For the
+parser of this description to be able to construct the policy, it has
+to be able to refer to instances of behaviours and arbiters that are
+mentioned within the XML file by their name.  For this purpose a {\tt
+  Miro::BehaviourRepository} and a {\tt Miro::ArbiterRepository} class
+do exist.  At these Repositories an instance of each behaviour and
+arbiter has to be registered. The name of the behaviour has to be
+reported by the {\tt behaviourName()} method.  Since we only need one
+instance of each of these repositories, there do exist a global
+instance of each. A pointer to such an instance can be obtained by
+the classes static method {\tt instance()}.
+
+\subsection{The Behaviour Factory}
+
+All the initialization stuff necessary before constructing an instance
+of the Policy class can be done within the main function of your
+program. This task consists mostly of obtaining the needed object
+references, instancing
+behaviours and arbiters and registering them at their respective
+repositories.  This can be bundled within a so called behaviour factory
+class as can be seen in the behaviour example at:
+
+{\tt \$MIRO\_ROOT/examples/behaviours/simple/BehaviourFactory.cpp|h}
+
+It uses the simple base class:
+
+{\tt \$MIRO\_ROOT/src/miro/BAFactory.cpp|h}
+
+\subsection{The Behaviour Engine}
+
+There does exist a small CORBA based interface for interaction with
+the behaviour framework. It is the {\tt BehaviourEngine} interface and
+the {\tt PolicyController} (section \ref{SEC:POLICY_CONTROLLER}) is a
+simple GUI based client for this interface. To allow your own
+behaviour sets to be controlled via this interface, the policy
+controller implementation has to be instantiated within your
+executable. This can be seen in the example at:
+
+{\tt \$MIRO\_ROOT/examples/behaviours/engine/SimpleBehaviourEngine.cpp}
+
+\section{The Policy Editor}
+\label{SEC:POLICY_EDITOR}
+
+Editing large XML files is tedious and error prone. Therefore \miro
+offers an GUI based editor, with which you can build and edit your
+policies. You can also edit the parameters defined within the
+Parameters classes of your behaviours.
+
+The policy editor can be started with no parameters or with the policy
+file to edit as first parameter. It has a menu bar and displays the
+policy graph within the big scroll view area of the program.
+
+\subsection{The Menu}
+
+\subsubsection{File}
+\begin{itemize}
+\item New \\
+  Create a new policy.
+\item Open ... \\
+  Open a policy file. The file dialog will be displayed.
+\item Save \\
+  Save the current policy to disc. If no file name is yet specified,
+  Save as will be invoked instead.
+\item Save as ... \\
+  Save the current policy under a new file name. The file dialog will be
+  displayed.
+\item Send to ... \\
+  Send the current policy to a robot. A dialog box will be displayed to
+  enter the robots name (the naming context, its behaviour engine is
+  registered at). The behaviours and arbiters within the policy have to
+  be present within the behaviour and arbiter repositories in the
+  behaviour engine running on the robot. - Otherwise the parsing will
+  fail.
+\item Quit \\
+  Quit the policy editor.
+\end{itemize}
+\subsubsection{Options}
+\begin{itemize}
+\item Behaviour Descriptions \\
+  Display the behaviour descriptions dialog. The dialog consist of a
+  listbox with the currently loaded behaviour parameter description
+  files. (See the chapter \ref{SEC:PARAMETERS} for more details on
+  parameter files.) Buttons for adding and deleting files are
+  provided. On pressing the button add, the file dialog will be
+  displayed. Note that the selected file has to contain a valid
+  behaviour description. - Verifying, whether the load was successful
+  is currently only done on leaving the dialog. On the positive side
+  the currently loaded description is memorized in the file
+  .PolicyEditorConfig.xml file in the users home directory for further
+  runs of the policy editor.
+\end{itemize}
+\subsubsection{Help}
+Currently this menu only contains two about dialogs.
+
+\subsection{Editing the Policy Graph}
+
+Clicking with the right mouse button into the editing area produces
+a popup menu with the option to place a new action pattern. Enter the
+name of the new pattern in the dialog box.
+
+Clicking with the right mouse button into the name of an action
+pattern produces a popup menu with the following options.
+\begin{itemize}
+\item Start pattern \\
+  Select the pattern to be the start pattern. That is the pattern, the
+  policy will begin with by default. Every policy has to have exactly
+  one start pattern. The start pattern is marked with two asterix
+  around the pattern name.
+\item Add behaviour \\
+  Add a behaviour to the action pattern. A list of available behaviour
+  will pop up. Every behaviour can be instantiated only once per
+  action pattern.
+\item Add transition \\
+  Click on another action pattern to link the two pattern with a
+  transition. A dialog box will appear to enter the transition name.
+\item Rename pattern \\
+  A dialog box will appear to enter the new name of the action
+  pattern.
+\item Rename transition \\
+  A dialog box will appear with the name and the target of the
+  transitions. You can also delete a transition by deleting the name
+  or the target of the transition. - Be careful, the new entry
+  will only be accepted, if you left the entry field by clicking on
+  another entry before hitting the okay button.
+\item Delete pattern \\
+  Deletes the pattern.
+\end{itemize}
+
+Clicking with the right mouse button into the green area of an action
+pattern produces a popup menu with the following options.
+\begin{itemize}
+\item Set arbiter \\
+  Select the arbiter for to the action pattern. A list of available arbiters
+  will pop up. Every action pattern has to have an arbiter.
+\item Delete arbiter \\
+  Deletes the arbiter from the action pattern.
+\end{itemize}
+
+Clicking with the right mouse button onto a behaviour within an action
+pattern produces a popup menu with the following options.
+\begin{itemize}
+\item Up \\
+  Move the behaviour up one position in the list of behaviours. The
+  position in the behaviour list represents the priority of the
+  behaviour at the arbiter. - The higher, the more important.
+\item Down \\
+  Move the behaviour down one position in the list of behaviours.
+\item Set parameters \\
+  The parameters dialog will be displayed. It has three columns. In
+  the left one, the parameter names are displayed as label. The middle column
+  contains a single line entry field for the parameter. In the right column the
+  measure of the parameter is displayed as label, if no measure is available
+  the parameters type is displayed. The default value is
+  displayed as bubble help associated with each entry field, if
+  available. The parameters type is displayed as bubble help
+  associated with each measure label. The dialog is strictly
+  typed. Therefore the okay button is inactive if any of the entry fields
+  are containing invalid input, for instance a value bigger than 180
+  for an Angle type.
+\item Delete behaviour \\
+  Deletes the behaviour from the action pattern.
+\end{itemize}
+
+\subsection{Describing the Available Behaviours}
+\label{SEC:BehaviourDescription}
+
+To be able to use your own behaviours within the PolicyEditor, you
+have to describe their properties (name and parameters) within a
+parameters description file. The parameter framework is explained in
+more detail in the previous chapter. Anyhow there are some minor
+restrictions for behaviour parameter description files, that are
+explained below:
+
+$<$!--MiroParametersConfigDocument--$>$
+
+\begin{description}
+  \item[config]
+  \begin{description}
+  \item[config\_group]
+
+    Attributes:
+    \begin{itemize}
+    \item \textit{name} The name of the config group. Within the
+      behaviour parameters framework the valid names are \textbf{behaviour} and
+      \textbf{arbiter}. Within each group only config items of the
+      specified type are allowed to occur. Other groups are processed
+      by the parameter auto code generation tool {\tt MakeParams} but
+      ignored by the {\ PolicyEditor}.
+    \end{itemize}
+
+    \begin{description}
+    \item[config\_item]
+
+      Attributes:
+      \begin{itemize}
+      \item \textit{name} The name of the behaviour or the arbiter.
+      \item \textit{parent} The name of the super class. That has to
+        correspond to the corresponding super class of the behaviour.
+      \item \textit{namespace}
+      \end{itemize}
+      \begin{description}
+      \item[config\_parameter]
+
+        Attributes:
+        \begin{itemize}
+        \item \textit{name}
+        \item \textit{type} No nested types are allowed!
+        \item \textit{default}
+        \item \textit{measure}
+        \item \textit{inherited}
+        \end{itemize}
+      \end{description}
+    \end{description}
+  \end{description}
+\end{description}
+
+\subsection{Example Behaviour Description File}
+
+\subsection{Auto-generating Parameter Class Code}
+\label{sec:makeParams}
+
+Having written the description of your behaviours parameters within
+XML, it is possible to auto-generate the necessary code for your
+behaviours associated Parameters class. See the previous chapter for
+details.
+
+\section{Policy Controller}
+\label{SEC:POLICY_CONTROLLER}
+
+The policy controller is some kind of remote control for the behaviour
+engine. It consists of a panel with four buttons and a menu bar. The
+buttons allow to start, stop, suspend and resume the behaviour engine.
+
+\subsection{The Menu}
+
+\subsubsection{File}
+\begin{itemize}
+\item Connect robot \\
+  Connect the policy controller with a behaviour
+  engine of a robot. A dialog box will be displayed to enter the
+  robots name (the naming context, its behaviour engine is registered
+  at).
+\item Load policy \\
+  Load a policy file into the behaviour engine. A dialog box will be
+  displayed to enter the file name. The file has to be locally
+  accessible by the robots behaviour engine.
+\item Send policy \\
+  Send a policy to the robot.  The file dialog will be displayed to
+  select the policy. The behaviours and arbiters within the policy
+  have to be present within the behaviour and arbiter repositories in
+  the behaviour engine running on the robot. - Otherwise the parsing
+  will fail.
+\item Quit \\
+  Quit the policy editor.
+\end{itemize}
+
+\subsubsection{Edit}
+\begin{itemize}
+\item Send transition \\
+  Send a transition to the behaviour engine. A dialog box will be
+  displayed to enter the transition name. This is for debug purposes
+  only, as the transition will only succeed if it is registered at the
+  currently active action pattern - which in turn can change any time.
+  There will be also no feedback whether the transition succeeded or
+  not.
+\item Send global transition \\
+  Send a global transition to the behaviour engine. A dialog box will be
+  displayed to enter the action pattern to activate. The action
+  pattern has to be present within the current policy, otherwise the
+  transition will fail.
+\end{itemize}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

@@ -1,0 +1,20 @@
+{
+    "tasks": [
+        {
+            "name": "station 0",
+            "latLon": {
+                "lat": 37,
+                "lon": -117
+            },
+            "description": "do something"
+        },
+        {
+            "name": "station 1",
+            "latLon": {
+                "lat": 37.5,
+                "lon": -117.5
+            },
+            "description": "do something else"
+        }
+    ]
+}

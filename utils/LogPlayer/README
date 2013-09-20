@@ -1,0 +1,6 @@
+Utility for playing log-files recorded by LogNotify.
+
+This is program needs X.
+
+Specify the name of the log-file directly at the commandline.
+Use the -MNC option to set the namingcontext, the LogPlayer is using.

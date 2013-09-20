@@ -1,0 +1,97 @@
+\chapter{Group Communication in Robot Teams}
+\label{sec:NMC}
+
+When it comes to multi-robot scenarios, group communication becomes an
+issue of interest. As \miro is designed for usage in distributed
+environments, most of the prerequisites for communication in teams of
+robots are in place. But in the presence of WLANs, that have extremely
+varying bandwidth, that dependents on the location of the computer
+etc. some more requirements have to be met. Especially the TCP/IP
+based transport protocol can become a bottleneck, when temporary
+network breakdowns can regularly happen during operation.
+
+\section{Event Channel Federation}
+
+The event based communication of \miro is based upon the CORBA
+Notification Service. In a team of robots, one central event
+channel could be set up and used for team communication. While this is
+most convenient from a user perspective, it creates a single point of
+failure for a team of otherwise independent autonomous robots.
+
+Using a single virtual event channel, that is distributed over
+multiple channels, that run on the different robots helps both, the
+programmers, as well as the systems fault tolerance. As such an event
+channel federation is not part of the specification of the CORBA
+Notification Service, \miro provides its own implementation. Namely
+the Notify Multicast (NMC) module. Its implementation is based upon
+the work done for the event channel federation of the RT-EC of TAO
+\cite{gore01designing}. A successful application of the NMC module is
+described in \cite{Utz++:04:RCS}.
+
+\section{Notify Multicast}
+
+One notification service is run on each robot (computer). The NMC
+module attaches one consumer and one supplier to the robots local
+event channel. Additionally it subscribes at a multicast group. Events
+that are subscribed by other robots are exchanged via the multicast
+group.
+
+For the automatic arbitration of the set of events that need to be
+exchanged via the multicast group, the offer/subscription protocol of
+the Notification Service is used. Offers to and subscriptions at the
+event channel are determined by the \texttt{domain\_name} and
+\texttt{type\_name} fields of the event header. In \miro the domain
+name is by convention the name of the robot. The NMC module
+posts all events that subscribed for at the local channel, but that
+are not offered locally to the multicast group and collects these
+posts from the other robots. Events that are requested by other
+robots and offered locally, are posted to the multicast group on arrival
+on the local event channel. Those events, that are subscribed for at
+the local channel, but not offered locally, are published to the local
+channel as they become posted on the multicast group.
+
+\begin{figure}
+%\vspace*{-0.5cm}
+\begin{center}
+\includegraphics[width=10.0cm]{federatedchannel}
+\caption{\label{fig:federated_channel}
+A Federated Notification Channel Setup}
+\end{center}
+
+%\vspace*{-0.3cm}
+\end{figure}
+
+See also figure \ref{fig:federated_channel} for a possible
+configuration of subscriptions and offers in a federated event channel.
+
+\section{Usage}
+
+The NMC module is part of most robot servers by default. It can be
+enabled by the command line option \texttt{-MiroNotifyMulticast} or
+\texttt{-MNMC} for short. It also exists, as a separate program:
+NotifyMulticast.
+
+\subsection{Parameters}
+
+The parameters can be set in the robots configuration file. They are
+located in the configuration group \texttt{Notification}. The
+available parameters are.
+\begin{description}
+\item[MulticastGroup] The multicast group used for group communication.
+\item[Timeout] The maximum age for events send over the group. This
+  requires proper synchronization of the team clock (i.e. by NTP
+  \cite{RFC2030}). A value o zero indicates, that all events should be
+  processed regardless of their age.
+\item[Subscription] These events are shared with other robots event if
+  no one seems to listen. - Events that are exchanged on the bases of the
+  offer/subscription management protocol need some time, until the
+  request is acknowledged by the suppliers. By providing events with
+  this option, this time can be skipped. Note, that only the type name
+  is specified here. The domain name is assumed to be the robots name.
+\end{description}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

@@ -1,0 +1,109 @@
+// -*- idl -*- ///////////////////////////////////////////////////////////////
+//
+// This file is part of Miro (The Middleware for Robots)
+// Copyright (C) 2013
+// Department of Neural Information Processing, University of Ulm
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation; either version 2, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+#ifndef miro_SCmdLog_idl
+#define miro_SCmdLog_idl
+
+#include <TimeBase.idl>
+#include <AnyTypeCode/Dynamic_Parameter.pidl>
+#include <orb.idl>
+
+//! Namespace of the Miro project.
+/** Miro is the Middleware for Robots.
+ */
+module Miro
+{
+  //! Telemetry data structure header
+  /**
+   * Every telemetry data structure is supposed to aggregate this
+   * header as its first member.
+   */
+  struct Head 
+  {
+    //! Time, the telemetry data was generated.
+    /**
+     * For sensor data, this is the time of measurement, not the time,
+     * the data was received in the computer. So if there is a known
+     * latency to the transfer time, this timestamp should be corrected
+     * accordingly.  Sensor data derived data products should still be
+     * timestamped with the sensor timestamp, if feasible.
+     *
+     * Note, that due to the different latencies of different sensor,
+     * (or processing time), combining telemetry streams from multiple
+     * sources, does not necessarily result in a monotonous increasing
+     * timestamp sequence.
+     */
+    TimeBase::TimeT time;
+    //! Telemetry status field.
+    /**
+     * This field is for error reporting on telemetry data. As error
+     * modes of telemetry data are very much device dependent, the
+     * values of this field are left almost entirely device defined.
+     * Devices are therefore free to define their own error format,
+     * even when reusing a telemtry struct defined for some abstract
+     * telemetry source type. There is one convention though:
+     *
+     * A value of 0 denotes, no error in the telemetry report.  All
+     * values represent therefore actual values and can be readily
+     * consumed. (E.g. the HMR compass report NaN values for erronous
+     * telemetry on an axis. A status of zero would therefore inidcate
+     * that there are no NaN values for any axis.
+     */
+    long status;
+  };
+  
+  //! This constant is used in the Head::status field, for flagging a valid, nominal telemetry reading.
+  const long RET_OKAY = 0;
+  //! This constant is used in the Head::status field, for flagging an off-nominal telemetry reading.
+  const long RET_EXCEPTION = 1;
+
+
+  typedef sequence<Dynamic::Parameter> DynParamSeq;
+  typedef  sequence<CORBA::TypeCode> TypeCodeSeq;
+
+  //! Event type describing a command request.
+  /** This event is sent by the command-logging interceptor.
+   * This interceptor creates a call-trace in the telemetry logs for each CORBA call.
+   * To control verbosity of this interceptor, filter patterns can be specified.
+   */
+  struct SCmdReq
+  {
+    Head hdr;                 //!< Generic header.
+    string  objName;         //!< The object name, we don't have the ior for reference.
+    string  operation;      //!< The method to call.
+    DynParamSeq params;  //!< The parameter list, in the order of appearance. Out parameters and inout parameters will be updated after the method completed.
+    TypeCodeSeq exceptions; //!< The exceptions that interface can raise.
+    CORBA::TypeCode resultType; //!< The return type.
+  };
+
+  //! Event type describing a command reply.
+  /** This event is sent by the command-logging interceptor. */
+  struct SCmdRep
+  {
+    Head hdr;                 //!< Generic header.
+    string  objName;         //!< The object name, we don't have the ior for reference.
+    string  operation;      //!< The method to call.
+    DynParamSeq params;  //!< The parameter list, in the order of appearance. Out parameters and inout parameters will be updated after the method completed.
+    any result; //!< The return value.
+  };
+
+};
+
+#endif // miro_SCmdLog_idl

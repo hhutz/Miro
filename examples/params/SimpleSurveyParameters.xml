@@ -1,0 +1,19 @@
+<!DOCTYPE xml SYSTEM "MiroParametersDescriptionDocument.dtd">
+<config> 
+  <config_group name="Blah">
+    <config_item name="LatLon">
+      <config_parameter name="Lat" type="double" default="0.0" />
+      <config_parameter name="Lon" type="double" default="0.0" />
+    </config_item>
+
+    <config_item name="SimpleTask">
+      <config_parameter name="Name" type="string" default="Unnamed" />
+      <config_parameter name="LatLon" type="LatLonParameters" />
+      <config_parameter name="Description" type="string" default="No description" />
+    </config_item>
+
+    <config_item name="SimpleSurvey">
+      <config_parameter name="Tasks" type="std::vector&lt;SimpleTaskParameters&gt;" />
+    </config_item>
+  </config_group>
+</config>

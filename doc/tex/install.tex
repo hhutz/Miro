@@ -1,0 +1,385 @@
+\chapter{\miro installation}
+\label{sec:miroInstall}
+
+This section is an extended version of the INSTALL file contained
+within \miro. If you have problems installing \miro, read on.  Ask
+your system administrator if there exists a central installation, or
+whether it would be more convenient to prepare a central installation.
+
+\subsection{Requirements}
+
+You need the following packages in order to compile \miro:
+\begin{description}
+\item[ACE ($>$= 5.4.1):] We recomment using the latest bug-fix only
+  releases for ACE and TAO. Please refer to the installation
+  instruction in \ref{sec::aceInstall} for building and installing
+  ACE. The source
+  tarball and CVS access is available at:\\
+  \texttt{http://www.cs.wustl.edu/$\sim$schmidt/ACE.html}.
+\item[TAO ($>$= 1.4.1):] Building and installation is also described in
+  section \ref{sec::aceInstall}. TAO downloads are available on:\\
+  \texttt{http://www.theaceorb.com/}.
+\item[Qt ($>$= 3.1):] Installation should be quite easy, as Qt uses a
+  configure script for automatic system checks. Qt is installed on
+  most modern Unix/Linux systems anyway, since KDE relies on
+  it. Recent versions of Qt can be found at:\\
+  \texttt{http://www.trolltech.com/}.
+\end{description}
+
+If you want to compile the wrapper classes for the speech detection
+system, you also need:
+\begin{description}
+\item[Speech tools:] The Edinburgh Speech Tools Library is a collection
+  of C++ class, functions and related programs for manipulating the
+  sorts of objects used in speech processing. It is to provide the
+  underlying classes in the Festival Speech System. We use version
+  1.2.3 that can be retrieved from:\\
+  \texttt{http://www.cstr.ed.ac.uk/projects/speech\_tools}
+\item[Festival:] The Festival Speech Synthesis System is a general
+  multi-lingual speech synthesis system developed at CSTR. We
+  successfully used version 1.4.2. See:\\
+  \texttt{http://www.cstr.ed.ac.uk/projects/festival/}
+\item[Sphinx:] The CMU Sphinx Group Open Source Speech Recognition, a
+  real-time, large vocabulary, speaker independent speech recognition
+  system. We use version Sphinx2-0.4, downloaded from:\\
+ \texttt{http://www.speech.cs.cmu.edu/sphinx}
+\end{description}
+
+Depending on your camera system, you may need libraries for the
+IEEE 1394 (aka Firewire) support:
+\begin{description} 
+\item[libraw1394:] This library provides direct access to the IEEE 1394
+  bus through the Linux 1394 subsystem's raw1394 user space
+  interface. It can be found one it's homepage:\\
+  \texttt{http://www.linux1394.org/}\\
+  or on SourceForge:\\
+  \texttt{http://sourceforge.net/projects/libraw1394/}
+\item[libdc1394:] It is a library that is intended to provide a high
+  level programming interface for application developers who wish to
+  control IEEE 1394 based cameras that conform to the 1394-based
+  Digital Camera Specification. Available via:\\
+  \texttt{http://sourceforge.net/projects/libdc1394/}
+\end{description}
+Both libraries are available as compiled packages for the most modern
+Linux systems too.
+
+To build the documentation, your system should provide the following
+tools:
+\begin{description}
+\item[Doxygen:] It is a JavaDoc like documentation system for C++, C,
+  Java and IDL. It can generate an on-line HTML documentation
+  extracted directly from the sources, which makes it much easier to
+  keep the documentation consistent with the source code. You can
+  download from the homepage:
+  \texttt{http://www.stack.nl/\~dimitri/doxygen/}\\
+  or again from SourceForge:\\
+  \texttt{http://sourceforge.net/projects/doxygen/}
+\item[\LaTeX:] The LaTeX package (either pdflatex or latex and dvips, bibtex
+  and makeindex -- available via one of the CTAN server, e.g.\ 
+  \texttt{http://dante.ctan.org}) and the convert image convertsion
+  utility from the ImageMagick package \\
+  (\texttt{http://imagemagick.sourceforge.net/}).
+\end{description}
+
+\subsection{Download}
+
+As if you read this text, you already have a version of \miro, but if
+you want to update this version, or need some additional information,
+please have a look at
+\texttt{http://smart.informatik.uni-ulm.de/MIRO/index.html}
+
+\subsection{Compilation}
+
+\miro is now shipped with a configure script, so the package can be
+installed with the usual steps:
+
+\begin{lstlisting}[frame=tb]{}
+./bootstrap (for cvs checkouts)
+./configure
+make 
+(make install)
+\end{lstlisting}
+
+The configure script looks automatically for the necessary and
+optional software packages, and will stop or print a warning if some
+of them are not found. If you install e.g.\ ACE in an unusual place,
+you can pass the configure script some additional options like for
+example \texttt{--with-ACE=<ACE-root-dir>}. For Qt, their are more
+flexible command-line parameters, because Qt is often distributed over
+several directories (like e.g.\ in a standard Debian installation).
+In contrast to older version, the configure script now searches
+automatically for libqt or libqt-mt (the thread-save version).
+A complete list of command-line options are accessible via
+\texttt{./configure --help}.
+
+Another way of telling the configure script where the packages are
+installed is the use of environment variables. For the required
+packages, these are \texttt{ACE\_ROOT}, \texttt{TAO\_ROOT} and
+\texttt{QTDIR} point to the base directory of each package. Because
+ACE and TAO need this environment variables anyway, this is the most
+comfortable way to point to the directories. For the speech detection
+wrappers classes, \texttt{SPEECH\_TOOLS\_ROOT}, \texttt{SPHINX\_ROOT}
+and \texttt{FESTIVAL\_ROOT} are possible. It can be necessary, to let
+the \texttt{LD\_LIBRARY\_PATH} point to all the libraries anyway.
+
+If the configure script did not find the different packages anyhow, or
+if your system require unusual options for compilation or linking that
+the configure script does not know about, you can give configure
+initial values for variables by setting them in the environment. Using
+a Bourne-compatible shell, you can do that on the command line like
+this:
+
+\begin{lstlisting}[frame=tb]{}
+CFLAGS=-O2 LIBS=-lposix ./configure
+\end{lstlisting}
+
+Or on systems that have the `env' program, you can do it like this:
+
+\begin{lstlisting}[frame=tb]{}
+env CPPFLAGS=-I/usr/local/include LDFLAGS=-s ./configure
+\end{lstlisting}
+
+On runtime, some applications rely on two environment variables,
+namely \texttt{MIRO\_ROOT} (the base directory) and \texttt{MIRO\_LOG}
+(directory, where logging data is stored), so please set these
+variables to the appropriate values too.
+
+Additionally, you can enable or disable several features, like the
+support for different robot platforms and for different video devices.
+
+Supported robot platforms:
+\begin{itemize}
+\item The B21 port is the oldest one and should therefore be the most
+  stable, regarding the interfaces. All of the robots hardware
+  components are supported by \miro.
+\item The Sparrow99 and Sparrow2003 robots are our soccer robots. They
+  are our testbed for multi-robot programming. Therefore most new
+  technology is first tested on this platform. So even as you do not
+  have a Sparrow99 robot (we built them ourselfs), it might be
+  interesting to look at the sources for this robot if you are looking
+  for group communication technology etc.
+\item The Pioneer platform is a complete port for the ActiveMedia
+  robot series, based on the PSOS, P2OS and AROS protocols. But we
+  could only test and extend it to the platforms available to us.
+  \begin{itemize}
+  \item The old Pioneer1 is supported, but lacks maintenance, as our
+    model is not used at the lab anymore.
+  \item The Performance PeopleBot is in active development and already
+    mostly complete. Motors, Sonars, Bumpers and Video are working.
+    PanTilt and Gripper are experimental, Zoom is to come next.
+  \end{itemize}
+\end{itemize}
+
+Supported video devices:
+\begin{itemize}
+\item Bttv Frame Grabbers: These frame grabber cards are supported via
+  video for Linux.  This is the standard way of connecting standard
+  analog video cameras to the computer.
+\item Firewire Digital Cameras: \miro supports the fire wire digital
+  camera protocol using libraw1394 and libdc1394.
+\item Matrox Meteor Frame Grabbers: These rather old frame grabber
+  cards are also supported by \miro. This device however, is mostly
+  unmaintained.
+\end{itemize}
+
+Finally, you can choose if the documentation should be build or not.
+Even if you decide not to build it, but the configure script found all
+the necessary tools, the Makefiles are prepared. So you can go to the
+\texttt{doc/tex} and \texttt{doc/html} directory later on and build
+the documentation there with a simple make.
+
+After running the configure script, \miro show up a summary of what
+will be compiled and which features will not. If this is not what you
+desired, please check the messages coming up during the configure run
+for packages, \miro did not find.
+
+\subsection{Installation}
+
+\miro can be installed with the a simple:
+
+\begin{lstlisting}[frame=tb]{}
+make install
+\end{lstlisting}
+
+By default, the package's files will be installed in \texttt{/usr/local/bin},
+\texttt{/usr/local/lib} etc.  You can specify an installation prefix other
+than \texttt{/usr/local} by giving configure the option
+\texttt{--prefix=PATH} (note: if you use the prefix-option, you should
+install \miro actually, otherwise libtool may look for the library in
+the installation directory and therefore do not find it).
+
+Beside that, \miro can be used already without installation. Therefore,
+a make run install the libraries and the binaries during the
+compilation into the \texttt{lib/} and \texttt{bin/} directory. This
+enlarges the \miro directory, but can be quite useful, if you work on
+\miro itself and a derived application at the same time.
+
+Moreover with this trick it is possible, to use different \miro
+versions in parallel at the same time. Therefore the build process
+allow to compile the package in a different directory. Assuming you
+have extracted \miro in a directory called \texttt{Miro}, you can
+build it in two different directories with miscellaneous options:
+
+\begin{lstlisting}[frame=tb]{}
+mkdir Miro.B21
+cd Miro.B21
+../Miro/configure --enable-B21
+make
+cd ..
+mkdir Miro.Sparrow99
+cd Miro.Sparrow99
+../Miro/configure --enable-Sparrow99
+make
+\end{lstlisting}
+
+\subsection{Additional make targets}
+
+Beside the already described \texttt{install} target and an solely
+\texttt{make} (which in fact means \texttt{make all}), there are a
+couple of other targets, that may be of interest:
+
+\begin{description}
+\item[clean:] Removes object files, libraries, binaries and
+  automatically generated code, like the parameter classes generated
+  from the xml files and the client and server stubs generated from
+  the idl files.
+\item[distclean:] Removes all of the above files and the automatically
+  generated \texttt{Makfiles} generated from the autotools. So you
+  have to reconfigure the packet after this.
+\item[dist:] Generates a gzipped tar-file containing a snapshot of the
+  actual \miro directory, including all the necessary source files to
+  configure and build \miro.
+\item[distcheck:] Some as above plus a complete make of the packed
+  tar.gz file and finally make another tarfile to ensure the
+  distribution is self-contained. You can change the configure options
+  that are used for this make run within the toplevel
+  \texttt{Makefile.am} by changing the
+  \texttt{DISTCHECK\_CONFIGURE\_FLAGS} variable.
+\end{description}
+
+\subsection{Developer information}
+
+The build-process within \miro is done using automake, autoconf and
+libtool. Normally, there is no need to use these programs, as of
+running the configure script is the only thing a user have to do.
+
+The configure shell script attempts to guess correct values for
+various system-dependent variables used during compilation. It uses
+those values to create a Makefile in each directory of the package.
+It also create one config.h file containing system-dependent
+definitions that can be used in the source file to allow appropriate
+compilation:
+
+\begin{lstlisting}[frame=tb]{}
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+...
+#ifdef MIRO_HAS_1394
+...
+#endif
+\end{lstlisting}
+
+If you want to change something within \miro like for example adding
+additional files or directories, you have to change the proper
+\texttt{Makefile.am}. Do \textbf{not} change the \texttt{Makefile.in}
+or even the final \texttt{Makefile}, because changes there are getting
+lost at the next automake run. The same applies, if you want to
+change the behaviour of the configure script itself, for example to
+detect new software packages or special version information, you have
+to change the \texttt{configure.ac} and \textbf{not} the
+\texttt{configure} file itself.
+
+Assuming that you have written appropriate \texttt{Makefile.am} and
+\texttt{configure.ac} files, you should be able to build your project
+by entering the following commands:
+
+\begin{lstlisting}[frame=tb]{}
+aclocal -I config
+autoheader
+automake
+autoconf
+./configure
+\end{lstlisting}
+
+For every consecutive step, you can simply call the resulting
+\texttt{config.status} script, that rerun the configure procedure with
+the used configuration values.
+
+Depending on your versions of automake, autoconf and libtool you may
+get some warning messages about improper usage of \texttt{LDFLAGS}.
+Ignore this, since it is without any influence on the final result. We
+tested the whole procedure successfully with at least the following
+versions:
+\begin{itemize}
+\item automake 1.5
+\item autoconf 2.52
+\item libtool 1.4.2
+\end{itemize}
+
+Normally, it should be enough, to use the available examples within
+\miro (see section \ref{sec:makefile}) to add some small additions to
+the build process, but sometimes a deeper understanding of the used
+tools might be necessary. Please have a look at the manuals, available
+e.g.\ directly from the GNU homepage:
+\texttt{http://www.gnu.org/manual/} or read the freely available book
+on \texttt{http://sources.redhat.com/autobook/}.
+
+\chapter{ACE and TAO Installation}
+\label{sec::aceInstall}
+
+ACE/TAO is a large software package with many configuration
+options affecting the build process as well as its runtime
+features. Therefore we summarize here our experience with the
+ACE/TAO installation.
+
+At the time of this writing we suggest to use the latest BFO (bug fix
+only) version ACE/TAO --- currently this is 5.4.1/1.4.1.
+
+The options that should be set additionally in the {\tt
+  platform\_macros.GNU} file (to be found under
+$<$ACE-directory$>$/include/makeinclude/) are the following:
+
+\begin{lstlisting}[frame=tb]{}
+debug=0
+\end{lstlisting}
+
+Debug information has a huge impact on the footprint of the libraries,
+so as long as you do not really need it, disable it.
+
+Additionally, for further footprint reduction you
+might also add the following:
+
+\begin{lstlisting}[frame=tb]{}
+qt_reactor=0
+xt_reactor=0
+TAO_ORBSVCS= Naming Notify
+DEFFLAGS= -DACE_USE_RCSID=0
+ACE_COMPONENTS= FOR_TAO
+\end{lstlisting}
+
+The two reactors are not needed by ACE/TAO/Miro. So as long as you do
+not use them yourself, they might just be left out. Also Miro only
+uses the CORBA Naming Service and the CORBA Notification Service.
+Therefore the other services of TAO need not to be built.
+
+We also recommend to read the installation instructions provided
+by ACE carefully. We admit, the installation isn't entirely trivial.
+
+To compile and run programs that use the ACE/TAO toolkit, also the
+environment variables {\tt ACE\_ROOT} and {\tt TAO\_ROOT} need
+to be set to the appropriate root directories of your ACE/TAO
+installation. For the bash shell the following lines in your local
+{\tt .bashrc} file should do the job:
+
+\begin{lstlisting}[frame=tb]{}
+export ACE_ROOT=<path to the ACE directory>
+export TAO_ROOT=$ACE_ROOT/TAO
+export LD_LIBRARY_PATH=$ACE_ROOT/ace/:$LD_LIBRARY_PATH
+\end{lstlisting}
+%%$
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

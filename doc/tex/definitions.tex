@@ -1,0 +1,36 @@
+\chapter{Definitions}
+
+
+\section{Units}
+
+When it comes to parameter passing, distances are specified in mm and
+angles in radiant. Velocities are specified in mm/s and rad/s
+respectively. 
+
+There have been discussions recently to unify the data formats used in
+the different robot programming environments, such as Player/Stage,
+OROCOS, Orca, etc. \miro supports this idea and therefore we will most
+probably switch to the general ``kilogram, second, meter'' system in
+the near future. As long as not documented otherwise, the basic data
+type for specifying these values will be a float value (IEEE floating
+point value of 32 bit).
+
+\section{Coordinates}
+
+\miro uses the cartesian coordinate space. Angles are specified
+mathematically, that is, counter-clock wise, using radiant.
+
+%mm, rad
+
+
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=8cm]{grid_coords}
+  \end{center}
+\end{figure}
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

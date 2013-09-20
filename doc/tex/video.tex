@@ -1,0 +1,702 @@
+\chapter{Video Image Processing}
+\label{sec:VIP}
+
+Video image acquisition is one of the most common sensory
+devices used in robotics. Therefore \miro offers a common
+{\tt VideoService} that can be adapted by the configuration file to any
+supported video device.
+
+Also, image processing is computationally expensive and many standard
+filters exist in literature as well as some high performance
+implementations such as \cite{IPP}. To facilitate the unified usage
+within robotics scenarios, the video service provides a filter tree
+framework.
+
+Real-time image streams need a lot of bandwidth. This is usually
+higher than the bandwidth available on most mainstream network
+devices. Therefore the {\tt Video}-interface of \miro also provides
+methods for usage of shared memory for sharing of images with its
+clients on the same machine. Those methods are also designed for
+minimizing copying overhead.
+
+This section is organized as follows. First, the supported image
+devices along with their bugs and features are discussed. Then the
+filter tree framework is presented. First from an end user
+perspective and second from a developer perspective. In section
+\ref{SEC:VIDEO_INTERFACE} the video interface itself along with its
+two use cases and helper classes is discussed.
+
+\section{Video Device Access}
+
+The VideoService currently supports the following devices for images
+acquisition:
+
+\subsection{Bttv Frame Grabbers}
+
+These frame grabber cards are supported via video for linux \cite{}.
+This is the standard way of connecting standard analog video cameras
+to the computer.
+
+Note, that the default number of frames used by the kernel driver for
+video capture are two. In order to get the full frame rate (25/30Hz),
+this has to be set to 4 buffers. This can be specified as a module
+parameter.
+
+\subsection{Firewire Digital Cameras}
+
+\miro supports the fire wire digital camera protocol using
+libraw1394\cite{} and libdc1394 \cite{}.
+  
+Note that most cameras 1394 controllers do not support being bus
+master for dma transfers. Therefore the 1394 controller of the
+computer has to be the highest numbered node. This can be configured
+by a module parameter. Otherwise, unplugging the firewire cable from
+the camera for some seconds helps.
+
+\subsection{Matrox Meteor Frame Grabbers}
+
+These rather old frame grabber cards are also supported by \miro.
+Kernel drivers can be found at \cite{}. This device however, is mostly
+unmaintained within \miro.
+
+\section{Video Filter Trees}
+
+For image processing many standard filters do exist that usually
+perform a function $M_{n+1} = f_i(M_{n})$. Where $M_n$ denotes the input
+image (matrix), $M_{n+1}$ the output image and $f_i$ is the actual
+filtering function. 
+
+Often filter chains are used (see figure \ref{fig:filterChain}). I.e.
+first undistorting the image $f_0$ and then performing some color
+indexing $f_2$. So the filtering function producing the output image
+$M_o$ from the input image $M_i$ could be expressed as: $$M_o =
+f_2(f_1(M_i))$$
+
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=5cm]{filterchain}
+  \end{center}
+\caption{A simple filter chain.}
+\label{fig:filterChain}
+\end{figure}
+
+More complex vision processing could also include the computation of
+an edge image $M_e$ in addition to the color indexing above. This can
+be done i.e. by producing a grey image $f_3$ and applying a canny
+filter $f_4$, leading to the second filter chain: 
+$$M_e = f_4(f_3(f_1(M_i)))$$
+
+To avoid computing the undistorted image twice, a filter tree should
+be used instead of two separate filter chains, as illustrated in
+fiugre \ref{fig:filterTree}.
+
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=6cm]{filtertree}
+  \end{center}
+\caption{A still quite simple filter tree.}
+\label{fig:filterTree}
+\end{figure}
+
+As an additional complication, many sophisticated filters use more
+then one input filter. For instance the Canny filter computes first
+two images of the Sobel operator (one for the x axis $D_x$ and one for the y
+axis $D_y$). So the above described filter tree is actually an acyclic
+directed graph of filters, as illustrated in figure \ref{fig:filterGraph}.
+
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=7cm]{filtergraph}
+  \end{center}
+\caption{A not that simple filter graph.}
+\label{fig:filterGraph}
+\end{figure}
+
+\section{VideoService}
+
+The program provided by \miro for image acquisition and preprocessing
+is called {\tt VideoService}.
+
+\miro comes with a set of basic filters. The term filter is used here
+in a very general way, as almost every processing unit of the video
+service is designed as a filter. Actually the image acquisition from
+the different video devices is implemented as a filter, forming the
+first set of filters available in \miro. The second set of filters are
+basic image conversions, like byte order swapping, YUV to RGB
+transformations etc. The third set of filters are the classic image
+filters. Unluckily, there do not exist any of them currently in \miro.
+It introduces further library dependencies for the middleware, which
+we have to be careful about. And i.e. for Ipp based filters, we also
+have a licensing problem. How to extend the video service to process
+your own filters is covered in the following subsection.
+
+Filter graphs and their individual parameters can be specified within
+the configuration file of the robot. The VideoService actually does
+not support every possible directed acyclic graph. The implications on
+control flow and synchronisation are too cumbersome. Instead the
+filters in the VideoService are organised as follows.
+
+The filters are organised as a filter tree. That is, every filter has
+one predecessor and $n$ successors. The filtertree is processed in
+depth first order. This scheme is extended by so called filter
+links: A filter can specify additional input filters. To guaranty the
+correct order processing the filters, those additional filters have to
+reside before the specifying filter, in terms of the depth first
+evaluation scheme of the filter tree. Figure \ref{fig:legalIlligal}
+tries to visualize this constrain.
+
+\begin{figure}[!ht]
+  \begin{center}
+    \includegraphics[width=5cm]{filtergraphlegal}
+    \includegraphics[width=5cm]{filtergraphillegal}
+  \end{center}
+\caption{A legal vs an illigal filter graph.}
+\label{fig:legalIlligal}
+\end{figure}
+
+\subsection{VideoService Parameters}
+
+The video service expects its configuration parameters with the
+section Video of the configuration file. Its parameter is
+also called Video. The
+video service has the following parameters:
+
+\begin{description}
+\item[Width] The width of the input image (unsigned int).
+  It has to be supported directly by the used video device.
+\item[Height] The height of the input image (unsigned int).
+  It has to be supported directly by the used video device.
+\item[Palette] The palette of the input image (string).
+  It has to be supported directly by the used video device.
+  The recognized palettes of the video service are:
+  \begin{description}
+  \item[grey] 8 bit grey values.
+  \item[grey16] 16 bit grey values.
+  \item[rgb] 24 bit RGB format.
+  \item[bgr] 24 bit BGR format (byte swapping).
+  \item[rgba] 32 bit RGB format (plus alpha channel).
+  \item[abgr] 32 bit BGR format (plus alpha channel).
+  \item[yuv] 24 bit YUV format.
+  \item[yuv411] compressed YUV format from 1394.
+  \item[yuv422] compressed YUV format from 1394.
+  \end{description}
+\item[Filter] The root of the filter tree. The filter parameter
+  has three entries:
+  \begin{description}
+  \item[Type] The filter type name (string).
+  \item[Name] The name of the corresponding configuration file
+    parameter entry (string).
+    \item[Successor] The list of successor filters (Filter).
+    \item[BackLink] The list of additional predecessor filters,
+      specified by name (string). Note that this is the name of the
+      filter instance, not the name of the filters video interface.
+  \end{description}
+\end{description}
+
+\subsection{Video Filter Parameters}
+
+For each filter in the filter tree, filter parameters can be given
+within the parameter whose name matches the filter name given in the
+filter tree. Those are also located within the section Video.
+
+The base parameter set of each filter is as follows:
+
+\begin{description}
+\item[InterfaceInstance] Whether the filter has an instance of the
+  video interface associated with it (bool).
+  Each filter can have an instance of the video interface. That way
+  every single node of the filter tree can be passed on to the client.
+\item[Interface] The parameters of the interface. For each interface
+  the following parameters can be specified:
+  \begin{description}
+  \item[Name] The name under which the interface is registered at the
+    naming service (string). The default is Video. Note that if
+    you have more than one Video object, you have to specify a unique
+    name for each instance.
+  \end{description}
+\item[Buffers] The number of memory buffers, reserved by the buffer
+  (unsigned int). The default is 4. While a client is accessing an
+  image, the video service guarantees, that it does not become
+  overridden with a new image from the video stream. If clients hold
+  multiple images (i.e. for temporal integration) it has to be made
+  sure, that there is still a buffer left, to put the next image from
+  the video stream into.
+\end{description}
+
+\subsection{Video Device Parameters}
+
+As mentioned above, all supported video devices are implemented as
+filters. Therfore they inherit the base parameters. Note however, that
+the device filters are not capable of having an interface
+instance. Sharing memory mapped files is a bit tricky, and we didn't
+want to go into that, yet. The common DeviceFilter parameters are:
+
+\begin{description}
+\item[Device] The fully qualified path of the video device
+  (string). The individual device filters set this parameter to
+  a common default (like /dev/video/0 for bttv and /dev/video1394/0 for
+  firewire).
+\end{description}
+
+Common parameters for frame grabber based video devices are:
+
+\begin{description}
+\item[Format] The analog format of the video signal. This is either
+  \texttt{pal, ntsc, secam} or \texttt{auto}.
+\item[Source] The source of the video signal. Available sources are
+  \texttt{composite1, composite2, composite3, svideo} and
+  \texttt{tuner}.
+\end{description}
+
+
+
+The available video device filters are (listed by type name):
+
+\begin{description}
+\item[VideoDeviceBttv] The bttv device filter defines the following
+  additional parameter:
+  \begin{description}
+  \item[Subfield] The subfield chosen (string). As the PAL and
+    NTSC images are interleaved, the bttv frame grabbers can select,
+    which of the half images to scan, if the height of the output
+    image is half the height of the full image (384). Possible values
+    are odd, even and all. Note however, that many frame grabber cards
+    do not support this feature. In this case, use the FilterHalfImage
+    described below.
+  \end{description}
+\item[VideoDevice1394] The firewire digital camera standard gives
+  access to many of the internal camera parameters. These can be
+  configured in the parameter section of the 1394 device. For all
+  these values -1 denotes, that this parameter should be controlled by
+  the camera.
+  \begin{description}
+  \item[Buffers] The number of image buffers used for dma transfers
+    (unsigned int).
+  \item[Brightness] (int).
+  \item[Exposure] (int).
+  \item[Focus] (int). Default is auto.
+  \item[Framerate] (int). Default is 30Hz.
+  \item[Gain] (int).
+  \item[Gamma] (int).
+  \item[Hue] (int).
+  \item[Iris] (int).
+  \item[Saturation] (int).
+  \item[Sharpness] (int).
+  \item[Shutter] (int).
+  \item[Temperature] (int).
+  \item[Trigger] (int).
+  \item[WhiteBalance0] (int).
+  \item[WhiteBalance1] (int).
+  \end{description}
+\item[VideDeviceMeteor] The matrox meteor device filter does not
+  define any additional parameters.
+\item[VideoDeviceDummy] A dummy device which can be used for offline
+  testing.  It reads an image specified by the {\em Device} parameter.
+  If the {\em Device} specifies a directory instead of a file, all
+  {\em *.ppm} files of the directory are used by the device.
+  \begin{description}
+  \item[Timeout] The image refreshing time (sec).
+  \item[Cyclic] (bool) The default is {\em true}. If true the device
+    will restart with the first image after all images were loaded.
+  \end{description}
+\end{description}
+
+\subsection{Basic Video Filters and Their Parameters}
+
+\miro also provided the following basic filters with the standard
+VideoService.
+
+\begin{description}
+\item[FilterCopy] As the video device filters cannot map the image
+  data directly into shared memory for access by the clients, this
+  filter is provided. It copies the image internally, to allow for an
+  interface instance.
+\item[FilterSwap3] Byte swapping for 24 bits per pixel images (BGR to RGB).
+\item[FilterSwap4] Byte swapping for 32 bits per pixel images (ABRG to
+  RGBA).
+\item[FilterFlip] We have a camera that's mounted upside down. This
+  filter flips the image. Also useful if your fly imitating robot has
+  successfully landed on the ceiling.
+\item[FilterHalfImage] This is a filter to extract a half image from an
+  interlaced image as the bttv frame grabbers provide. It copies each
+  second scan line. It defines the
+  following additional parameter:
+  \begin{description}
+  \item[Odd] Take the second half image by starting with the second
+    line (bool). Default is false.
+  \end{description}
+\end{description}
+
+\subsection{Configuration Example}
+
+Putting it all together the configuration section for the {\tt
+  VideoService} might look like the following. This is actually the
+configuration of our Performance PeopleBot. It has an analog video
+camera and a bttv frame grabber card. The camera is mounted upside
+down.
+
+\begin{verbatim}
+<!-- The video configuration section. -->
+<section name="Video" >
+
+ <!-- Parameter section of the VideoService -->
+ <parameter name="Video" >
+
+  <parameter value="bgr" name="Palette" />         <!-- Input image palette. -->
+  <parameter value="384" name="Width" />           <!-- Input image width. -->
+  <parameter value="288" name="Height" />          <!-- Input image height. -->
+  <parameter name="Filter">                        <!-- Filter tree root. -->
+   <parameter value="DeviceBTTV" name="Type" />    <!-- It's a bttv device. -->
+   <parameter value="DeviceBTTV" name="Name" />    <!-- Params section name. -->   
+   <parameter name="Successor" >                   <!-- Filter tree leafs. -->
+    <parameter name="Filter" >
+     <parameter value="FilterSwap3" name="Type" /> <!-- Byte swapping filter -->
+     <parameter value="FilterSwap3" name="Name" />
+     <parameter name="Filter" >                    <!-- Filter tree leafs. -->
+      <parameter value="FilterFlip" name="Type" /> <!-- Upside down filter. -->
+      <parameter value="FilterFlip" name="Name" />
+     </parameter> 
+    </parameter>
+   </parameter>
+  </parameter>
+ </parameter>
+
+ <!-- Parameter section of the bttv device. -->
+ <parameter name="DeviceBTTV">                   
+  <parameter value="/dev/video0" name="Device" /> <!-- Path of the device. -->
+ </parameter>
+
+ <!-- Parameter section of the byte swapping filter. -->
+ <parameter name="FilterSwap3">
+  <parameter value="true" name="InterfaceInstance" /> <!-- Video interface. -->
+ </parameter>
+
+ <!-- Parameter section of the upside down filter. -->
+ <parameter name="FilterFlip">
+  <parameter value="true" name="InterfaceInstance" /> <!-- Video interface. -->
+  <parameter name="Interface">                        <!-- Interface params. -->
+   <parameter value="Flipped" name="Name" />          <!-- Interface name. -->
+  </parameter>
+ </parameter> 
+
+</section>
+\end{verbatim}
+
+\section{QtVideo}
+
+{\tt QtVideo} is a test client for the {\tt VideoService} and the {\tt
+  Video} interface. It displays an image stream from a {\tt Video}
+interface instance and has an additional button, to save snapshots to
+disk.
+
+The {\tt QtVideo} tool accepts the following command line parameters:
+\begin{description}
+\item[-n] Name of the {\tt Video} interface instance within the CORBA
+  naming service. Default is {\em Video}.
+\item[-r] Remote access of the images. QtVideo will be using the
+  methods for location transparent image access of the {\tt Video}
+  interface. These are much slower, than the methods using shared
+  memory buffers, but are the only option when running QtVideo on
+  another machine.
+\item[-v] Verbose mode.
+\item[-?] Emitting command line help and exits.
+\end{description}
+
+\section{Video Interface}
+
+The {\tt Video} interface is used to manage the access of image data
+by client programs. It supports location transparent as well as
+optimized local image access. Additionally connection management is
+used, to switch off filter subtrees that are not accessed by any other
+program.
+
+The general access pattern of a client of a {\tt Video} object looks
+like follows:
+\begin{enumerate}
+\item Get a {\tt Video} interface IOR from the naming service.
+\item Connect to the {\tt Video} object.
+\item Get images until done.
+\item Disconnect from the {\tt Video} object.
+\end{enumerate}
+
+Note that due to the performance centric design of the Video
+interface, the VideoService can easily be jammed by client programs
+violating the access protocol of the interface. To facilitate the
+correct usage, some helper classes are provided by \miro. These are
+discussed in section \ref{SEC:C++HelperClasses}.
+
+\subsection{Location Transparent Image Access}
+
+To access an image as a client running on a different computer than
+the {\tt VideoService}, the {\tt Video} interface offers the methods
+\begin{itemize}
+\item {\tt exportSubImage}
+\item {\tt exportWaitSubImage}
+\end{itemize}
+They both return a copy of the image as return value. The first method
+returns immediately the current image, while the second one waits until
+a new image becomes available before returning. The image will be
+scaled down to the size specified by method parameters.
+
+Note, that due to the copying and network overhead of those methods,
+they are only useful for debugging and monitoring purposes.
+
+\subsection{Local Image Access}
+
+For clients running on the same machine as the {\tt VideoService}, the
+{\tt Video} interface offers the following methods for image access
+via shared memory buffers:
+\begin{itemize}
+\item {\tt acquireCurrentImage}
+\item {\tt acquireNextImage}
+\item {\tt releaseImage}
+\end{itemize}
+While the first method returns immediately the buffer of the current
+image, the second one waits until a new image becomes available before
+returning. Note that the clients have to release each image buffer
+after processing. Otherwise the VideoService will soon run out of
+buffers, to share new images with its clients.
+
+\subsection{C++ Helper Classes}
+
+To facilitate the usage of the {\tt Video} interface and the adherence
+of the connect/disconnect, acquire/release protocol, \miro provides
+two simple helper classes. They are defined in the file {\tt
+  \$(MIRO\_ROO)/src/miro/VideoHelper.h}
+
+\begin{description}
+\item[Miro::VideoConnection] This class connects to a {\tt Video}
+  interface instance on construction and disconnects on destruction.
+  The constructor takes a pointer to the {\tt Video} object, to
+  connect to as argument.
+\item[Miro::VideoAcquireImage] This class acquires an image from a
+  {\tt Video} interface instance on construction and releases it on
+  destruction. The constructor takes a reference to a {\tt
+    Miro::VideoConnection} object, as first argument, the second
+  selects whether the current or the next image is to be acquired.
+\end{description}
+
+\subsection{Example Video Client}
+
+\lstinputlisting[frame=tb, firstline=12, caption={examples/video/VideoExample.cpp}]{VideoExample.cpp}
+\label{lst:VideoExample}
+
+\section{Video Broker Interface}
+
+In addition to the Video interfaces of individual filters, the
+VideoService also offers an interface that accesses the whole filter
+tree of the service. It is called VideoBroker and also registers as
+VideoBroker at the NamingService. It offers methods for synchronised
+simultanious access to multiple filters and for inspection of the
+filter tree.
+
+\subsection{Synchronised Image Access}
+
+The client side evaluation of the results of the various filters often
+requires access to multiple filters, that originate from the same
+input image. The following methods are available in the VideoBroker
+interface for this purpose. They work quite like the corresponding
+methods of the Video interface of the  individual filters.
+
+\begin{itemize}
+\item {\tt acquireNextImageSet}
+\item {\tt releaseImageSet}
+\end{itemize}
+
+\subsection{Filter Tree Meta Information}
+
+Statistical information about the filter tree can be optained at the
+VideoBroker interface via the method:
+
+\begin{itemize}
+\item {\tt filterTreeStats}
+\end{itemize}
+
+It returns the number of connections, the processing time of the
+filter as well as the processing time of the corresponding filter
+subtree (not including the processing time of the filter), the name of
+the filter, the ior and the name of its Video interface (if
+available), the filter successors as well as the successor links.
+
+\section{Writing Filters}
+
+Sooner or later, it will become handy for a user to add 
+custom filters to the video image processing framework. This is a two
+step process. First the filter has to be implemented as a class
+derived from the {\tt Filter} base class. Second a customized version
+of the {\tt VideoService} has to be built. The later has two
+reasons. The first is, that \miro currently does not contain a plug in
+architecture for dynamically loadable modules. The second is, that
+dynamic loadable modules require the usage of shared libraries. As
+this is has some runtime performance impact, that might not really
+desirable for performance critical tasks like image
+processing. Nevertheless, patches are welcome.
+
+\subsection{The Filter Base Class}
+
+The base class of all filters is {\tt Video::Filter}. It provides
+methods for filter tree setup and configuration, a harness for
+recursive filter tree processing and buffer management in interaction
+with a {\tt Video} interface instance.
+
+The most important protected methods and data members for child classes are.
+\begin{description}
+\item[inputBuffer()] Returns a pointer to the input buffer.
+\item[inputFormat\_] Specifies the data format of the input buffer.
+\item[outputBuffer()] Returns a pointer to the output buffer.
+\item[outputFormat\_] Specifies the data format of the output buffer.
+\end{description}
+
+\subsection{Methods to Overwrite}
+
+The most important methods for child classes are.
+\begin{description}
+\item[Constructor] The constructor takes a struct of type {\tt
+    Miro::ImageFormatIDL} as parameter. It describes the input format
+  of the filter (hence the output format of the predecessor filter).
+  The constructor of the {\tt Filter} base class copies this parameter
+  into the two member variables {\tt inputFormat\_} and {\tt
+    outputFormat\_}. The derived filter has to ensure, that the input
+  format is a valid format for the filter and modify the member {\tt
+    outputFormat\_}, to correctly describe the output format of the
+  filter. If the input format is not valid a {\tt Miro::Exception} has
+  to be thrown.
+\item[process] The actual filtering method. Put your filter code here.
+\end{description}
+
+\subsection{Configuration and Parameter Processing}
+
+If your filter needs additional parameters for configuration, your can
+add them to the configuration file framework by specifying them in a
+parameter file description, deriving them from {\tt
+  Miro::FilterParameters}. You have to overwrite the factory methods
+for {\tt Miro::FilterParamters} in the {\tt Filter} class to return an
+instance of your derived parameters class. This can be automated by
+using the macros:
+\begin{description}
+\item[FILTER\_PARAMETERS\_FACTORY(X)] For usage within the class definition.
+\item[FILTER\_PARAMETERS\_FACTORY\_IMPL(X)] For usage within the class implementation.
+\end{description}
+Where X is the name of your derived Filter class. 
+
+For initialization and cleanup the following two methods exist.
+\begin{description}
+\item[init] Called on initialization of the filter tree. It provides a
+  pointer to the parameters object initialized from the configuration
+  file. Use {\tt dynamic\_cast} to convert it to the type of your
+  derived parameter class.
+\item[fini] Called before destruction of the filter tree.
+\end{description}
+
+\subsection{Enabling and disabling features}
+
+The interface also contains some flags that allow the
+derived classes to specify the existens of certain properties for the
+base class. Overwrite their settings in the constructor. Those are namely:
+\begin{description}
+\item[interfaceAllowed] Specifies, whether the filter result can be
+  exported by a video interface. The default for Video::Filter is
+  true. For Video::Device it is false (see section
+  \ref{sec:VideoDevice} for details).
+\item[inplace] Not implemented yet. (Allways false)
+\end{description}
+
+\subsection{Filter Meta Information: FilterImageParameters}
+
+Sophisicated filters may also extract additional information from the
+images, such as a region of interest etc. To hand this information to
+subsequent filters, an additional interface does exist. It is based on
+the same mechanisms as the filter parameters, except that they can't
+be specified within configuration files. The base class is empty.
+
+The factory methods also reside in the corresponding {\tt Filter}
+class and are wrapped by the two macros:
+\begin{description}
+\item[IMAGE\_PARAMETERS\_FACTORY(X)] For usage within the class definition.
+\item[IMAGE\_PARAMETERS\_FACTORY\_IMPL(X)] For usage within the class implementation.
+\end{description}
+Where X is the name of your derived Filter class. The base class is
+named {\tt FilterImageParameters} and the macros expect the name of
+any child class to end on {\tt ImageParameters}.
+
+The {\tt Filter} interface provides accessor methods for the
+parameters of the individual buffers:
+\begin{description}
+\item[inputBufferParameters] Returns a const pointer to the parameters
+  of the input buffer.
+\item[inputBufferParametersLink] Returns a const pointer to the
+  parameters of the linked input buffer specified by its index.
+\item[outputBufferParameters] Returns a pointer to the parameters of
+  the output buffer. Note that the parameter instances is not
+  initialized with defaults before processing of the filter. That is,
+  the filters {\tt process} method is responsible, that all data
+  members of the image parameters instance contain meaningfull values
+  on return.
+\end{description}
+
+
+\subsection{Example Video Filters}
+
+To illustrate the framework, a simple example filter is provided under
+{\tt \$(MIRO\_ROOT)/examples/videoFilter}.
+
+\subsection{Calculating a Gray Image}
+
+{\tt FilterGray} implements a simple gray
+filter for images in 24 bit rgb format. The gray value is calculated
+as the average of the weighted sum of the three color values. The
+weighting can be specified by the filters parameters.
+
+Start the example service in the directory videoFilter with \\
+{\tt GrayVideoService -MiroConfigFile GrayVideoConfig.xml}
+
+It registers two interfaces at the naming service: {\tt Video} and
+{\tt Gray}. To examine the original and the filtered image, use {\tt
+  QtVideo} and {\tt QtVideo -n Gray}.
+
+\subsection{Image time series}
+
+{\tt FilterDiff} illustrates the use of multiple input filters. It
+calculates the difference of two input images. For that purpose it
+locks images of one image source to provide a view into the past. The
+number of images locked can also be specified by the filters
+parameters. Note however, that it has to be less then the number of
+output buffers provided by the input buffer.
+
+Start the example service in the directory videoFilter with \\
+{\tt GrayVideoService -MiroConfigFile DiffVideoConfig.xml} \\
+Note that the usage of an input filter link is a bit artificial in
+this configuration, as both input filters are the same.
+
+It registers two interfaces at the naming service: {\tt Video} and
+{\tt DiffImage}. To examine the original and the filtered image, use {\tt
+  QtVideo} and {\tt QtVideo -n DiffImage}.
+
+\section{Writing a new Input Device}
+
+The root of a filter tree is a video device. A video device is
+actually not an image filter but an image producer. But as mentioned
+above, it is implemented as as specialization of the video filter
+class. Some additional requirements and features do exist to handle
+this case.
+
+\subsection{BufferManger}
+
+The video framework does use a buffer manager class to organize the
+concurrent acces to the images of a filter by the filters and remote
+clients. Video devices normally aint capable of having directly a
+video interaface instance attached. The video interface uses shared
+memory to allow for zero copy acces to the clients. Video devices
+often use memory mapped io to acquire the images. Combining the two is
+at least tricky, if possible at all. So most video devices just skip
+it.
+
+Instead the buffer manager class is used for synchronising the access
+to the mmaped images between the filters and the hardware.
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

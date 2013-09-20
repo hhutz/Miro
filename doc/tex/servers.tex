@@ -1,0 +1,596 @@
+\chapter{Available Services}
+\label{sec:services}
+
+The \miro framework abstracts the robots hardware devices as active
+services, that export the sensors and actuators functionality via CORBA
+interfaces that can be accessed transparently from other programs,
+probably running on totally different machines. Which services there
+are available depends on the individual robot type. To provide easy
+access to the services interface, each service registers itself under
+a standard name at the CORBA Naming Service. To allow multiple
+robots to be accessed at a time, each individual robot creates its
+one naming context within the Naming Service under which its services
+register. The default naming context is {\tt Miro}, but a given robot
+should register itself under its own name (for example {\tt stanislav}).
+The naming context to use can be specified at the
+command line of every service and example program via the
+{\tt -MiroNamingContext} option.
+
+
+\section{Command Line Options}
+\label{sec:command-line}
+
+For each service the following command line options can be specified:
+
+\begin{description}
+\item[-MiroConfigFile {\em fileName}:]
+  The services are widely configurable. These parameters are specified
+  in config files within the directory {\tt \$MIRO\_ROOT/etc}. The
+  file name is derived from the computers {\tt \$HOST} environment
+  variable: {\tt \$HOST}.xml. If you want to specify another
+  configuration file, you can do with this command line option.
+\item[-MiroNamingContext {\em contextName}:]
+  The short form of this option is \textbf{-MNC}.
+  As mentioned before all services register their interfaces at the
+  naming service within a naming context. The default naming context
+  is {\tt Miro}. In multi robot scenarios for instance it would be
+  necessary to assign a different naming context to each robot. This
+  can be done by this command line option. Note that since it is
+  necessary to specify none default naming context names also at the
+  client side, this option is also recognized by every client program.
+\item[-MiroRebindIOR:]
+  To prevent services from different robots to accidentally
+  deregister each other from the naming service, an already existing
+  entry in the naming service isn't unbound by a service, if it tries
+  to register under the same name. Anyhow, if you need to overwrite an
+  existing entry, specify this option at the command line.
+\end{description}
+
+
+\section{Individual Interfaces}
+
+In the following, we list the different services and their
+interface names in the naming service, all interfaces are
+registered within the specified naming context in the naming
+service. For multi robot scenarios the canonical naming convention
+for the individual robots naming contexts is the robots name.
+Don't get confused by the fact that many services are collocated
+within a single binary, while for others there exists a dedicated
+binary. Note that in general the specialized interfaces of
+individual robots register at the Naming Service under their
+ancestors name.  The interface documentation can be looked up
+within the \miro reference and in the \miro online documentation
+as well.  For some services specializations for individual robot
+types do exist. Those are described in the subsequent sections.
+
+\begin{description}
+\item[Odometry:]
+  The motion service registers the {\tt Miro::Odometry} interface as
+  {\tt Odometry}. It encapsulates
+  the odometry (dead reckoning) sensor.
+\item[Motion:]
+  The motion service registers the {\tt Miro::Motion} interface as
+  {\tt Motion}.
+\item[RangeSensor:] The range sensor interface is the general
+  abstraction of all range sensor devices, such as sonar, laser range
+  finders etc. It offers a method for querying the sensors physical
+  configuration as well as the latest sensor reading.  See the {\tt
+    QtRangeSensor} program in the utils directory for an example on
+  how to use this information.  The range sensor interface becomes
+  registered at the naming service under the name of the actual
+  sensory device.
+  \begin{description}
+  \item[Sonar:] The sonar service registers as {\tt Sonar}.  It
+    provides an interface to the very common ultrasonic sensors for
+    robots.
+  \item[Infrared:] It registers as
+    {\tt Infrared}.
+  \item[Tactile:] Some robots have bumpers as some sort of ''it's too
+    late'' sensors.  Still it is better to stop when you crashed than
+    just moving on. It is registered as {\tt Tactile}.  Since it can
+    be interpreted as a (very limited) range sensor, it is also a {\tt
+      Miro::RangeSensor}.
+  \item[Laser:] The laser scanner service registers as {\tt Laser}. It
+    provides very accurate 180° distance measurements, with up to
+    48Hz.
+  \end{description}
+\item[Stall:]
+  Similar to the bumpers, the stall detection monitors the robots
+  motion and detects, when the robot is stuck in its movement. The
+  {\tt Miro::Stall} interface registers at the naming service as
+  {\tt Stall}.
+\item[Video:] The video service registers the {\tt Miro::Video}
+  interface as {\tt Video}. It provides camera images at a rate of up
+  to 25 images per second captured by frame grabber cards. Currently
+  supported are {\tt matrox meteor} and cards that are supported
+  by {\em video for linux} (bttv8).  Since the bandwidth needed for
+  uncompressed image data transportation exceeds the capabilities of
+  most todays network devices and even memory copying can introduce
+  excessive overhead, the video service enables access
+  to the grabbed images via shared memory keys.
+\item[PanTilt:] Cameras often are mounted on top of a pan-tilt unit,
+  allowing the robot to look sideways while moving in another
+  direction. Lightweight versions of such a device are panning or
+  tilting units.  The associated services register the
+  {\tt Miro::Pan}, {\tt Miro::Tilt} and {\tt Miro::PanTilt}
+  interfaces as {\tt Pan, Tilt} and {\tt PanTilt} at the naming
+  service.
+\item[CameraControl:]
+  This interface allows to control the optical properties of certain
+  camera models, i.e. {\em zoom}, {\em focus} and {\em shutter speed}.
+  In addition to the generic {\tt CameraControl} interface there are
+  some specialized interfaces for particular camera models, e.g.
+  {\tt CanonCameraControl} or {\tt SonyCameraControl}.
+\item[Buttons:]
+  For simple user interaction, some robot types provide push
+  buttons. The buttons service registers the {\tt Miro::Buttons}
+  interface as {\tt Buttons}.
+\item[Speech:]
+  To provide a more natural way of communication, some robots are
+  equipped with speech synthesizer cards. The speech service registers
+  the {\tt Miro::Speech} interface as {\tt Speech}.
+\item[Gps:]
+  Some robots may be equipped with a GPS receiver to allow easy and
+  Odometry-independent positioning. The GPS service registers the
+  {\tt Miro::Gps} interface as {\tt GPS}. Specialized services for
+  particular GPS devices may also register an extended interface derived
+  from {\tt Miro::Gps}, e.g. {\tt Miro::CtGps}.
+\end{description}
+
+
+\section{Asynchronous Sensory Information}
+\label{SEC:ASYNCHRONOUS_SENSORY_INFORMATION}
+
+Another feature of the \miro framework is the asynchronous
+distribution of sensory data via the CORBA Notification Service
+\cite{OMG:Notify-Spec}. These event channels allow filtered and
+priority based event processing for time critical sensory information
+distribution under high load.  Therefore in every robots naming
+context exists a reference {\tt EventChannel} under which the
+robots notification service can be accessed.
+
+The usage of the notification service within the \miro framework is
+explained in more detail in \ref{sec:notify}. In the following we give
+only a brief description. The notification service allows simple event
+filtering on the bases of the domain name and the type name of the
+event. This way the individual consumer can easily subscribe for the
+messages it is interested in. As the domain name, the naming context
+is used within the \miro framework (note that in a multi robot
+scenario, an event channel can transport data from multiple robots).
+In the following the type names of the events and the data contained
+in the event are listed for the individual services:
+
+\begin{description}
+\item[Odometry:] The odometry servant and all derived services
+  generates periodical {\tt Miro::MotionStatusIDL} events), that
+  propagate the robots current position and velocities. The event type
+  name is {\tt Odometry}.
+\item[RangeSensor:] The range sensor servant and all derived services
+  can generate periodical range sensor events. The event type name is
+  that of the derived sensor interface (Sonar, Laser etc.). It is also
+  returned by the {\tt getScanDescription} method within the {\tt
+    ScanDescriptionIDL} struct. The event data is one of three types,
+  as also specified within {\tt Miro::SensorDescriptionIDL}.
+  \begin{description}
+  \item[Miro::RangeScanEventIDL]
+    The data of a range sensor that acquires data in a continuous scan
+    pushes its data within this struct. (Currently, there does exist
+    no actual sensor that behaves in this way, but anyways...)
+  \item[Miro::RangeGroupEventIDL]
+    The data of a range sensor that acquires data groupwise
+    pushes its data within this struct. A range sensor group
+    normally is formed by a set of sensors that are mounted on the
+    same hight, pointing in different directions. The laser scanners
+    are organized that way.
+  \item[Miro::RangeBunchEventIDL] The data of a range sensor that
+    acquires data in a discontinuous fashion pushes its data within
+    this struct. Each sensor reading contains its own group id as
+    well as its index within that group. Especially sonar sensor
+    are organized that way, since neighbouring sensor mustn't be
+    fired simultaneously to minimize crosstalk.
+  \end{description}
+  The event type name is that of the actual sensor: {\tt Sonar}, {\tt
+    Laser}, {\tt Tactile}, etc. as also specified within {\tt
+    Miro::SensorDescriptionIDL}.
+
+\item[Sonar:] The sonar service generates range sensor events with the
+  type name {\tt Sonar}. Note that the sonar sensors are fired
+  interleavingly to avoid crosstalk between them. Therefore the
+  payload of an event emitted by a sonar device is normally a
+  \texttt{RangeBunchEventIDL}. That way you have to analyze multiple
+  {\tt Sonar} messages to get a full sonar scan.
+\item[Infrared:] The infrared service generates range sensor events
+  with the type name {\tt Infrared}.
+\item[Tactile:] The tactile service generates range sensor events with
+  the type name {\tt Tactile}. Due to the hopefully low frequency
+  at which those events occur it might be better to listen to the
+  {\tt Tactile} events, instead of polling the tactile status. Tactile
+  devices usually contain a \texttt{RangeBunchEventIDL} struct.
+\item[Stall:] The stall service also emits events. These contain the
+  type name {\tt Stall}. For the event data see the individual
+  robots descriptions.  Due to the hopefully rare occasions at which
+  those events occur it might be better to listen to these events,
+  instead of polling the stall interface.
+\item[Buttons:] They also provide the event triggered communications
+  model that uses the event type {\tt Button}. The events payload is
+  of type {\tt ButtonStatusIDL}.
+\item[Gps:] The GPS service sends out events for every position or
+  dilution update received from the device. Position updates are denoted
+  by the type name {\tt GpsPosition} and carry a {\tt
+  GpsPositionEventIDL} payload containing updated information for the
+  global position as well as a local position relative to a freely
+  placeable reference point. Dilution events contain the type name {\tt
+  GpsDilution} and carry a {\tt GpsDilutionEventIDL} type payload.\\
+  Besides that the GPS service is also able to forward selected GPS
+  sentences received from the device for evaluation by the client. If
+  this feature is enabled the generated events will contain the {\tt
+  GpsSentence} type name and carry a {\tt GpsSentenceEventIDL} type
+  payload.
+\end{description}
+
+
+\section{\bXXI}
+
+The \bXXI robot has a large number of available sensors and actuators. The
+relevant binaries for its specialized services are:
+
+\begin{description}
+\item[B21Base:] This is a collection of the robots main services. This
+  binary incorporates the motion service as well as the sonar, tactile
+  and infrared services. Furthermore it gives access to the four
+  colored buttons, that are mounted on top of the robot. The
+  corresponding interfaces are:
+  \begin{itemize}
+  \item {\tt Miro::B21Motion} \\
+    The {\tt Miro::B21Motion} interface is derived from the
+    {\tt Miro::Motion} interface and gives access to the
+    specialized movement commands of the B21 robot. It registers under it
+    ancestors name {\tt Motion}.
+  \item {\tt Miro::Sonar} \\
+    The derived {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Sonar}.
+  \item {\tt Miro::Infrared} \\
+    The derived {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Infrared}.
+  \item {\tt Miro::Tactile} \\
+    The derived {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Tactile}.
+  \item {\tt Miro::B21Buttons} \\
+    The B21 has four buttons, that can be used as a simple user
+    interface. The {\tt Miro::B21Buttons} interface is supported by
+    this service. It sends {\tt Miro::ButtonStatusIDL} events, if a
+    button is pressed or released.
+  \end{itemize}
+
+\item[SickLaserService:]
+  This is the service to access the SICK laser scanner. It supports
+  the {\tt Miro::RangeSensor} interface.
+\item[DtlkSpeech:]
+  This service lets you control the DoubleTalk Speech cards. The
+  interface is named {\tt Miro::Speech}
+\item[VideoService:]
+  It gives you access to the two frame grabbers of the robot. It
+  supports the {\tt Miro::Video} interface.
+\item[DpPantilt:]
+  It supports the {\tt Miro::DirectedPerceptionPanTilt} interface,
+  which is derived from {\tt Miro::PanTilt}. It therefore registers
+  itself as {\tt PanTilt}
+\end{description}
+
+Note that the B21 has two internal computers, to which the
+different sensors and actuators are attached. You have to start
+the relevant binaries at the correct computer. The
+sensory/actuatory distribution in our laboratory is as follows:
+Start B21Base and LaserService on the left computer, VideoService
+and DpPantilt and DtlkSpeech on the right.
+
+
+\section{\sparrow}
+
+The \sparrow soccer robots have a similar diversity of sensors and
+actuators, but for efficiency and internal design reasons, they are
+grouped together in less binaries:
+
+\begin{description}
+\item[SparrowBase:]
+  Within this file the following services are grouped together:
+  Motion, Stall, Kicker, Buttons, Sonar, Infrared and Pantilt. The
+  corresponding interfaces are:
+  \begin{itemize}
+  \item {\tt Miro::SparrowMotion} \\
+    The {\tt Miro::SparrowMotion} interface is derived from the
+    {\tt Miro::Motion} interface and gives access to the
+    specialized movement commands of the \sparrow robot. It registers
+    under it ancestors name {\tt Motion}.
+  \item {\tt Miro::Stall} \\
+    The {\tt Miro::Stall} interface is registered as {\tt Stall}.
+  \item {\tt Miro::Kicker} \\
+    Due to its purpose as football robot, the \sparrow robot has a
+    kicker, that can be accessed via this interface. It registers at
+    the naming service as {\tt Kicker}.
+  \item {\tt Miro::Buttons} \\
+    The {\tt Miro::Buttons} interface registers as
+    {\tt Buttons}.
+  \item {\tt Miro::Sonar} \\
+    The {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Sonar}.
+  \item {\tt Miro::Infrared} \\
+    The {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Infrared}.
+  \item {\tt Miro::PanTilt} \\
+    The {\tt Miro::SparrowPanTilt} interface is registered as
+    {\tt PanTilt}.
+  \end{itemize}
+
+  Note that the
+  stall service sends {\tt Miro::SparrowStallIDL} events.
+\item[VideoService:]
+  It gives you access to the frame grabber of the robot. It supports
+  the {\tt Miro::Video} interface.
+\end{description}
+
+
+\section{Pioneer}
+
+Due to the limited variety of sensors and actuators on the Pioneer robots, there exists only
+the most fundamental services for this robot.
+
+\begin{description}
+\item[PioneerBase:]
+  The following services are grouped together: Motion, Stall and Sonar.
+  The corresponding interfaces are:
+  \begin{itemize}
+  \item {\tt Miro::PioneerMotion} \\
+    The {\tt Miro::PioneerMotion} interface is derived from the
+    {\tt Miro::Motion} interface and gives access to the
+    specialized movement commands of the Pioneer robot. It registers
+    under it ancestors name {\tt Motion}.
+  \item {\tt Miro::PioneerStall} \\
+    The {\tt Miro::PioneerStall} interface (derived from {\tt
+      Miro::Stall}) is registered as {\tt Stall}.
+  \item {\tt Miro::Sonar} \\
+    The {\tt Miro::RangeSensor} interface registers itself
+    as {\tt Sonar}.
+  \end{itemize}
+
+  Note that the stall service sends {\tt Miro::PioneerStallIDL} events.
+\end{description}
+
+
+\section{Frame Grabbers and Digital Cameras}
+
+The {\tt VideoService} provides an interface to several video image
+sources.  All BTTV cards that are supported by the video for linux
+project are also supported here (namely the Bt848/849/878/879 based
+frame grabbers). Support for IEEE 1394 digital cameras (aka Firewire)
+is provided.  The Matrox Meteor frame grabbers cards are also
+supported, but note that kernel drivers are only available for the
+older 2.2.x kernel series. See the chaper \ref{sec:video} for a
+detailed discussion of the topic.
+
+
+\section{SICK Laser Scanner}
+
+The {\tt sickLaserService} provides an interface to a laser range
+finder of type Sick PLS.
+%%pls200 (TODO: check this?).
+This sensor is connected to the controlling PC via a serial line. It
+is delivered either with a RS-232 or a RS-422 compliant interface.
+
+The idl-interface implemented by the {\tt sickLaserService} is
+{\tt Miro::Laser}, which is derived from
+{\tt Miro::RangeSensor}. The server can be driven in two different
+modes, either the sensor automatically provides a scan about 40 times
+a second, or every scan is polled, which results in a maximum scan
+frequency of 10 times a second. The second mode also allows to choose
+a different (i.e. lower) scan frequency. At the moment no other
+special features of the Sick PLS200 are supported.
+
+The configuration of this service is provided in xml, within the
+section {\tt sick}. The following parameters are understood:
+
+\begin{description}
+\item[Device:]
+  The filename of the device which should be used.
+\item[Baudrate:]
+  The baudrate for communication with the sensor,
+  possible values are: 9600, 19200, 38400 and 500000.
+\item[StdCrystal:]
+  For achieving the unusual baud rate of 500000
+  baud, we use a serial adapter, that is equipped with a 16MHz
+  crystal, instead of the standard 14.??MHz. Due to this reason, the
+  standard baud rates must be generated by modifying the divisor of
+  the UART. If you have an off-the-shelf serial adapter, use
+  {\tt true} here, you will probably not be able to use 500000 baud
+  then.
+\item[ContinousMode:]
+  If {\tt true} is provided for this
+  parameter the sensor will provide data automatically, about 40 times
+  a second. If {\tt false} is used, the service will poll a
+  measurement after an interval that can be specified with the
+  following parameter.
+\item[PollIntervall:]
+  The interval between two consecutive
+  measurements, measured in seconds. This parameter has no effect
+  if ContinousMode is set to {\tt true}.
+\item[Notify:]
+  Specifies whether incoming scan results should be sent out through the
+  CORBA notification service.
+\item[PositionStamps:]
+  Specifies whether laser scan events should be marked with an odometry
+  position reading.
+\item[Statistics:]
+  If this parameter is {\tt true} the laser service will dump some
+  statistical data about the device communication at regular intervals
+  (once for each 1000 received packets).
+\item[Fov:]
+  The field of vision, i.e. angular scan range of the laser scanner in
+  degrees. Current SICK laser scanners support a scan range of either
+  180° (default) or 100°.
+\item[ScanResolution:]
+  The scan resolution, i.e. the angular distance between two single shots
+  in degrees. Supported values are 0.5° (default) or 1° for a scan range
+  of 180° or 0.25°, 0.5° or 1° for a scan range of 100°.
+\end{description}
+
+The following example shows the configuration used for our hardware:
+
+\begin{lstlisting}[frame=tb]{}
+    <section name="Sick" >
+      <parameter name="Laser::Parameters" >
+	<parameter value="/dev/laser" name="Device" />
+        <parameter name="TtyParams" >
+          <parameter value="500000" name="Baudrate" />
+        </parameter>
+        <parameter value="false" name="StdCrystal" />
+        <parameter value="true" name="ContinousMode" />
+        <parameter value="0.100000" name="PollInterval" />
+        <parameter value="false" name="Notify" />
+        <parameter value="false" name="PositionStamps" />
+        <parameter value="true" name="Statistics" />
+        <parameter value="180" name="Fov" />
+	<parameter value="0.5" name="ScanResolution" />
+      </parameter>
+    </section>
+\end{lstlisting}
+
+As the laser provides a specialization of a range sensor, we also provide
+a scandescription for it. See section \ref{scandescrption} for details.
+However, since it isn't feasible to manually specify up to 401 separate
+range sensors large parts of the scandescription are calculated from the
+Fov and ScanResolution parameters at service startup.
+
+
+\subsection{Possible Problems}
+
+Due to the unusual and high data rate of 500000~baud a special serial
+interface card is required. The card recommended by Sick provides a
+16550A compatible interface, for that reason the current
+implementation is able to use the card through the standard linux
+serial device drivers, which keeps the implementation of the service
+more portable. Unfortunately this introduces a big drawback: receiving
+up to 50000 characters per second, results in at least $50000/16=3125$
+interrupts per second, this is an enormous load. It is essential, that
+every interrupt is handled on time, because the sensor does neither
+support hardware, nor software flow control, and provides a packet
+with data every 25~ms. If you have the chance to use an interface card
+with a larger FIFO buffer than the standard 16 bytes, this will
+provide a large improvement in performance, stability and system
+reactivity.  We solved most of our stability problems, that were
+caused by lost packages without a larger FIFO: We enabled irqs
+throughout IDE interrupt processing (this may be extremely dangerous,
+depending on your configuration, see man page of {\em hdparm}). Another
+solution could be using {\em irqtune} to give the serial irq a higher
+priority, or using {\em RT-Linux}.
+
+\textbf{Due to the adaptations of the divisor for the serial line,
+the {\tt SickLaserService} has to be suid root. If you use a
+standard crystal, and you do not use 500000~baud, this is not
+necessary.}
+
+
+\section{DoubleTalk Speech Card}
+
+
+\section{Directed Perception Pantilt}
+
+\section{Global Positioning System}
+
+The {\tt GpsService} provides an interface for any NMEA-0183 compatible
+GPS receiver connected via a serial interface. The service implements
+the idl interface {\tt Miro::Gps} or, depending on its configuration, a
+specialized interface derived from it.
+
+The service reads the {\tt GPS::Parameters} from the {\tt Gps} section
+of the XML configuration file. The parameter format is derived from {\tt
+Miro::TtyParameters} and includes the following fields:
+
+\begin{description}
+\item[Device:]
+  The filename of the device which should be used. If no device is
+  specified {\tt /dev/gps} is used.
+\item[Baudrate:]
+  The baudrate for communication with the GPS device. Most receivers
+  communicate at 4800 baud.
+\item[ReceiverType:]
+  The type of the GPS receiver. If this parameter is not specified the
+  {\tt generic} type is used.
+\item[NmeaNotify:]
+  This parameter is a string vector and can hold an arbitrary number of
+  NMEA sentences that should be forwarded to the client. By default this
+  feature is disabled.
+\end{description}
+
+A typical GPS configuration section might look like this:
+
+\begin{lstlisting}[frame=tb]{}
+  <section name="Gps" >
+    <parameter name="GPS::Parameters" >
+      <parameter value="/dev/ttyS1" name="Device" />
+      <parameter value="4800" name="Baudrate" />
+      <parameter value="generic" name="ReceiverType" />
+      <parameter name="NmeaNotify" >
+        <parameter value="GPRRE" />
+        <parameter value="GPVTG" />
+      </parameter>
+    </parameter>
+  </section>
+\end{lstlisting}
+
+In this example any NMEA sentences containing the type name {\tt GPRRE}
+or {\tt GPVTG} are wrapped inside a {\tt GpsSentenceEventIDL} event and
+forwarded to the client.
+
+\subsection{Generic GPS receivers}
+
+The generic GPS implementation is used if the {\tt ReceiverType}
+configuration parameter is either omitted or set to {\tt generic}. In
+this mode the service remains completely passive, i.e. it will read
+sentences sent out by the GPS unit and evaluate any known and verified
+message, but it will not send any commands to the device. If your device
+requires any configuration (i.e. to enable Altitude Aiding or
+Differential GPS) you have to use a separate tool to prepare it and, if
+possible, make the configuration permanent before starting the GPS
+service.
+
+The generic implementation registers the {\tt Miro::Gps} interface as
+{\tt GPS} in the CORBA Naming Service. It provides methods to poll for
+the current position (both global and relative to a relocatable position
+reference), to poll for the dilution of precision values and to place
+the reference point for relative positioning.
+
+\subsection{Star Track GPS receivers}
+
+This implementation is specialized for use with GPS receivers
+manufactured by CT Communication Technology GmbH Friedberg. It was
+developed and tested using a Star Track GSX-1 GPS receiver, but it
+should be compatible compatible with other models by the same vendor (or
+maybe even by other vendors) as well. Set the {\tt ReceiverType} config
+parameter in GPS::Parameters to {\tt ct} in order to use this interface
+instead of the generic one.
+
+In this mode the service implements the {\tt Miro::CtGps} IDL interface
+which is derived from {\tt Miro::Gps} and registers it as {\tt GPS} in
+the Naming Service. The specialized interface provides all methods of
+the generic interface as well as additional methods to configure
+Differential GPS, enable and disable Altitude Aiding, select the rate at
+which each particular NMEA sentence is sent and store the current
+configuration.
+
+%\section{Higher-level Servers}
+
+%In the current version of \miro, no high-level services are included.
+
+%\subsection{MapServer}
+
+%\subsection{RegionServer}
+
+%\subsection{SaliencyServer}
+
+%\subsection{ClassificationServer}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End:

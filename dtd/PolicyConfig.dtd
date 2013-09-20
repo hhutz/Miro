@@ -1,0 +1,32 @@
+
+
+<!ENITY % integer "CDATA">
+<!ENITY % double "CDATA">
+
+<!ELEMENT xml(actionpattern*)>
+
+<!ELEMENT actionpattern (arbiter?,behaviour*,transition*)>
+<!ATTLIST actionpattern
+	x	%integer 	#REQUIRED
+	y 	%integer	#REQUIRED
+	start   (true|false)	#REQUIRED
+	name 	CDATA		#REQUIRED>
+	
+<!ELEMENT arbiter (parameter*)>
+<!ATTLIST arbiter
+	name	CDATA		#REQUIRED>
+	
+<!ELEMENT behaviour (parameter*)>
+<!ATTLIST behaviour
+	name	CDATA		#REQUIRED>
+	
+<!ELEMENT parameter EMPTY>
+<!ATTLIST parameter
+	value	(%integer|%double|true|false)	#REQUIRED
+	name	CDATA		#REQUIRED>
+	
+<!ELEMENT transition EMPTY>
+<!ATTLIST transition
+	target 	CDATA		#REQUIRED
+	message CDATA		#REQUIRED>
+	

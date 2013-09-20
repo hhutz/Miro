@@ -1,0 +1,14 @@
+<!DOCTYPE MiroConfigDocument>
+<config>
+  <section name="Robot" >
+    <parameter name="Miro::RobotParameters" >
+      <parameter value="MyRobot" name="Name" />
+      <parameter value="NewRobot" name="Type" />
+      <parameter value="true" name="NoNaming" />
+      <parameter value="MyContext" name="NamingContextName" />
+      <parameter value="12" name="NamingServiceTimeout" />
+      <parameter value="/data/root/dir" name="DataRootDir" />
+      <parameter value="MyEventChannel" name="EventChannelName" />
+    </parameter>
+  </section>
+</config>

@@ -1,0 +1,47 @@
+# miroJson
+#  - miroCore
+#  - miroBase
+#  - Qt
+#---------------------------------------
+
+set( JSON_LIB_NAME  miroJson )
+set( JSON_DIR_NAME "${LIB_NAME}" )
+set( EXPORT_NAME  "${JSON_LIB_NAME}_Export" )
+set( EXPORT_FILE  "${EXPORT_NAME}.h" )
+string( TOUPPER   "${JSON_LIB_NAME}_BUILD_DLL" JSON_EXPORT_DEFINE )
+
+set( JSON_SOURCES
+  JsonParse.cpp
+  JsonParseAce.cpp
+)
+
+set( JSON_HEADERS
+  ${EXPORT_FILE}
+  JsonCpp.h
+  JsonParse.h
+  JsonParseAce.h
+)
+
+include_directories(
+  ${JSONCPP_INCLUDE_DIR}
+)
+
+add_library( ${JSON_LIB_NAME} SHARED
+  ${JSON_SOURCES}
+  ${JSON_HEADERS}
+)
+
+target_link_libraries( ${JSON_LIB_NAME}
+  ${BASE_LIB_NAME}
+  ${CORE_LIB_NAME}
+  ${QT_QTCORE_LIBRARY}
+  ${JSONCPP_LIBRARIES}
+)
+
+# add target-specific defines
+# *_BUILD_DLL required on win32 for proper dll linkage
+set_property(
+  TARGET ${JSON_LIB_NAME}
+  PROPERTY COMPILE_DEFINITIONS ${JSON_EXPORT_DEFINE}
+)
+

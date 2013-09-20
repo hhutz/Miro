@@ -1,0 +1,99 @@
+# miro
+#  - miroBase
+#  - miroCore
+#  - miroXml
+#  - TAO
+#---------------------------------------
+
+set( LIB_NAME     miro )
+set( DIR_NAME    "${LIB_NAME}" )
+set( EXPORT_NAME "${LIB_NAME}_Export" )
+set( EXPORT_FILE "${EXPORT_NAME}.h" )
+string( TOUPPER  "${LIB_NAME}_BUILD_DLL" EXPORT_DEFINE )
+
+# idl files
+set(ALL_IDL_FILENAMES
+        SCmdLog.idl
+)
+tao_wrap_idl( ${ALL_IDL_FILENAMES} )
+
+miro_makeparams( Parameters.xml )
+
+set( SOURCES
+  ${MIRO_MAKEPARAMS_SOURCES}
+  AmiHandler.cpp
+  AmiHelper.cpp
+  AnyPrinter.cpp
+  Client.cpp
+  ClientData.cpp
+  CmdLog.cpp
+  LogHeader.cpp
+  LogInterceptor.cpp
+  LogInterceptorInit.cpp
+  LogNotifyConsumer.cpp
+  LogReader.cpp
+  LogTypeRepository.cpp
+  LogWriter.cpp
+  NamingRepository.cpp
+  NotifyLogSvc.cpp
+  NotifySvc.cpp
+  Server.cpp
+  ServerWorker.cpp
+  StructuredPushConsumer.cpp
+  StructuredPushSupplier.cpp
+)
+
+# headers need to be added for MSVC project generation
+set( HEADERS
+  ${EXPORT_FILE}
+  ${MIRO_MAKEPARAMS_HEADERS}
+  AmiHandler.h
+  AmiHelper.h
+  AnyPrinter.h
+  Client.h
+  ClientData.h
+  ClientParameters.h
+  CmdLog.h
+  LogHeader.h
+  LogInterceptor.h
+  LogInterceptorInit.h
+  LogNotifyConsumer.h
+  LogReader.h
+  LogTypeRepository.h
+  LogWriter.h
+  NamingRepository.h
+  NotifyLogSvc.h
+  NotifySvc.h
+  NotifyTypedConsumer.h
+  NotifyTypedConnector.h
+  NotifyTypedSupplier.h
+  Server.h
+  ServerData.h
+  ServerWorker.h
+  StructuredPushConsumer.h
+  StructuredPushSupplier.h
+)
+
+add_library( ${LIB_NAME} SHARED
+  ${SOURCES}
+  ${HEADERS}
+  ${TAO_IDL_GENERATED}
+)
+
+target_link_libraries( ${LIB_NAME}
+  ${BASE_LIB_NAME}
+  ${CORE_LIB_NAME}
+  ${XML_LIB_NAME}
+  ${TAO_LIBRARIES}
+)
+
+# add target-specific defines
+# *_BUILD_DLL required on win32 for proper dll linkage
+set_property(
+  TARGET ${LIB_NAME}
+  PROPERTY COMPILE_DEFINITIONS ${EXPORT_DEFINE}
+)
+
+# make sure we build MakeParams before this 
+add_dependencies( ${LIB_NAME} MakeParams )
+

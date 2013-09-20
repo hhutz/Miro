@@ -1,0 +1,21 @@
+This is the README file for the Miro software package.
+
+The layout of this this software is organized as follows:
+
+$(MIRO_ROOT)/
+
+ bin       : this is, where the executables are installed
+ include   : collects symbolic links to all relevant header files 
+ lib       : collects symbolic links to all libraries
+
+ idl       : contains idl sources
+ src       : contains the source code of all components of miro
+ examples  : contains subdirectories with example code (as simple as possible)
+ performance-tests : contains subdirectories with performace-test code 
+ tests     : contains subdirectories with test code
+
+ scripts   : contains some useful scripts
+ templates : contains templates for Makefiles and source code files, 
+             that follow our style guide
+ doc       : contains tex sources for printed, as well as html documentation
+ etc       : contains configuration files needed for execution

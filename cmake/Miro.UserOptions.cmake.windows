@@ -1,0 +1,34 @@
+######################################################
+## 
+## Default Miro options file for Windows 
+##
+######################################################
+
+# Tell the find scripts exactly where to find the
+# dependencies on Windows
+######################################################
+set( PACKAGES_DIR        "C:/devel"   )
+
+set( BOOST_ROOT        ${PACKAGES_DIR}/boost-1.41-${ARCH_COMPILER} )
+set( JSONCPP_ROOT_DIR  ${PACKAGES_DIR}/jsoncpp-${ARCH_COMPILER} )
+
+if( MSVC100 ) # Visual Studio 2010 (vc100)
+  set( BOOST_ROOT           ${PACKAGES_DIR}/boost_1_47 )
+endif( MSVC100 )
+
+# if BOOST_ROOT env var 
+# is set, use that value
+########################
+set( BOOST_ROOT_ENV $ENV{BOOST_ROOT} )
+if( BOOST_ROOT_ENV )
+  set( BOOST_ROOT ${BOOST_ROOT_ENV} )
+endif( BOOST_ROOT_ENV )
+
+# Boost setup
+########################
+set( Boost_USE_STATIC_LIBS FALSE )
+set( Boost_USE_MULTITHREAD TRUE )
+
+#add_definitions( -DBOOST_LIB_DIAGNOSTIC )
+add_definitions( -DBOOST_MEM_FN_ENABLE_CDECL ) #- needed for use of boost::bind
+

@@ -1,0 +1,27 @@
+We are pleased to announce our next snapshot of Miro.
+
+It is the third beta. The tag in the cvs repository is
+Beta3. You can update to it by a simple:
+
+cvs update -r Beta3
+
+Tar archives and the manual are also available at our web site.
+
+There is lots of new stuff in the current Miro cvs since the last 
+Miro-Ppb-Beta: 
+
+- Lots of small fixes for the new gcc 3.x versions. Miro should now
+compile with the current gcc versions without any problems.
+
+- Some fixes for the latest ACE/TAO versions. Miro should now compile
+with current ACE/TAO versions. However, we did not test it extensively
+on the robots.
+
+- Support for out new Sparrow2003 robot platform.
+
+- A new VideoService, adding support for firewire digital cameras and
+providing an infrastructur for advanced image filtering. It is now
+covered by a seperate chapter in the documentation. Unluckily this
+changes the Video interface sligthly.
+
+- Autoconf and Automake support. This is also covered in the manual.

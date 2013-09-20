@@ -1,0 +1,16 @@
+.libs
+.deps
+LogPerformance
+*.o
+Makefile
+Makefile.in
+*C.h
+*C.i.h
+*C.cpp
+*S.h
+*S.i.h
+*S.cpp
+*S_T.cpp
+*S_T.h
+*S_T.inl
+*S_T.i

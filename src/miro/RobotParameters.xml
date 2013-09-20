@@ -1,0 +1,61 @@
+<!DOCTYPE xml SYSTEM "MiroParametersDescriptionDocument.dtd">
+<config> 
+  <config_global name="namespace" value="Miro" />
+  <config_global name="include" value="ConfigParameters.h" />
+  <config_global name="Include" value="cstdlib" />
+
+  <config_group name="Robot">
+    <config_item name="Robot" parent="Config" final="true" instance="true" >
+      <config_parameter name="Name" type="string" default="Robot" />
+      <config_parameter name="Type" type="std::string" default="k10" />
+      <config_parameter name="TeamMembers" type="vector&lt;std::string&gt;" default="" />
+      <config_parameter name="NoNaming" type="bool" default="false" />
+      <config_parameter name="NamingContextName" type="std::string" default="Miro" />
+      <config_parameter name="NamingServiceTimeout" type="ACE_Time_Value" default="15" measure="sec"/>
+      <config_parameter name="DataRootDir" type="std::string" default="/data" />
+      <config_parameter name="EventChannelName" type="std::string" default="NotifyEventChannel" />
+      <constructor>
+    char* hn = getenv("HOSTNAME");
+    if (hn != NULL) {
+      std::string hostname = hn;
+
+      unsigned int first = 0;
+      unsigned int last = 0;
+
+      unsigned int current;
+      do {
+        current = last;
+        ++last;
+      }
+      while (current &lt; hostname.length() &amp;&amp; hostname[current] != '.');
+
+      if (first &lt; current) {
+        name = hostname.substr(first, current - first);
+        namingContextName = hostname.substr(first, current - first);
+      }
+      else {
+        name = hostname;
+        namingContextName = hostname;
+      }
+    }
+      </constructor>
+    </config_item>
+
+    <config_item name="SvcObject" parent="Config" final="false" instance="false" >
+      <config_parameter name="Enabled" type="bool" default="true" />
+      <config_parameter name="Name" type="string" />
+      <config_parameter name="NameSpace" type="string" />
+      <config_parameter name="Library" type="string" />
+      <config_parameter name="Type" type="string" default="" />
+      <config_parameter name="Parameters" type="string" />
+      <config_parameter name="StaticSvs" type="bool" default="false" />
+      <config_parameter name="SvcType" type="string" default="ServiceObject *" />
+    </config_item>
+
+    <config_item name="SvcManager" parent="Config" final="true" instance="true" >
+      <config_parameter name="Services" type="std::vector&lt;SvcObjectParameters&gt;" />
+    </config_item>
+
+  </config_group>
+</config>
+

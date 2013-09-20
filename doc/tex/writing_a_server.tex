@@ -1,0 +1,135 @@
+\chapter{Writing a \miro Service}
+
+The programming of a \miro service is divided into two step:
+Accessing the low level hardware device (such as the Can bus) and
+writing the high level interfaces. Note that many hardware devices
+incorporate multiple sensor modalities.
+
+
+\section{High-Level Server Programming}
+
+\begin{figure}[!ht]
+  \includegraphics[width=\textwidth]{client_server}
+  \caption{Client-Server Architecture Overview}
+  \label{FIG_CLIENT_SERVER_ARCHITECTURE}
+\end{figure}
+
+In order to write a server you have to do the following steps:
+\begin{enumerate}
+  \item Describe your interface in IDL.
+  \item Translate the IDL description to C++ files.
+  \item Implement your methods.
+\end{enumerate}
+
+
+\subsection{Copy the \miro server template directory}
+
+- Which files are in there
+
+
+\subsection{Describing an interface in IDL}
+
+- edit interface description (.idl) \\
+- idl/Makefile 
+
+\subsection{Translating the IDL description to C++}
+
+- call TAO\_idl (in {\tt \$(TAO\_ROOT)/TAO\_IDL})
+
+\subsection{Implementing your own methods}
+
+- in ...Impl \\
+- don't forget to document !!
+
+
+\section{Low-Level Server Programming}
+
+Low-Level Servers are Servers that talk to hardware devices. They
+usually use a device driver that is compiled into the kernel or loaded 
+as a module. They provide handling for special protocols which have to 
+be followed and provide the services of the hardware device in an
+abstracted way, so that they are useful.
+
+Hardware devices in a UNIX system are represented by file
+descriptors. There are two groups, character devices and block devices,
+character devices are stream based and provide for sequential reading
+and writing, while block based devices provide random access to block
+addresses. At the moment all hardware devices used by miro use the
+character device abstraction.
+
+A useful \miro low-level server must provide two functionalities:
+interaction on the CORBA level with (potential multiple) clients that
+use the service concurrently and handling of all communication with
+the device, which may be asynchronous to the requests. This requires a
+multithreaded design. Fortunately the ACE framework provides design
+patterns that fulfill these needs. For a schematic view of a \miro
+low-level server see figure
+\ref{FIG_CLIENT_SERVER_ARCHITECTURE_LOW_LEVEL}.
+
+
+\subsection{The Device Framework}
+
+\subsubsection{Connection}
+
+\subsubsection{EventHandler}
+
+\subsubsection{Consumer}
+
+\subsection{The Configuration Framework}
+
+\subsection{Parameter}
+
+\subsection{XML parsing}
+
+\subsection{The Reactor and Events}
+
+The ACE reactor class provides an abstraction of the popular
+{\tt select} method in common UNIX programming environments. It is
+able to invoke an event handler when data is readable from the file
+descriptor\footnote{it can also handle timer events and asynchronous
+  writes, see \cite{ACE-Manual} for details}. It provides low
+latency and the thread does not consume any CPU power while waiting
+for data to come. To keep the responsiveness of this architectural
+element high\footnote{which is essential to avoid flooded input
+  queues}, only few computation should be done inside of the event
+handler, usually this event handler only assembles full packets and
+passes these on to a separate task which accounts for higher level
+processing. It is important to note that the reactor and the event
+handler share a single thread of execution, so don't expect to get
+feedback from the reactor within the event handler. 
+
+
+\subsection{Using Tasks}
+
+Tasks are the second important design pattern provided by ACE that we use.
+A task is an assembly of one or more threads, that share a common
+message queue, which can be used to pass requests to the threads. We
+usually use a task for handling of complete packets assembled by the
+event handler, which puts them on the message queue. According to the
+type of the packet the tasks takes appropriate action. This usually
+consists in retrieving data from the packet and signaling it on a
+condition variable. Condition variables are the main mechanism of the
+(CORBA) server implementation methods to wait for data requests or
+events that are provided by the hardware. The ACE task class provides
+an easy scaling for multiple working threads that concurrently work on 
+the different requests.
+
+\begin{figure}[!ht]
+  \includegraphics[width=\textwidth]{client_server_low_level}
+  \caption{Client-Server Architecture}
+  \label{FIG_CLIENT_SERVER_ARCHITECTURE_LOW_LEVEL}
+\end{figure}
+
+
+\subsection{Thread/Task Synchronization}
+
+\subsection{ACE logging}
+
+\subsection{A Simple Example}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual.tex"
+%%% End: 
+
+

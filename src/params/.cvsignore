@@ -1,0 +1,11 @@
+libmiroParams.so
+Makefile.in
+Makefile
+.deps
+.libs
+Type.lo
+Generator.lo
+Parameter.lo
+Parser.lo
+TextErrorHandler.lo
+libmiroParams.la

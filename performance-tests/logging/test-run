@@ -1,0 +1,11 @@
+#! /bin/bash
+
+# various test runs for the performance evaluation of
+# the logging client 
+
+./LogPerformance -f None.log -p None -v -MiroNoNaming 2> None.cerr
+./LogPerformance -f OctetStream1K.log -p OctetStream1K -v -MiroNoNaming 2> OctetStream1K.cerr
+./LogPerformance -f OctetStream100K.log -p OctetStream100K -v -n 1000 -MiroNoNaming 2> OctetStream100K.cerr
+./LogPerformance -f MotionStatus.log -p MotionStatus -v -MiroNoNaming 2> MotionStatus.cerr
+./LogPerformance -f RangeSensor.log -p RangeSensor -v -MiroNoNaming 2> RangeSensor.cerr
+./LogPerformance -f SharedBelief.log -p SharedBeliefFull -v -MiroNoNaming 2> SharedBelief.cerr

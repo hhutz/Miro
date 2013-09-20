@@ -1,0 +1,9 @@
+<!DOCTYPE xml SYSTEM "MiroParameterDescription.dtd">
+  <config> 
+    <config_global name="namespace" value="Miro" />
+    
+    <config_group name="Config">    
+      <config_item name="Config" final="false" />
+    </config_group>
+  </config>
+  

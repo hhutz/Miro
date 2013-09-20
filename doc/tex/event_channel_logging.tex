@@ -1,0 +1,231 @@
+\chapter{Event Channel logging}
+\label{sec:ecLogging}
+
+The acquisition of data during the run of a robot application from
+various levels of sensor processing is an essential feature for
+debugging, evaluation and performance assessment. The event based
+communication paradigm of \miro is designed to distribute raw sensor
+data as well as higher level system events, like the latest belief
+state of the robot. The stream of events resembles therefore a quite
+complete trace of the system state during the run of a robot program.
+\miro provides functionalitiy to log such an event stream generically
+to a file. The data can not only be reread into the system, but the
+events can also be redistributed over the event channel, allowing for
+detailed offline analysis. In \cite{Utz+Mayer+Kraetzschmar:04} the
+various configuration and application scenarios are described along
+with a detailed performance analysis of the facility. This chapter is
+concerned with a more technical view, like the setup of the logging
+client, the replay as well as the maintenance of logged data and the
+file format.
+
+\section{Logging Client}
+
+The logging client for the notification service ist called
+\texttt{LogNotifyConsumer} and is located in the service library
+\texttt{libmiroSvc}. It can be used as a normal event channel client
+within the own application or as a standalone program.
+
+\subsection{Parameters}
+
+The location of the log files can be defined by the environment
+variable \texttt{MIRO\_LOG}. The default file name is defined as:
+
+\$(MIRO\_LOG)/<domain name>\_<time string>.log
+
+where <domain name> is the name of the robot and <time string> is the
+time the recording of the log file was started in the format
+\emph{yyyy.mm.dd-hh.mm}. An alternative file name can be specified at
+the command line or as constructor parameter respectively.
+
+Other parameters can be specified in the config file. They are located
+in the section Notification. Those are:
+\begin{description}
+\item[MaxFileSize] The maximum size of the log file. Log files can become
+  quite large over time. So it is good to have an upper limit. Also,
+  the implementation uses a memory mapped file for maximum throughput.
+  So the log file, along with the application should fit into the
+  available physical memory. Otherwise swapping will jeopardize the
+  overall system performance. The default is 150 MB. This is
+  sufficient for 20 minute runs of our soccer robots, logging almost
+  everything that is happening.
+\item[TCRFileSize] The log file contains a type code repository, that
+  holds descriptions for all types, stored within the log file (CORBA
+  type codes, to be exact). The default maximum size for the type code
+  repository is 1 MB. As a the number of different payload types is
+  usually limited for one robot (about a dozend) and the type code
+  size is between 0.5 -- 1.5 KB, this should be sufficient for most
+  applications.
+\item[Event] A vector of domain name, type name pairs that shall be logged.
+\item[TypeName] A vector of type names that shall be logged. The
+  domain name is supposed to be the domain name of the robot. Usually
+  a robot only logs its own events.
+\end{description}
+
+\section{Standalone Logging Client}
+
+The LogNotify client is a standalone program, that can be used as an
+ad hoc solution for logging data. It offers the possibility to connect
+directly to a selected event channel, or use the IP-multicast based
+event channel federation described in section \ref{sec:NMC}.
+
+\subsection{Command Line Parameters}
+
+The command line parameters are the following:
+
+\section{LogPlayer}
+
+The \texttt{LogPlayer} is a GUI-based application for the replay of
+logged data. It offers timely replay, slow motion and single stepping
+as well as simple maintenance operations like cutting and event
+filtering. It can also load multiple log files and play them
+synchronized, distributing the events over mutliple event channels. A
+screenshot of the \texttt{LogPlayer} can be seen in figure
+\ref{fig:logplayer}.
+
+The main panel consits of five button, a digital clock, a slider bar
+and a dail. The clock shows the time stamp of the coursor within the
+file. The slider shows the relative positon of the cursor within the
+log stream and can be used to repositon the cursor. The dail resembles
+the replay speed. Twelve o'clock is the original timing.
+Counterclockwise is slow motion and clockwise fast forward.
+
+\subsection{Main Panel}
+
+The buttons on the main panel do the following:
+\begin{description}
+\item[Stop] Stop the replay of the log file and reset the coursor to
+  the beginning of the log stream.
+\item[Play] Play the log file from the current cursor position in the
+  speed selected on the dail.
+\item[Pause] Pause replay. The cursor position remains unaffected.
+\item[Forward] Single step one event forward.
+\item[Backward] Single step one event backward.
+\end{description}
+
+\subsection{Menu}
+
+The menu bar has five entries: File, Edit, Events, Tools and Settings.
+The file menu offers file operations. The edit menu offers simple
+cutting functionality. The events menu allows to filter certain events
+from the log file. The tools menu holds tool windows for further log
+file event inspection and the settings menu holds the configuration.
+
+\subsubsection{File Menu}
+\begin{description}
+\item[Open/Close...] Displays the file set dialog that allows to add and
+  remove log files, from the set.
+\item[Save as...] Allows to save the current log file set, with event
+  filtering and cutting applied to a new file.
+\end{description}
+
+\subsubsection{Edit Menu}
+\begin{description}
+\item[Cut Front] Removes everything from the beginning to the current
+  cursor position from the log file.
+\item[Cut Back] Removes everything from the current cursor position to
+  the end of the log file.
+\item[Undo all] Undo all logfile cutting.
+\end{description}
+
+\subsubsection{Events Menu}
+The events menu holds an entry for every robot, that was found in the
+currently loaded log file set. That is, for every distinct domain
+name. For each domain name a submenu with this robots events in the event
+stream is available. That is, every distinct type name. Each type name
+entry is checkable and can be switched on and off. Each unchecked
+event type is skipped on replay of the log file.
+
+\subsubsection{Tools Menu}
+This menu offers the event view, which is a window, listing a sequence
+of events around the coursor position. This is uesefull for event
+exact cut operations etc.
+
+\subsubsection{Settings Menu}
+The only setting currently available at the menu is the length of the
+history of the event view. - More to come --- promised.
+
+
+\section{File Format}
+
+The file format consists of a header block of 8 bytes: The first four
+represent the log format magic cooky: MLOG. The next two are the
+version number in intel byte order. Followed by a two byte byte
+order flag, as defined by the CORBA common data representation format.
+
+\begin{lstlisting}
+struct LogHeader
+{
+  unsigned long id; // MLOG: 0x474f4c4d
+  unsigned short version; // Version 3: 0x003
+  unsigned short byteOrder; //Host byte order
+};
+\end{lstlisting}
+
+The current version of the log file format is 3. In basic, all
+following data, including the events are stored in CORBA CDR stream
+format. What follows is in general a variable length array (CORBA
+sequence) of type:
+
+\begin{lstlisting}
+struct EventEntry;
+{
+  TimeT timeStamp;
+  unsigned long eventSize;
+  CosNotification::StructuredEvent event;
+};
+
+typedef sequence<EventEntry> EventArray;
+\end{lstlisting}
+
+The timeStamp field denotes the time, the event was received by the
+logging consumer. It is used for the timely replay and synchronization
+of log files. 
+
+The eventSize field denotes the size of the event field within the log
+file. This is used to speed up initial parsing of log files for the
+\texttt{LogPlayer}. 
+
+The event field contains the event, as delivered by the event channel.
+As a footpring optimization, the type codes, stored with every
+CORBA::Any, that is, remainder\_of\_body field of the events are stored as
+
+\begin{lstlisting}
+typedef sequence<TypeCode> TypeCodeArray;
+\end{lstlisting}
+
+at the end of the log file, forming the type code repository. The type
+code in the remainder\_of\_body field is replaced by the index of the
+type code within the type code array.
+
+The offset of the type code sequence within the log file is stored at
+the beginning of the CDR stream. That way the type code repository can
+be read before parsing of the events. This defines the log file
+format version 3, as follows:
+
+\begin{lstlisting}
+struct LogFile
+{
+  LogHeader header;
+  unsigned long tcrOffset;
+  EventArray events;
+  TypeCodeArray tcr;
+};
+\end{lstlisting}
+
+\section{Test and Example Programs}
+
+The programs provided in the tests directory for the LogNotification
+format, are in basic two configuration files, that restrict the size
+of the log file and the type code repository, to provoke overflow of
+the log files. 
+
+A utility program for log files is LogTruncate. If a log client dies
+discracefully with a segfault, the log is still saved and usable, but
+has the size specified by the MaxFileSize parameter, regardless of the
+actual footprint of the stored events. LogTruncate, removes the unused
+0 bytes and truncates the log file to a reasonable size.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

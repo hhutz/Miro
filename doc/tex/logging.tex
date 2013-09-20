@@ -1,0 +1,184 @@
+\chapter{Logging}
+\label{sec:logging}
+
+The logging of debug, information and error messages can help a great
+deal in the recovery from failure situations. This is especially true
+for robotic applications. Unfortunately the sheer mass of console
+output from the different modules can become too complex quite fast. So
+\miro comes with a set of logging facilities that cover different
+levels of the system functionality. The first framework, that is
+introduced within this chapter is based on the logging framework
+provided by ACE. It is a system log oriented framework to organize printf
+like output on various levels. Chapter \ref{sec:ecLogging} will cover
+another, more sophisticated set of logging functionality.
+
+\section{Log Levels and Categories}
+
+\miro uses two mechanisms to customize logging output.  Log levels are
+used to give fine grained control over the verbosity of log output.
+\miro defines log levels from 0 to 9. The higher log levels are
+considered to be used for debugging purposes only. They are therefore
+also referred to as debug levels. They usually are only meaningful for
+developers. For debug levels log categories 
+are used to restrict the logging output to one or more subsystems of
+the robot application. Output from debug levels is only displayed if
+its log category is enabled, too.
+Additional log categories can be defined for your own
+programs.
+
+The different log levels are:
+\begin{enumerate}
+\setcounter{enumi}{-1}
+\item \emph{Emergency} Log level of messages reporting an emergency.
+  Your robot is on fire etc. This log level is not maskable, except if
+  you turn of logging at configure time.
+\item \emph{Alert} Log level of messages reporting an alert. This is
+  when the red lights start blinking and this unnerving honking sound
+  is played.
+\item \emph{Critical} Log level of messages reporting a critical
+  condition. This usually is an unrecoverable error, that leads to
+  the termination of reporting program.
+\item \emph{Error} Log level of messages reporting an error.
+  This indicates a real error, but the program will usually try to
+  continue anyway.
+\item \emph{Warning} Log level of messages reporting a warning.  A
+  warning should be fixed, but the program is likely to work anyways.
+\item \emph{Notice} Log level of messages reporting a notice. Make
+  a post-it and add it to the other 500 ones.
+\item \emph{Ctor\_Dtor} Debug level of messages reporting a
+  constructor/destructor entry.  This debug level is designed to hunt
+  segmentation faults on startup and exit. --- This is when all the big
+  ctors/dtors are run.
+\end{enumerate}
+
+The debug levels are:
+\begin{enumerate}
+\setcounter{enumi}{6}
+\item \emph{Debug} Log level of messages reporting debug output.
+\item \emph{Trace} Log level of messages reporting program trace
+  output.
+\item \emph{Prattle} Log level of messages reporting really verbose
+  comments on the program execution.
+\end{enumerate}
+
+The different log categories used within \miro are the
+following. (All brand names have to be marked as such, as soon as we
+find the time):
+\begin{description}
+\item[Miro] This category is used by the \miro core components,
+  namely those located in the library libmiro.so
+\item[Video] Used by the components of the video image processing
+  system. See section \ref{sec:VIP} for details.
+\item[NMC] The notify multicast based event channel deliberation, as
+  used for team communication. See section \ref{sec:NMC} for details.
+\item[B21] Used by the components exclusive to the B12 robots of RWI.
+\item[Pioneer] Used by the components exclusive to the Pioneer robots
+  or Active Media.
+\item[Sparrows] The custom built Sparrows platform.
+\item[Faul] The motor controllers from Faulhaber.
+\item[DP] The pan-tilt unit from DirectPerception.
+\item[Sick] The sick laser scanners have their own category.
+\item[Sphinx] The sphinx speech components.
+\item[Dtlk] The DoubleTalk speech components.
+\item[BAP] The reactive control subsystem logs messages within this
+  category. See section \ref{sec:BAP} for details.
+\end{description}
+
+\section{Run-Time Configurability}
+
+The log level and log categories that are displayed can be configured
+at program startup by command line parameters.
+
+\begin{description}
+\item[-MiroLogLevel $<$n$>$] or -MLL $<$n$>$ for short, selects the log level
+  up to which data is logged. The log levels are referenced by number.
+  The default log level is 4. Log level 0 can not be masked by command
+  line parameters, but only by turning off logging entirely at compile
+  time.
+\item[-MiroLogFilter $<$name$>$] or -MLF $<$name$>$ for short, selects a
+  category to log. This option can be specified multiple times to
+  enable multiple categories. The category enabled by default is
+  \miro.
+\end{description}
+
+\section{Usage in Source Code}
+
+This logging facility is used extensively in the \miro sources. It can
+also be used and extended for the usage in robotic projects based on
+\miro.
+
+\subsection{Miro::Log}
+
+The class \texttt{Miro::Log} is defined in \texttt{miro/Log.h}. It
+works mostly as a namespace for the logging facility. It holds
+constants for all log levels as well as log categories. The main
+method is \texttt{Miro::Log::init()}. This is a static method that
+takes \textit{argc} and \textit{argv} as arguments, to parse for the
+\texttt{-MiroLogLevel} and \texttt{-MiroLogFilter} command line
+options. Additionally, accessor methods and predicates are defined to
+query log levels etc.  at runtime.
+
+\subsection{Macros}
+
+\texttt{miro/Log.h} also defines a set of macros that are usable for
+development with, and within \miro.
+\begin{description}
+\item[MIRO\_LOG] Produce some log output, if the required log
+  level is enabled. It takes two arguments. The first is the log level,
+  the second is a single character string. The log level is specified
+  by name. The canonical name format for log levels is the log level
+  name in capitals, prefixed by \texttt{LL\_}.
+\item[MIRO\_LOG\_OSTR] Like \texttt{MIRO\_LOG}, but the second
+  parameter is used as right hand side argument for an output stream
+  operator $\ll$. So it can contain some operator $\ll$ concatenated
+  expression.
+\item[MIRO\_DBG] Produce some log output, if the required log level as
+  well as the log category is enabled. It takes three arguments. The
+  first is the log category, the second the level, and the third is a
+  single character string. The canonical name format for log
+  categories is the log category name in capitals.
+\item[MIRO\_DEBUG\_OSTR] Like \texttt{MIRO\_DBG}, but the last
+  parameter is used as right hand side argument for an output stream
+  operator $\ll$. So it can contain some operator $\ll$ concatenated
+  expression.
+\item[MIRO\_LOG\_CTOR] For constructor tracing. Accepts a single
+  parameter containing the class name as string. Logged with log level
+  6.
+\item[MIRO\_LOG\_DTOR] For destructor tracing. Accepts a single
+  parameter containing the class name as string. Logged with log level
+  6.
+\item[MIRO\_DBG\_TRACE] For method call traces. Takes the log
+  category as argument.
+\item[MIRO\_ASSERT] The standard assert macro. It is provided to
+  enable disabling of assert macros in (inline) code of \miro without
+  disabling them for user code too.
+\end{description}
+
+\section{Compile-Time Configurability}
+
+Log and debug messages can be disabled entirely at compile time by two
+configure flags: 
+\begin{description}
+\item[--disable-DebugInfo] disables debug information, that is namely
+  log levels above 6. The \texttt{MIRO\_DBG\_...} macros will be
+  replaced by no-op implementations, removing footprint and performance
+  overhead of the programs, introduced by debug information. -
+  Especially the performance overhead is mostly negligible, so this
+  option might well be omitted even for release versions.
+\item[--disable-LogInfo] disables log information entirely. Like
+  above, this can save some footprint but is hardly measurable in
+  performance.
+\end{description}
+
+\section{Test and Example Programs}
+
+The programs located at tests/log provide some testing facilities
+for the logging facility and can serve as a practical example on the
+setup of the logging facility as well as on the usage of
+the logging and debug macros. The only program currently located there
+is TestLog.cpp. The source code is documented to help understanding.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

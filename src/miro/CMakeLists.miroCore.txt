@@ -1,0 +1,46 @@
+# miroCore
+#  - miroBase
+#  - ACE
+#---------------------------------------
+
+set( CORE_LIB_NAME     miroCore )
+set( CORE_DIR_NAME    "${LIB_NAME}" )
+set( EXPORT_NAME "${CORE_LIB_NAME}_Export" )
+set( EXPORT_FILE "${EXPORT_NAME}.h" )
+string( TOUPPER  "${CORE_LIB_NAME}_BUILD_DLL" CORE_EXPORT_DEFINE )
+
+set( CORE_SOURCES
+  Log.cpp
+  ReactorTask.cpp
+  ShutdownHandler.cpp
+  TimeHelper.cpp
+  TimeSeries.cpp
+)
+
+set( CORE_HEADERS
+  ${EXPORT_FILE}
+  Log.h
+  ReactorTask.h
+  Repository.h
+  ShutdownHandler.h
+  Singleton.h
+  TimeHelper.h
+  TimeSeries.h
+)
+
+add_library( ${CORE_LIB_NAME} SHARED
+  ${CORE_SOURCES}
+  ${CORE_HEADERS}
+)
+
+target_link_libraries( ${CORE_LIB_NAME}
+  ${BASE_LIB_NAME}
+  ${ACE_LIBRARIES}
+)
+# add target-specific defines
+# *_BUILD_DLL required on win32 for proper dll linkage
+set_property(
+  TARGET ${CORE_LIB_NAME}
+  PROPERTY COMPILE_DEFINITIONS ${CORE_EXPORT_DEFINE}
+)
+

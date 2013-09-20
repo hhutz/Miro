@@ -1,0 +1,11 @@
+.cvsignore.swp
+.deps
+.libs
+ConfigDocumentXML.moc.cpp
+ConfigEditor
+MainWindow.moc.cpp
+Makefile
+Makefile.in
+ParameterInstance.moc.cpp
+ParameterSingleton.moc.cpp
+Section.moc.cpp

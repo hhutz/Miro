@@ -1,0 +1,226 @@
+% detect interpreter: pdflatex or latex
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse
+\else
+\pdftrue
+\fi
+
+\documentclass[10pt]{book}
+
+\usepackage{graphicx} % enhanced graphics usage
+%\usepackage{a4} % A4 paperformat
+%\usepackage{isolatin1} % for input of 8 bits character
+\usepackage[latin1]{inputenc}
+\usepackage[english]{babel}
+\usepackage{makeidx} % enable indexing
+\usepackage{verbatim} % better verbatim environment
+\usepackage{epsfig}
+\usepackage{xspace} % add extra space at the end of the word if necessary
+\usepackage{color} % provides standard LaTeX colors
+\usepackage{fancyhdr}
+\usepackage{float} % float environment enhancements
+\usepackage{alltt} % defines alltt environment which is like verbatim, but allows some additional formating
+\usepackage{listings} % pritty print of code-listings
+\ifpdf
+% this package should be loaded last
+\usepackage[colorlinks=true,
+            pdfstartview=FitV,
+            linkcolor=blue,
+            citecolor=blue,
+            urlcolor=blue]{hyperref}
+\fi
+
+\graphicspath{{../fig/}}
+
+%% insert the common definitions
+\input{tex_definitions}
+
+%% special definitions
+\setcounter{tocdepth}{3}
+
+%% =============================================================================
+
+\begin{document}
+%\maketitle
+
+\thispagestyle{empty}
+\begin{center}
+  \vfill
+  \includegraphics[width=5in]{signature}\\
+  \vspace{30 mm}
+  {\Xbombastic \miro}\\
+  \vspace{10 mm}
+  {\LARGE \textbf{Manual}}\\
+  \vspace{10 mm}
+  \textbf{Version 0.9.4}\\
+  \vspace{10 mm}
+  \today\\
+  \vfill
+\end{center}
+
+\newpage
+
+\begin{center}
+  \includegraphics[width=5in]{pincolla}
+  \bigskip
+  For more paintings, see {\tt http://www.bcn.fjmiro.es/}
+\end{center}
+
+\pagestyle{headings}
+
+\newpage
+\tableofcontents
+
+%% =============================================================================
+
+\chapter{Introduction}
+
+\miro is a distributed object oriented framework for mobile robot
+control, based on CORBA (Common Object Request Broker
+Architecture) \cite{OMG:CORBA-standart} technology. The \miro core
+components have been developed in C++ for Linux. But due to the
+programming language independency of CORBA further components can be
+written in any language and on any platform that provides CORBA
+implementations.
+
+The \miro core components have been developed under the aid of ACE
+(Adaptive Communications Environment) \cite{ACE-Paper, ACE-Manual}, an
+object oriented multi-platform framework for OS-independent
+interprocess, network and real time communication. They use TAO (The
+ACE ORB) \cite{TAO-paper} as their ORB (Object Request Broker), a
+CORBA implementation designed for high performance and real time
+applications. Therefore \miro should be easily portable to any other
+OS, where ACE and TAO run on.  These are many Unix clones, Windows NT
+and some real time operating systems.
+
+\miro is currently available for the RWI B21 platform (pre rflex), the
+Activmedia Pioneer family (namely the Performance PeopleBot), and the
+vi\sparrow architecture developed at the University of Ulm.  We are
+convinced, that other ports can be done straight forward.
+
+\miro was built since the existing robot control architectures didn't
+suffice our needs of usability, reliability, scalability and
+portability.
+
+We used C++ due to its advantages in big projects, since it was
+especially designed for big projects. We have learned the hard way,
+that this is a serious requirement, for projects like a mobile robot
+control architecture.
+
+We use multi processing, multithreading and the CORBA technology since
+most robotics applications are inherently concurrent and distributed.
+The hardware devices, like sensors and actuators run concurrently and
+due to the constant lack of computing power especially in computer
+vision, tend to reside on multiple computers. And as soon as
+cooperative behavior of multiple autonomous robots is of interest, the
+system as a whole is distributed anyways.
+
+%We used an object oriented approach, since real live objects are
+%concerned. And on the other hand, OO is just state of the art and you
+%need good arguments to start a new project ignoring object
+%orientation.
+
+And last but not least we use ACE and TAO since these are multi
+platform, high performance libraries which proved to be very
+sophisticated in terms of usability, portability and scalability. ---
+Additionally, they are open source libraries. They haven't
+disappointed us yet, to the contrary.
+
+\section{The \miro Group}
+
+The \miro core developers are (in alphabetical order):
+\begin{itemize}
+  \item Stefan Enderle
+  \item Gerhard Kraetzschmar
+  \item Gerd Mayer
+  \item Guillem Pages
+  \item Stefan Sablatn\"og
+  \item Steffen Simon
+  \item Hans Utz
+\end{itemize}
+
+\section{\miro Directory Structure}
+
+\miro comes with the full source code and documentation as well as a
+set of test programs and examples that should facilitate your first
+steps when writing your own programs. To help you navigate through the
+directory tree of a \miro distribution, we give a brief overview of
+the directories present in the \miro root directory:
+
+\begin{description}
+\item[bin:]
+  This directory contains links to the binaries of \miro.
+  For an explanation of the individual binaries, see Chapter
+  \ref{sec:services} about the robot services.
+\item[botsvcs:] Higher level robot services. This is were platform
+  independent stuff for autonomous mobile robot programming should go.
+  Currently it hosts a framework for hierarchical behavior programming
+  and one for particle filter based Monte Carlo self localization.
+\item[doc:]
+  Here, the available documentation is gathered. In the
+  subdirectory {\tt tex} you find the postscript version of this
+  manual and in the directory {\tt html} resides the auto generated
+  online documentation of all \miro classes and their methods
+  (the starting page of this documentation resides at: \\
+  {\tt \$MIRO\_ROOT/doc/html/idl/index.html} respectively \\
+  {\tt \$MIRO\_ROOT/doc/html/cpp/index.html}).
+\item[etc:] Config files for the individual robots. While these are
+  xml-based configuration files, using the {\tt ConfigEditor} will
+  surely facilitate their editing.
+\item[examples:]
+  Examples on how to use individual interfaces of \miro. If you want
+  to write your own programs utilizing the \miro framework, this is a
+  good place to look for inspirations.
+\item[idl:]
+  The IDL sources of the CORBA interfaces and data types.
+\item[performance-tests:]
+  Some tests that measure the performance of \miro's
+  services. --- Not too much there at the moment.
+\item[scripts:]
+  Utilities for source code formatting and handling sequences of
+  datafiles.
+\item[src:]
+  Here, all sources of the \miro services reside. New services for
+  further robot platforms should go in here.
+\item[templates:]
+  Templates for Makefiles and the headers for source files. Copy the
+  corresponding template, if you want to start a new subproject within
+  the \miro source hierarchy. If you start your own new project on top
+  of \miro, the Makefile templates might still be useful for you. They
+  handle all the stuff concerning ACE/TAO and the multi-platform build
+  process. See Chapter \ref{sec:makefile} for details.
+\item[tests:]
+  Small test programs to monitor or test isolated interfaces of the
+  \miro robot control architecture.
+\item[utils:]
+  Utilities made for convenience. No magic to be expected here, but some
+  really cool graphical editing facilities.
+\end{description}
+
+%=============================== Tutorial ====================================
+
+\input{definitions}
+\input{using}
+\input{servers}
+\input{clients}
+\input{writing_a_client}
+\input{parameters}
+\input{video}
+\input{group_communication}
+\input{logging}
+\input{event_channel_logging}
+\input{behaviourEngine}
+\input{writing_a_server}
+
+\begin{appendix}
+\input{install}
+\input{new_project}
+\end{appendix}
+%------------------------------------------------------------------------------
+
+
+\bibliography{miro_manual}
+\printindex
+
+\end{document}

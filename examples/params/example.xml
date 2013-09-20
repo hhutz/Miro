@@ -1,0 +1,23 @@
+<!DOCTYPE SurveyPlan>
+<plan>
+ <parameter>
+  <parameter name="Tasks" >
+   <parameter>
+    <parameter value="station 0" name="Name" />
+    <parameter name="LatLon" >
+     <parameter value="37" name="Lat" />
+     <parameter value="-117" name="Lon" />
+    </parameter>
+    <parameter value="do something" name="Description" />
+   </parameter>
+   <parameter>
+    <parameter value="station 1" name="Name" />
+    <parameter name="LatLon" >
+     <parameter value="37.5" name="Lat" />
+     <parameter value="-117.5" name="Lon" />
+    </parameter>
+    <parameter value="do something else" name="Description" />
+   </parameter>
+  </parameter>
+ </parameter>
+</plan>

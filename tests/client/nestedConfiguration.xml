@@ -1,0 +1,4 @@
+<!DOCTYPE MiroConfigDocument>
+<config>
+  <include file="clientConfiguration.xml" />
+</config>

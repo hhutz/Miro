@@ -1,0 +1,60 @@
+# miroXml
+#  - miroCore
+#  - miroBase
+#  - Qt
+#---------------------------------------
+
+set( XML_LIB_NAME  miroXml )
+set( XML_DIR_NAME "${LIB_NAME}" )
+set( EXPORT_NAME  "${XML_LIB_NAME}_Export" )
+set( EXPORT_FILE  "${EXPORT_NAME}.h" )
+string( TOUPPER   "${XML_LIB_NAME}_BUILD_DLL" XML_EXPORT_DEFINE )
+
+miro_makeparams( ConfigParameters.xml  RobotParameters.xml )
+
+set( XML_SOURCES
+  ${MIRO_MAKEPARAMS_SOURCES}
+  ConfigDocument.cpp
+  Configuration.cpp
+  MiroIO.cpp
+  Robot.cpp
+  SearchPaths.cpp
+  XmlParse.cpp
+  XmlParseAce.cpp
+)
+
+set( XML_HEADERS
+  ${EXPORT_FILE}
+  ${MIRO_MAKEPARAMS_HEADERS}
+  ConfigDocument.h
+  Configuration.h
+  MiroIO.h
+  Robot.h
+  SearchPaths.h
+  XmlParse.h
+  XmlParseAce.h
+  qt_compatibility.h
+)
+
+add_library( ${XML_LIB_NAME} SHARED
+  ${XML_SOURCES}
+  ${XML_HEADERS}
+)
+
+target_link_libraries( ${XML_LIB_NAME}
+  ${BASE_LIB_NAME}
+  ${CORE_LIB_NAME}
+  ${QT_QTXML_LIBRARY}
+  ${QT_QTCORE_LIBRARY}
+)
+
+# add target-specific defines
+# *_BUILD_DLL required on win32 for proper dll linkage
+set_property(
+  TARGET ${XML_LIB_NAME}
+  PROPERTY COMPILE_DEFINITIONS ${XML_EXPORT_DEFINE}
+)
+
+# make sure we build MakeParams before this 
+add_dependencies( ${XML_LIB_NAME} MakeParams )
+

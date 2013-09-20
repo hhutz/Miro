@@ -1,0 +1,300 @@
+\chapter{Writing Your First Programs}
+
+This chapter tries to help you with the first steps of writing
+programs that use the \miro framework. The CORBA environment and the
+\miro framework seem to raise the bar for an easy entry into robot
+programming. While this can hardly be denied they facilitate
+tremendously the task of writing distributed programs. And since robot
+control software is inherently distributed (ever thought of multiple
+robots?) it seems the only way to go.
+
+As you will see, most of the distributed programming complexity is
+initially hidden from the user:
+
+\begin{itemize}
+\item The programmer simply calls methods of the devices interface.
+\item The programmer communicates via proxy object to the remote
+  service. The most tricky part is getting the object reference.
+\item The distributed environment is transparent. The
+  remote method invocation (RMI) is hidden entirely.
+\end{itemize}
+
+
+\section{Makefiles}
+\label{sec:makefile}
+In contrary to earlier versions of \miro, it is no longer based on the
+ACE/TAO Makefile hierarchy, but uses the GNU autotools for a simpler
+and more portable way to generate the Makefiles (beside that, this
+inherently adds new nifty features, like e.g.\ the automatically
+distribution via a simple \texttt{make dist}). Nevertheless it is
+still possible to use the ACE/TAO style of writing Makefiles in
+derived projects, as we didn't delete the \miro include rules and
+macros (but please note that we do not maintain them any longer and
+they may be deleted in future version).
+
+Makefile templates reside in the directory {\tt
+  \$MIRO\_ROOT/templates}, that should facilitate the creation of
+further subprojects within the \miro directory structure but can just
+as well be used to start new projects outside the {\tt \$MIRO\_ROOT}
+directory. The makefiles are designed to either build subdirectories,
+libraries or binaries. To use a template, simply copy it into the
+corresponding directory under the name {\tt Makefile.am} and adapt it
+as explained in the following sections. Additionally, you have to put
+a line in \texttt{configure.ac} to the macro named
+\texttt{AC\_CONFIG\_FILES} to let automake and autoconf know, that they
+have to build a \texttt{Makefile} (\texttt{Makefile.in} respectively).
+
+The Makefile templates are explained in more detail in the appendix
+\ref{sec:new_project}.
+
+
+\section{A Simple Sonar Client}
+
+To discuss things using actual code, let's look at the simple task of
+obtaining data from a sonar sensor device. Since this is a range
+sensor, the sonar is queried via the generalized range sensor
+interface. The only difference in querying an infrared or a sonar
+device is the name under which these sensors are registered within the
+naming service.
+
+\lstinputlisting[frame=tb, caption={examples/sonar/SonarPoll1.cpp}]{SonarPoll1.cpp}
+\label{lst:SonarPoll1}
+
+A step by step walk trough the code:
+
+\lstinputlisting[frame=tb, firstline=1, lastline=1]{SonarPoll1.cpp}
+
+The file \lstinline!miro/Client.h! contains the definition of the class
+\lstinline!Miro::Client!. See below.
+
+\lstinputlisting[frame=tb, firstline=2, lastline=2]{SonarPoll1.cpp}
+
+The file \lstinline!miro/RangeSensorC.h! provides the classes for the interface of the
+sonar service. The 'C' at the end of the name stands for client. This
+file is automatically generated from the idl-description of the interface.
+
+\lstinputlisting[frame=tb, firstline=6, lastline=6]{SonarPoll1.cpp}
+
+A standard main function is used.
+
+\lstinputlisting[frame=tb, firstline=8, lastline=8]{SonarPoll1.cpp}
+
+This class just wraps the few lines that are necessary at the beginning of any CORBA
+application. It will therefore be normally instantiated in all \miro
+applications first. This is a simple helper class that sets up the
+CORBA environment in a standard way. Nothing tricky there.  It
+initializes the orb etc. The call uses the command line arguments for
+finding the naming service, and parsing other commands...
+
+\lstinputlisting[frame=tb, firstline=9, lastline=10]{SonarPoll1.cpp}
+
+This initializes a proxy object to the sonar service. This proxy
+object is used as if it was the sonar service itself. Let's look
+at the call a bit closer. \lstinline!Miro::RangeSensor_var! is the
+CORBA equivalent of a standard C++ auto pointer for a
+\lstinline!Miro::RangeSensor! object. That is the proxy becomes
+automatically destroyed if the pointer goes out of scope. The
+method {\tt resolveName()} is a template member function. Its
+argument specifies the name that shall be resolved in the default
+naming context of the naming service (see Chapter
+\ref{sec:using}). The \lstinline!Miro::RangeSensor! in French
+brackets specifies the type of reference that shall be returned by
+the call. Note that this will only succeed if the reference stored
+under the name of Sonar refers indeed to a {\tt Miro::RangeSensor}
+object or to a derived ancestor of this class.
+
+\lstinputlisting[frame=tb, firstline=11, lastline=11]{SonarPoll1.cpp}
+
+The RangeSensor interface returns a pointer to the sensor scan, which
+the caller obtains ownership of. So we use another auto pointer to
+hold the return value of the call and to prevent us from memory leaks.
+The IDL in the type name reflects the fact, that this is a IDL defined
+data type. (This is just a naming convention of \miro that shall help
+you to trace the roots to the documentation.) In the CORBA mapping for
+C++ these types are mapped to plain C structs: No methods, no
+inheritance, just public data members.
+
+\lstinputlisting[frame=tb, firstline=13, lastline=13]{SonarPoll1.cpp}
+
+This gets a sonar scan from the service. Note, that we do not see where
+the service runs.
+
+\lstinputlisting[frame=tb, firstline=15, lastline=20]{SonarPoll1.cpp}
+
+These lines are used to print the received sonar scan to the
+console.
+
+%\lstinputlisting[frame=tb, firstline=22, lastline=22]{SonarPoll1.cpp}
+
+%Ends the program. Returning zero indicates, that no error occurred.
+
+%%\bigskip
+%%- Note the {\tt Miro::} prefixes which define the namespace ...
+
+
+\section{Using Namespaces}
+
+By inserting the lines
+
+\lstinputlisting[frame=tb, firstline=6, lastline=9]{SonarPoll2.cpp}
+
+we map the relevant ``Miro'' data types from the \lstinline!Miro!
+namespace into our global namespace. This shortens the type name
+specifiers, but also hides from where they are coming from. Note that
+a simple
+
+\begin{lstlisting}[frame=tb]{}
+using namespace Miro;
+\end{lstlisting}
+
+would do the same trick. But mapping a namespace completely is
+generally not a good idea, since it tends to produce name conflicts
+and secondly code reviewers can trace the origin of the types less
+easily. Be especially careful in header files. You are flattening the
+namespace for everyone that has to include your header file, which can
+lead to bad surprises.
+
+See the following listing which shows the same code again, but without
+the \lstinline!Miro::! prefixes. The initial lines containing the includes
+are skipped.
+
+\lstinputlisting[frame=tb, firstline=6, caption={examples/sonar/SonarPoll2.cpp}]{SonarPoll2.cpp}
+\label{lst:SonarPoll2}
+
+
+\section{Adding Exception Handling}
+
+Handling of error conditions itself is error prone. Exceptions make
+the handling of error conditions easier, but errors are errors and
+therefore stay somehow nasty. What's quite easy to achieve by the use
+of exceptions is to print some diagnostic output and exit instead of
+gracefully segfaulting. This is done in this example by enclosing the
+code in the main function in a try/catch block.
+
+Since \miro defines ostream operators for every \lstinline!Miro::...IDL!
+type in \lstinline! miro/IO.h!, we include that file and abandon the
+handcrafted streaming of the sonar data.
+
+Note the different kinds off exceptions. There are \miro
+exceptions. Exception types defined in \miro are beginning with a
+big E as a naming convention. These indicate problems on the
+service side, like hardware problems (may be the batteries?), bad
+service calls (trying to accelerate the robot to warp 1?) or load
+problems. Then there are CORBA exceptions. Those occur if there
+arise some communication problems: A service went down, the robot
+is loosing the radio ethernet connection etc. Since all \miro
+exceptions derived from \lstinline!CORBA::UserException!, those
+also are catched within the first \lstinline!catch! block of the
+example code. You do not have to catch all exceptions. An uncaught
+exception will lead to program termination. Just as if you'd catch
+them at the end of main and exit...
+
+Note also, that the instantiation of Client isn't within the try/catch
+block. This is intentionally. Exceptions that can arise in the
+construction of a Client instance are CORBA exceptions. The ostream
+operators for CORBA exceptions used by TAO need an ORB
+instance. Since the ORB is instantiated within the Client class, it
+will not exist after destruction of the Client --- and this would be
+done at the end of the try block. Therefore we catch exceptions within
+the constructor of Client, print them to stderr and exit. There is
+little to do for the client program anyhow, if it can't access the
+services.
+
+\lstinputlisting[frame=tb, firstline=14, caption={examples/sonar/SonarPoll3.cpp}]{SonarPoll3.cpp}
+\label{lst:SonarPoll3}
+
+\section{An Asynchronous Sonar Client}
+\label{sec:notify}
+
+By now we were actively requesting for the data of a service. But
+think of polling for tactile events that way. Having a good
+collision avoidance, those events should hardly ever occur.
+Nevertheless, as soon as there is a tactile signalling a
+collision, the robot should immediately react to this event. By
+polling it would have to call the tactile interface thousands of
+times, just not to miss the one event it can't effort to miss. And
+since the sensors are actively collecting their data, shouldn't
+they be able to trigger the data processing within the robot? - Oh
+yes, they can.
+
+For this purpose the notification framework within \miro does
+exist. It is based on the CORBA Notification Service
+\cite{OMG:00-5}, and precustomized by some utility classes. They
+enable clients to subscribe to arbitrary events of a notification
+channel. The data gets pulled to them as soon as it becomes
+available at the producer (e.g. a range sensor device).
+
+To show how asynchronous event processing works within \miro, lets
+look at a small example. First we look at the code to handle the
+events.
+
+\lstinputlisting[frame=tb, firstline=25, lastline=47, caption={examples/sonar/SonarNotify.cpp}]{SonarNotify.cpp}
+\label{lst:SonarNotify}
+
+A step by step walk trough the code:
+
+\lstinputlisting[frame=tb, firstline=25, lastline=25]{SonarNotify.cpp}
+
+The class \lstinline!SonarNotify! provides a callback for the event
+channel. It is derived from \lstinline!Miro::StructuredPushConsumer!,
+which handles the registration at the notification service etc. All
+the initialization and registering is done within the constructor of
+this super class. The method \lstinline!push_structured_event! is the
+callback that is called from the notification service.
+
+\lstinputlisting[frame=tb, firstline=32, lastline=32]{SonarNotify.cpp}
+
+In the constructor, we subscribe for the events we want to receive. As
+we are only interested in one single event, we can use the helper
+method \lstinline!setSingleSubscription!, which uses constant
+std::string references as parameter types instead of a CORBA sequence
+of CORBA string pairs. Events are subscribed by
+\lstinline!domain_name! and \lstinline!type_name!.  The domain name
+corresponds with the name of the robot and the type name usually
+corresponds with the name, the service interface is registered at the
+naming service with.
+
+\lstinputlisting[frame=tb, firstline=42, lastline=43]{SonarNotify.cpp}
+
+The payload of a structured event is contained within the
+\lstinline!remainder_of_body! field with is of type
+\lstinline!CORBA::Any!.  Therefore you can get a const pointer to the
+data with overloaded the \lstinline!operator >>= ()!. The return value
+is a \lstinline!CORBA::Boolean! indicating success of the operation.
+Even though a \lstinline!CORBA::Any! can hold any IDL defined struct,
+you can only extract type \lstinline!T! from a \lstinline!CORBA::Any!
+if it actually contains an object of type \lstinline!T!.
+
+\lstinputlisting[frame=tb, firstline=49, caption={examples/sonar/SonarNotify.cpp}]{SonarNotify.cpp}
+\label{lst:SonarNotify2}
+
+Lets now have a look at the \lstinline!main! function:
+
+\lstinputlisting[frame=tb, firstline=51, lastline=51]{SonarNotify.cpp}
+
+Since a push consumer is called (pushed) by the event producer, it
+is actually a server instead of a client. Therefor the
+\lstinline!Miro::Server!  class is instanciated. It performs the
+necessary calls to init the CORBA environment. It is basically the
+same as the \lstinline!Miro::Client!  but we also need a POA to
+register the consumer object.
+
+\lstinputlisting[frame=tb, firstline=53, lastline=53]{SonarNotify.cpp}
+
+Just like the former \lstinline!Miro::RangeSensor! interface, we
+resolve the \lstinline!EventChannel! by name at the naming service.
+
+\lstinputlisting[frame=tb, firstline=55, lastline=55]{SonarNotify.cpp}
+
+Instanciate the push consumer. It does all the necessary
+initialization within its constructor.
+
+\lstinputlisting[frame=tb, firstline=57, lastline=57]{SonarNotify.cpp}
+
+Now we enter the CORBA event loop. This will not return, until the
+process is signaled by SIGINT or SIGTERM.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End:

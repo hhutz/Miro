@@ -1,0 +1,238 @@
+% detect interpreter: pdflatex or latex
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+\pdffalse
+\else
+\pdftrue
+\fi
+
+\documentclass[10pt]{book}
+
+\ifpdf
+\usepackage{graphicx} % enhanced graphics usage
+\else
+\usepackage[dvips]{graphicx} % enhanced graphics usage
+\fi
+\usepackage{a4} % A4 paperformat
+\usepackage{isolatin1} % for input of 8 bits character
+\usepackage{makeidx} % enable indexing
+\usepackage{verbatim} % better verbatim environment
+\usepackage{epsfig}
+\usepackage{xspace} % add extra space at the end of the word if necessary
+\usepackage{color} % provides standard LaTeX colors
+\usepackage{fancyhdr}
+\usepackage{float} % float environment enhancements
+\usepackage{alltt} % defines alltt environment which is like verbatim, but allows some additional formating
+\usepackage{listings} % pritty print of code-listings
+\ifpdf
+% this package should be loaded last
+\usepackage[colorlinks=true,
+            pdfstartview=FitV,
+            linkcolor=blue,
+            citecolor=blue,
+            urlcolor=blue]{hyperref}
+\fi
+
+%% insert the common definitions
+\input{tex_definitions}
+
+%% special definitions
+\usepackage{doxygen} % special package for the reference-part created by doxygen
+\setcounter{tocdepth}{1}
+
+%% =============================================================================
+
+\begin{document}
+%\maketitle
+
+\thispagestyle{empty}   
+\begin{center}
+  \vfill
+  \includegraphics[width=5in]{signature}\\
+  \vspace{30 mm}
+  {\Xbombastic \miro}\\
+  \vspace{10 mm}
+  {\Large \textbf{Reference Manual}}\\
+  \vspace{10 mm}
+  \textbf{Version 0.7}\\
+  \vspace{10 mm}
+  \today\\
+  \vfill
+\end{center}
+
+\newpage
+
+\begin{center}
+  \includegraphics[width=5in]{pincolla}
+  \bigskip 
+  For more paintings, see {\tt http://www.bcn.fjmiro.es/}
+\end{center}
+
+\pagestyle{headings}
+
+\newpage
+\tableofcontents
+
+%% =============================================================================
+
+\chapter{Introduction}
+
+\section{The \miro Group}
+
+The \miro developers are (in alphabetical order): 
+\begin{itemize}
+  \item Stefan Enderle
+  \item Gerhard Kraetzschmar
+  \item Stefan Sablatnög
+  \item Steffen Simon
+  \item Hans Utz
+\end{itemize}
+
+%% =============================================================================
+
+\chapter{Requirements}
+
+\begin{itemize}
+  \item The Linux-kernel must be compiled with multicast enabled.
+  \item ACE 5.2.x and TAO 1.2.x (we currently recommend the latest beta)
+  \item gcc 2.95.3 (and above)
+  \item QT 2.3 (and above)
+  \item doxygen / LaTeX (for documentation)
+  \item {\tt /soft/ACE\_wrappers/ace} must be part of {\tt LD\_LIBRARY\_PATH}
+\end{itemize}
+
+%% =============================================================================
+
+\chapter{Directory Structure}
+
+\begin{verbatim}
+Miro
+  |
+  +--- idl                        all idl descriptions
+  +--- include                    includes (empty)
+  |      |
+  |      +-- make_includes        includes for make
+  +--- src
+  |      |
+  |      +-- abus                 abus utilities
+  |      +-- buttons              B21 button interface implementation
+  |      +-- mcp                  mcp utilities (b21 mobile base)
+  |      +-- miro                 miro class framework and auto-generated idl files
+  |      +-- msp                  msp utilities (sonar, infrared tactile)
+  |      +-- base                 B21 interface implementations (sonar, IR, tactile, ...)
+  |      +-- b21Base              B21 base services binary
+  |      +-- laser                SICK laser service
+  |      +-- speech               speech service (DoubleTalk cards)
+  |      +-- psos                 psos utilities
+  |      +-- pioneer              Pioneer interface implementations (sonar, motion, ...)
+  |      +-- pioneerBase          Pioneer base services binary
+  |      +-- can                  can bus utilities
+  |      +-- sparrow              Sparrow interface implementations (infrared, motion, ...)
+  |      +-- sparrowBase          Sparrow base services binary
+  |      +-- video                Frame grabber interface
+  |      +-- image                Frame grabber interface (deprecated)
+  +--- bin                        all binaries
+  +--- tests                      test suite
+  +--- performance-tests          test suite for service/hardware performance
+  +--- examples                   set of examples
+  +--- utils                       
+  |      |
+  |      +-- qtRangeSensor        GUI range sensor visualization
+  |      +-- qtTouchPad           GUI remote motion control by mouse
+  |      +-- qtJoyStick           GUI remote motion control by joystick
+  |      +-- notify               generic logging utilities
+  |      +-- policyEditor         GUI PolicyEditor for behaviour programming
+  |      +-- logPlayer            GUI player for log files
+  |      +-- nsIOR                CORBA Naming Service IOR retrival utility
+  |      +-- sparrow              Sparrow99 utilities
+  |      +-- makeParams           Parameter file auto code generation (soon to come)
+  +--- doc
+  |      |
+  |      +-- html                 html documentation (doxygen)
+  |      |     |
+  |      |     +-- idl (*)        documentation of idl interfaces (index.html)
+  |      |     +-- cpp (*)        documentation of c++ class framework
+  |      +-- tex                  TeX documentation (miro_manual.ps, miro_reference.ps)
+  +--- lib                        all libraries
+\end{verbatim}
+
+Note: \\ 
+The directories marked with {\tt (*)} are not part of the \miro
+repository but are dynamically built when calling
+{\tt make}.
+
+%% =============================================================================
+
+\chapter{Make}
+
+The following targets can be called in the main Makefile:
+\begin{itemize}
+  \item all (default)
+  \item depend (dont call before first complete build!)
+  \item clean (remove object files)
+  \item distclean (remove all generated files)
+\end{itemize}
+
+Simply typing {\tt make} calls the target {\em all}.  To get the
+documentation built, change into the directory \$(MIRO\_ROOT)/doc and
+call make. Note that doxygen has to be installed.
+
+%% =============================================================================
+
+\chapter{Styleguide}
+\input{styleguide}
+
+%% =============================================================================
+
+\chapter{Source Code Documentation}
+
+doxygen is used
+
+Example:
+
+\begin{lstlisting}[frame=tb]{}
+//! Brief online description of the class
+/**
+ * Some comments about this class are written here.
+ * You can use multiple lines.
+ *
+ * An empty line produces a new paragraph.
+ *      
+ * @author Stefan Enderle  (an author can be given!)
+ */
+class MyClass : public some other class
+{
+private:
+  /**
+   *  say something about this variable
+   */
+  double d;
+
+public:
+  /**
+   *  say something about this method 
+   *
+   * @exception SOME_EXCEPTION                    
+   *
+   * @param a This param is used for something nice
+   */
+  bool method(int a);
+};
+\end{lstlisting}
+
+%% =============================================================================
+
+\input{refman}
+
+%% !!! Be sure, that no other stuff comes here. particularly no \end{document}
+
+%\chapter{Class Reference}
+%\label{SEC_CLASS_REFERENCE}
+%\input{miro_class_reference.nh}
+%\input{miro_idl_reference.nh}
+%\printindex
+%\end{document}
+
+
+
+

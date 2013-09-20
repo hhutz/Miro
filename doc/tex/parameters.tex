@@ -1,0 +1,458 @@
+\chapter{Parameter Sets}
+\label{SEC:PARAMETERS}
+
+                                % problem
+
+Robot control programs and robotic algorithms are full of parameters.
+Different robot types vary in shape and sensor configuration, but also
+different robots of the same type tend to vary slightly. For instance
+some of them are equipped with further sensory or actuatory devices
+not present in the standard configuration. Also damage and repair of
+parts of a robot during its lifetime result in an individual robot,
+which has its own unique configuration.
+
+                                % examples
+
+Furthermore the environment provides a complete set of
+parameters. Lighting conditions, the shape and location of rooms and
+corridors, the position of obstacles like tables or stairs. The list
+could be continued indefinitely. These parameters vary between
+different environment, but also tend to change slightly over
+time. Light bulbs are changed, cupboards added, tables moved etc.
+
+A third source of parameters are defined by the task, the robot has to
+perform or the scenario, the robot is designed to operate in.
+Generalized tool boxes like planners or knowledge bases have to be
+populated with the actions and objects of relevance and a reactive
+execution engine need to be configured with what actions to take in
+which situation.
+
+                                % summary
+
+The configuration of these parameter sets can be done either by hand
+or tool supported or fully autonomously. Nevertheless it is a crucial
+part of the setup of robot for every scenario. The handling of those
+parameter sets therefore has to be well defined in order to keep the
+robots control software maintainable and adaptable to new tasks.
+
+                                % solution aproach
+
+In this chapter we will therfore introduce the parameter framework of
+\miro. The parameter framework was primarly designed to handle the
+first source of parameters, namely the configuration of the robot and
+its sensory and actuatory services for a task.  But meanwhile it is
+also used for the third part of the above sketched three sources of
+parameter sets: With slight extensions, it is used for the
+parameterization and configuration management of the reactive
+execution engine (the BAP framework) introduced in sectin
+\ref{sec:BAP}. Environmental modeling for different scenarios lies
+out of the scope of the problem set currently addressed by \miro.
+
+                                % organization of the chapter
+The remaining of this chapter is organized as follows.  First the
+general concept of parameter sets and configuration files is sketched.
+Then the location and naming of the robot configuration files of \miro
+and how to create a configuration for an individual robot will be
+explained. In the following section the description and implementation
+of parameter sets and the mapping to the actual parameter files will
+be discussed. In section \ref{SEC:DESCRIPTION_SYNTAX} the syntax and
+semantics of the description language will be explained.
+
+\section{Overview}
+
+Parameter sets are a quite powerfull concept within \miro, that
+therfore also encapsulates a lot of functionality. To facilitate the
+usage of the parameter framework of miro, tools support the handling
+of parameter sets for the different user communities. In this section
+we will describe the usage of parameter sets from the end-user as well
+as from the programmers perspective
+
+\subsection{End-User Perspective}
+ 
+An end-user has to handle parameter files for its robots. A parameter
+file contains various parameter sets, thatare described by an XML
+syntax. The server parses those files on startup, to initialize the
+parameter sets of its services. Parameters in general are strictly
+typed name value pairs.  They are grouped into sections within the
+file. They can be nested, structured types, including arrays of
+variable length as well as sets. The parameter names start with an
+upper case initial letter.
+
+To edit parameter files, the GUI-based \texttt{ConfigEditor} can be
+used. It enforces the XML-syntax as well as the correctness of the
+configuration section placement and the type correctness. It is
+discussed in more detail in section \ref{sec:ConfigEditor}.
+
+\subsection{Programmers Perspecitve}
+
+From a programmers perspective, a parameter set is represented by a
+struct within the target programming language. Currently only C++ is
+supported as target. For this language, a parameter set is translated
+into a class with all member variables declared public, just like
+a C struct. The member variable names begin with a lower case initial
+letter. Names consisting of multiple words are concatenated, the
+beginning of a new word is indicated by an upper case letter.
+Parameter classes support single, public inheritance. Apart from the
+member variables, the following methods are declared:
+\begin{description}
+\item[Default Constructor]
+  Initializes all member variables to their default values.
+\item[void operator $\ll =$ (QDomNode)]
+  Parses an XML node and sets the member variables accordingly.
+\item[QDomElement operator $\gg =$ (QDomElement)]
+  Appends the current
+  values of the member variables as a child to the XML node.
+\item[void printToStream(ostream\&)]
+  Prints the current values of the member variables to the
+  specified output stream.
+\item[std::ostream\& operator$\ll$ (std::ostream\&, Miro::Parameters\&
+  const)] is declared for the parameter parent class.
+\end{description}
+Optionally parameter set classes contain a static member method
+{\tt instance()}, that returns a pointer to the global heap allocated
+instance of the parameter set class (see also singleton pattern, and
+double checked locking \cite{Schmidth:}).
+
+As parameter set classes have a very generic structure, their coding,
+including the XML and ostream operators can be automated. Therefore
+parameter sets normally are described not within a programming
+language, but within an XML syntax. The mapping to target programming
+language is then performed by a small compiler, which emits the
+necessary (i.e. C++) code.  The parameter set descriptions are also
+used by the tools for GUI-based configuration editing. Those are the
+\texttt{ConfigEditor} as well as the \texttt{PolicyEditor} of the
+behaviour framework.
+
+\section{Configuration Files}
+
+Every service of \miro tries to find a configuration file on startup
+to adapt itself to the individual robots configuration if necessary.
+If no configuration file is found, the service has to use its default
+settings. The locations the configuration files are expected are:
+\begin{enumerate}
+\item {\tt \$MIRO\_ROOT/etc}
+\item The current directory.
+\end{enumerate}
+The name of the configuration file is expected to be the host name of
+the computer the service is running on. The file extension is .xml:
+
+{\tt \$HOST.xml}
+
+For example in the case of our famous Sparrow99 soccer robot goal
+keeper named haeltnix, the \miro service SparrowBase, started on the
+computer mounted on the robot will try to load the configuration file:
+
+{\tt \$MIRO\_ROOT/etc/haeltnix.xml}
+
+The default name and location of the configuration file can be
+overwritten by the command line option {\tt -MiroConfigFile} {\em
+  filename} or {\tt -MCF} for short. The search order of directories
+stays the same.  Additionally there can also be an absolute path
+specified.
+
+In {\tt \$MIRO\_ROOT/etc} there are sample configuration files for
+every robot model currently supported by \miro. They are named
+{\em model}.{\tt xml}. Copy the respective configuration file of 
+your robot model to {\tt \$HOST.xml} to get a configuration file to 
+start with. XML files are text files and quite easily
+readable. Therefore opening the configuration file into your favorite
+editor and changing the {\em value} attributes to different settings
+should be sufficient to solve the first few configuration problems
+like differing device names etc. For anything else, read on.
+
+\subsection{Configuration File Syntax}
+
+The available tags and there nesting capabilities look like follows:
+
+$<$!--MiroConfigurationDocument--$>$
+
+\begin{description}
+\item[configuration]
+  One file always describes one entire configuration. A
+  configuration describes all the services parameters, that can be
+  executed on the particular robot.
+  
+  There can only be one configuration tag per file.
+  
+  \begin{description}
+  \item[section] Each component of \miro can have its own section
+    within a configuration file. Configuration file sections are used
+    to group services of similar scope. For instance the vision
+    system, the configuration of the filter tree, as well as the
+    the specification camera paramters, is considered to
+    be a component within a \miro configuration file. Normally each
+    service defines its own section within the configuration file.
+    
+    There are multiple section tags permitted within a configuration.
+    
+    Attributes:
+    \begin{itemize}
+    \item \textit{name} The name of the section (required).
+    \end{itemize}
+    
+    \begin{description}
+    \item[instance]Parameters of a component are grouped and
+      described as set of parameters that belong together. Note that
+      within the configuration file there is a hardware centric
+      view taken. That is, sensors and actuators that result in multiple
+      service interfaces, are most likely to be grouped into one
+      component if they are controlled by the same low level
+      controller board. For instance the parameters for the pioneer
+      board, that controls the motors as well as the sonars etc., are
+      grouped within just one component.
+      
+      An instance of a certain parameter set can be
+      specified by the type and name attributes of the instance
+      tag. There are multiple instance tags permitted within a
+      section.
+      
+      Attributes: 
+      \begin{itemize}
+      \item \textit{name} Name of the parameter (required).
+      \item \textit{type} The type name of the parameter. The
+        parameter type definitions are described in section
+        \ref{SEC:PARAMETER_TYPES}.
+      \end{itemize}
+    \end{description}
+    
+    \begin{description}
+    \item[parameter] Parameters can be specified within the instance
+      tag, for each available parameter of described the type.
+        
+      There are multiple nested parameter tags permitted, but each has
+      to hold a name attribute that is unique within the enclosing tag.
+        
+        Attributes: 
+        \begin{itemize}
+        \item \textit{name} Name of the parameter.  
+        \item \textit{value} The value of the parameter.
+        \end{itemize}
+        
+        In case the parameter describes a structured type instead of a
+        basic type (like bool, int, string etc.), parameter tags can
+        be nested. In this case the value attribute is ignored.
+        
+      \end{description}  
+  \item[parameter] For many parameter types there is a default
+    instance available. Especially if there can only be one
+    parameter set of this type per robot (i.e. the Robot
+    parameters set, that holds the name of the robot etc.). This
+    default instance is not referenced by the \texttt{instance}
+    tag, but by a \texttt{parameter} tag, that holds the type
+    name of the parameter set as its \texttt{name} attribute.
+    
+    There are multiple parameter tags permitted within a section.
+    Apart from the unified \texttt{type/name} attribute, a parameter
+    tag behaves just like an \texttt{instance} tag, and can hold
+    multiple, probably nested \texttt{parameter} tags.
+    
+    Attributes: 
+    \begin{itemize}
+    \item \textit{name} Type name of the default parameter instance.
+    \end{itemize}  
+  \end{description}
+\end{description}
+
+\subsection{Example Configuration}
+
+See {\tt \$MIRO\_ROOT/examples/params/TestConfig.xml}
+for a small initial example.
+
+TODO: include and comment the example code here.
+
+Section tags are structurising elements and component instance tags
+are mainly defined by the underlying hardware devices. But what
+defines which parameters are accepted within by which component and of
+what types they are? While the configuration files contain comments to
+explain the purpose of the different parameters, there do also exist
+formal definitions of the components parameter sets, as described
+within the next section.
+
+\section{Parameter Set Generation}
+\label{SEC:PARAMETER_TYPES}
+
+Parameter sets, described as component parameters within a
+configuration file, correspond to strictly typed classes within C++.
+Those structures can be initialized by parsing the configuration file.
+To facilitate the generation of parameter sets, parameter classes
+needn't to be hand coded, but are auto-generated from parameter
+description files by a little parameter class compiler ({\tt
+  MakeParams}). The parameter description files are once again based
+on the XML syntax.
+
+Furthermore the description files are not only used for the
+configuration of the services, but also by other tools within
+the \miro framework. The configuration editor used this information
+for the generic editing of configuration files. Additionally, 
+the behaviour framework (sec.\ 
+\ref{SEC:BEHAVIOURS}) uses this functionality for parameterization of
+behaviours and arbiters and the {\tt PolicyEditor} (sec.\ 
+\ref{SEC:POLICY_EDITOR}  use the parameter description files for GUI
+based editing of the behaviour parameters). To facilitate the reuse of
+the parameter descriptions by multiple tools, the syntax of the file
+is somehow obfuscated by additional tags and attributes.
+
+\subsection{Description File Syntax}
+\label{SEC:DESCRIPTION_SYNTAX}
+
+Parameter classes support single inheritance.
+
+$<$!--MiroParametersConfigDocument--$>$
+
+\begin{description}
+\item[config]
+  A parameters config file describes the types, names and defaults
+  for parameter classes as used within the \miro framework. 
+
+  \begin{description}
+  \item[config\_group] Configurations can be grouped together for
+    various reasons.  A group within a description file in general
+    corresponds to a section within the configuration file. Within a
+    configuration file, a parameter set can only be instanciated
+    within the section, named as the config group.
+
+    Attributes:
+    \begin{itemize}
+    \item \textit{name} The name of the config group.
+    \end{itemize}
+
+    \begin{description}
+    \item[config\_item] A configurable item to built a parameters
+      class for. Each config item will be mapped to a parameter class
+      by the compiler.
+
+      Attributes:
+      \begin{itemize}
+      \item \textit{name} The name of the parameter class. The suffix
+        Parameters will be added to the name.
+      \item \textit{parent} The name of the super class. The suffix
+        Parameters will be added to the name. Note that namespaces
+        have to be fully qualified here, i they differ from the
+        current namespace.
+      \item \textit{instance} Whether or not a singleton instance
+        of the parameter class shall be created (sec.\
+        \cite{SINGLETON}). Default is {\em false}.
+      \item \textit{final} Corresponds to the finalize keyword of
+        java. It is only relevant for the editing tools, not for code
+        generation. It indicates, that a toplevel instance of this
+        parameter can be created.Default is {\em true}.
+      \item \textit{dummy} Sometimes you have to fake a parameter
+        class to the editing tools that does not exist as such. No
+        code will be generated for such a class. Default is {\em
+          false}.
+
+      \end{itemize}
+      
+      \begin{description}
+      \item[config\_parameter] A parameter for the class.
+
+        Attributes:
+        \begin{itemize}
+        \item \textit{name} Guess what.
+        \item \textit{type} Allowed basic types are: bool, char, int,
+          unsigned int, short, unsigned short, long, unsigned long,
+          double and std::string. There are two more
+          predefined types: Angle and angle. {\em Angle} corresponds
+          to a Miro::Angle instance. It is an angle $\phi$ normalized
+          to $-\pi \le \phi \le \pi$ while {\em angle} corresponds to
+          a none normalized angle represented by a simple double. Note
+          that while the internal representation of angles is in
+          radiant, the values specified in the configuration files are
+          in degrees. But you can also specify parameter
+          classes described within a parameter description file as
+          parameter type. Additionally, {\em std::vector$<>$} and {\em
+            std::set$<>$} are supported. Note
+          however that we are currently lacking support for specifying
+          default values for these none basic types.
+        \item \textit{default} Default value as set in the
+          constructor (optional).
+        \item \textit{measure} The measure the type represents, such
+          as: mm, msec, °, mm/s, °/s (optional).
+        \item \textit{inherited true/false}
+          This attribute is used to 
+          overwrite defaults for inherited variables within the
+          constructor of the class. If set to true, no new member
+          variable will be added to the class, and only the
+          attributes name and default will be evaluated.
+        \end{itemize}
+      \end{description}
+    \end{description}
+  \item[config\_global]
+    Global configuration items those are mainly used for code
+    generation. They specify things, that the compiler can not easily
+    derive autonomously, such as additional include directives, etc.
+
+    Attributes:
+    \begin{itemize}
+    \item \textit{name} The name of the config item. There are
+      currently three items supported:
+      \begin{description}
+      \item[namespace] Specifies the namespace of the generated
+        code. While multiple parameter classes can be described
+        within one file, they all have to reside within the same
+        namespace.
+      \item[include] Specifies a user include directive.
+      \item[Include] Specifies a system include directive.
+      \item \textit{value} The name of the namespace, the local or
+        global include directive.
+      \end{description}
+    \end{itemize}
+  \end{description}
+\end{description}
+
+\subsection{Example Description}
+
+See {\tt \$MIRO\_ROOT/examples/params/Parameters.xml}
+for a small initial example.
+
+TODO: include and comment the example code here.
+
+\subsection{MakeParams}
+
+The parameter description compiler has the following command line
+parameters.
+\begin{description}
+  \item[-f $<$file$>$] name of the input file (default is {\em Parameters.xml})
+  \item[-n $<$name$>$] base name of the output file (default is {\em Parameters})
+  \item[-s $<$extension$>$] extension of the generated source file (default is {\em cpp})
+  \item[-h $<$extension$>$]extension of the generated header file (default is {\em h})
+  \item[-v] verbose mode
+  \item[-?] help: emit this text and stop
+\end{description}
+
+\subsection{Example Header File}
+
+See {\tt \$MIRO\_ROOT/examples/params/Parameters.h}
+for a small initial example.
+
+TODO: include and comment the example code here.
+
+\subsection{Makefile magic}
+
+To enable automatic generation of the C++ source and header files from
+XML parameter descriptions, there does allready exist a rule within
+the make files of \miro. Therefore, you can simply add the XML based
+description file to the \texttt{target\_SOURCES} variable in the
+corresponding \texttt{Makefile.am}. Make sure however, that it is
+placed before the first source file, that includes the generated
+header file, to ensure its timely generation. Furthermore the
+resulting source and header files have to be added to the
+BUILT\_SOURCES variable.
+
+\section{Configuration Management Runtime Environment}
+\ref{sec:ConfigRuntime}
+
+
+\section{Config File Editor}
+\ref{SEC:CONFIG_EDITOR}
+
+For advanced config file editing, like filter trees of the video image
+processing framework \ref{SEC:VIDEO_IMAGE_PROCESSING}, a simple text
+editor is a fairly errorprone tool. XML editors do a better job in
+this case, but for real comfort, \miro provides the config file
+editor.
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

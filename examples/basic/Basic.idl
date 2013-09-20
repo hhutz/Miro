@@ -1,0 +1,60 @@
+// -*- idl -*- ///////////////////////////////////////////////////////////////
+//
+// This file is part of Miro (The Middleware for Robots)
+// Copyright (C) 2013
+// Department of Neural Information Processing, University of Ulm
+//
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published
+// by the Free Software Foundation; either version 2, or (at your option)
+// any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU Lesser General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with this program; if not, write to the Free Software Foundation,
+// Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+//
+#ifndef XMP_Basic_idl
+#define XMP_Basic_idl
+
+module XMP
+{
+  typedef long LongV2[2];
+
+  struct Foo
+  {
+    LongV2 f;
+  };
+
+  typedef sequence<Foo> FooSequence;
+  typedef sequence<long> LongSequence;
+
+  struct Bar
+  {
+    LongSequence b;
+  };
+
+  exception EFoo
+  {
+    string what;
+  };
+
+  interface Basic
+  {
+    void s0();
+    long s1(in long p1, out long p2, inout long p3);
+    string s2(in string p1, out string p2, inout string p3);
+    Foo s3(in Foo p1, out Foo p2, inout Foo p3);
+    FooSequence s4(in FooSequence p1, out FooSequence p2, inout FooSequence p3);
+    Bar s5(in Bar p1, out Bar p2, inout Bar p3);
+    Object s6(in Object p1, out Object p2, inout Object p3);
+
+    void e0() raises (EFoo);
+  };
+};
+
+#endif // XMP_Basic_idl

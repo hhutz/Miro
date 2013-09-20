@@ -1,0 +1,306 @@
+\chapter{Project setup with Automake and Autoconf}
+\label{sec:new_project}
+
+This chapter tries to give a short introduction on how to set up your
+own project that uses \miro by the help of automake and autoconf.
+This text was created using autoconf 2.52 and automake 1.5, so your
+local installation may differ slithly.
+
+First describe the the mode of operation of automake and autoconf is
+explained by a real-world example from the \miro source
+base. Afterwards the creation of the root configuration file of the
+autoconf tool, {\tt configure.ac} is discussed. Afterwards the
+different Makefile.ac templates, shipped with \miro are
+introduced. After a short survey on the actual buid directives, the
+chapter concludes with links to internet resources on the auto-tools.
+
+\section{Introductory Example}
+
+First a short introduction into the whole structure of automake and
+autoconf, that uses a two-stage process.
+
+\begin{itemize}
+\item With automake you can (normaly) easily describe, how the files
+within a folder should be processed. The commands for this are written
+in a file called Makefile.am. As a minimal example look for example in
+{\tt \$MIRO\_ROOT/\-src/\-can/\-Makefile.am}:
+
+\begin{verbatim}
+  lib_LIBRARIES = libcan.a
+  libcan_a_SOURCES = Parameters.xml CanConnection.cpp CanMessage.cpp ...
+\end{verbatim}
+
+This generates a (static) library named {\tt libcan.a}, which is build
+from the assigned sources {\tt Parameters.xml, CanConnection}...  All
+other stuff within the Makefile.am is e.g.\ which files are installed
+into which directory, if the user applies a {\em "`make install"'\/}
+({\tt can\_include\_HEADERS}, note the prefix of the macro), or which
+files are generated automatically during the build-process and can
+therefor removed if a {\em "`make clean"'\/} is desired ({\tt
+BUILT\_SOURCES} and {\tt CLEANFILES}). These Makefile.am are converted
+into {\tt Makefile.in} using the {\em automake\/} program.
+
+\item {\em autoconf\/} generates the real {\tt Makefile} for the {\tt
+Makefile.in} files. Therefor it has to know the paths and options
+necessary for the build process and which files, libraries and
+programs it has to compile at all. Exactly that is, what the
+configure-script tries to detect and guess automatically. Of course no
+one wants to write a configure-script directly (take a look at it, it
+looks really, really ugly. Moreover a program should compile on a
+couple of different systems, each having their own quirks and
+peculiarities). Therefor one writes a {\tt configure.ac} files, that
+is finally converted into the configure-script. The whole autoconf
+stuff is based on so called macros, from which are a lot of them
+allready included:
+
+\begin{verbatim}
+  AC_CHECK_LIB(raw1394, raw1394_get_libversion,
+               ac_have_libraw1394=yes, [ac_have_libraw1394=no])
+  AC_CHECK_HEADERS(errno.h fcntl.h stdlib.h)
+  AC_CHECK_PROG(ac_has_dvips, dvips, yes, no)
+\end{verbatim}
+
+There are e.g.\ macros to test the existence of libraries, header files
+or executable programs. If you need a more complicated test, you can
+write them with a language called M4 (M4's syntax is quite close to a
+normal shell syntax). The results of all tests are written in a file
+called config.h additionally. This file can be included into the
+C-files and are treated as normal c-defines (e.g. {\tt \#define
+MIRO\_HAS\_METEOR 1}).
+\end{itemize}
+
+
+\section{Create {\tt configure.ac}}
+
+The easiest way to start with is using the autoscan program (from the
+autoconf-package). This will create a file called configure.scan that
+you should rename to configure.ac. ({\em autoscan\/} is also a good
+tool to check your existing configure.ac for missing tests). Now look
+into your new configure.ac file. The first line ({\tt AC\_INIT})
+describe your project, so fill it with useful values, a name for your
+package, your version and an email address for bug-reports. The next
+two lines ({\tt AC\_CONFIG\_SCRDIR}, {\tt AC\_CONFIG\_HEADER}) should be
+fine.
+
+The remainder of the file is group into different parts. First part is
+the check for programs. {\em autoconf\/} offers several ready to use checks
+for this, like e.g. {\tt AC\_PROG\_CC} that checks several behaviours of
+your installed C-compiler or {\tt AC\_PROG\_LN\_S }that looks how to
+create a symlink. The automatically included macros should be fine.
+
+The next paragraph checks for libraries. Note, that the philosophy of
+{\em autoconf\/} is to check for the possibility of creating and
+compiling a program with a certain function using this library, not
+the pure existence of this library. So look for a function that should
+be within the different libraries and insert them in the second field
+of the {\tt AC\_CHECK\_LIB} macros (the first name is the library name
+itself). Possibly you have to remove lines for libraries, that are in
+fact builded by your project itself (Note, that it may be difficult to
+use C++ specific stuff here).
+
+Third, header files are checked. Beside some prefabed macros for
+standard headers (e.g. {\tt AC\_HEADER\_STC}) you can insert additional
+files into the {\tt AC\_CHECK\_HEADERS} macros. Insert them as a space
+separated list.
+
+Next two paragraph contains checks for typedef and structures and
+library functions. The automatically included macros should be fine,
+otherwise include additional functions into the {\tt AC\_CHECK\_FUNCS}
+macro. The functions here refer to standart C functionality, not to
+mix up with special functions provided by additional libraries as
+described above.
+
+The last, long macro {\tt AC\_CONFIG\_FILES} contains a space separated
+list of all the Makefiles the configure script has to produce. This
+means, if you add a directory into your project later on, you have to
+insert the path here.
+
+
+
+\subsection{Tests for more complex packages (and facilities)}
+
+Most checks for the functionallity of your system should be covered
+with the above, autogenerated checks. But to build a project that
+relies on other, more complex packages (in our case \miro, ACE, TAO,
+Qt, etc), it is necessary to add additionally tests to the configure
+script.
+
+Additionally checks are written in a language called M4. It is up to
+you, where to save these files, but I prefer to add an extra directory
+named config, so the following explanation will assume this.
+
+Miro has to check e.g.\ for the existence of ACE, TAO and Qt. But if you build your own
+project, these packages are found allready. So during the configure run of Miro, a small
+script called miro-config is generated. This script can be used not only to test Miro's
+properties (e.g.\ check the installation prefix using \texttt{miro-config --prefix}), but
+also the properties of these other packages (ACE, TAO and Qt). So for example you can
+easily check which C-flags are necessary to include ACE stuff (\texttt{miro-config
+  --acetao-clags}). Additionally, the script can be used to check if Miro contains all
+necessary modules you may need for your own project. For example \texttt{miro-config
+  --bttv} returns yes or no, depending on the configure parameters miro is built with.
+
+If you need a starting point on how to use this sript, have a look at
+\texttt{\$MIRO\_ROOT/\-templates/\-search\_miro.m4}. Copy this file into your own local
+config directory and add \texttt{AC\_SEARCH\_MIRO} (the name of the function macro) to the
+\texttt{configure.ac} script (for example directly above the {\tt AC\_CONFIG\_FILES} macro. 
+
+In the lowermost part of \texttt{search\_miro.m4} you can see, how Miro is checked for its
+conditional features. If you need more of these checks, simply add them there the same way
+
+If you need to write your own tests and checks, please feel free to
+use and modify these files. Additional macros that can be used out of
+the box or as examples for own tests, look at:
+
+\begin{verbatim}
+http://wwww.gnu.org/software/ac-archive/
+http://ac-archive.sourceforge.net/
+\end{verbatim}
+
+\section{Create {\tt Makefile.am} for directories, libraries and executables}
+
+The next step is to prepare a Makefile.am within each directory that
+contain files that need to be compiled. The easisest way is again to
+use the examples within {\tt \$MIRO\_ROOT/\-templates/}. For example to
+create a Makefile.am that should call other Makefiles in other
+subdirs, take {\tt \$MIRO\_ROOT/\-templates/\-Makefile.am.dir}, rename it to
+{\tt Makefile.am} and add the names of the subdirectories. There are also
+examples for sources that should be compiled into a static library
+(Makefile.am.lib.a) into a shared library (Makefile.am.lib.so) or
+different executables (Makefile.am.bin). All examples contain some
+comments to guide you, what to fill in.
+
+Remeber to be sure, that each directory with a {\tt Makefile.am} is
+listed in the {\tt AC\_CONFIG\_FILES} macro in the {\tt configure.ac}
+script.
+
+
+\subsection{Makefile.am.dir}
+This Makefile starts subbuilds in the specified directories. It is an
+example for conditional compilation (depending on the
+configuration). If you don't have conditional branches, you can left
+the second variable empty or reduce the Makefile.am to a single line,
+like e.g. \texttt{SUBDIRS = firstDir secondDir}.
+
+\subsection{Makefile.am.bin}
+This Makefile builds a single or several binaries. The name of the
+binaries to be built are specified in the variable {\tt bin\_PROGRAMS}.
+There have to be an extra line for each binary to be build starting
+with the name of the binary itself and an additional
+\texttt{\_SOURCES}-suffix. The sources are specified with their suffix
+(.cpp). Please also list all the header files here, otherwise they
+don't get distributed by an call to \texttt{make dist}. If the
+programs need to be linked against several libraries, there is again
+one line per binary containing the name of the binary plus an
+additional \texttt{\_LDADD}-suffix.
+
+\subsection{Makefile.am.qt}
+This is a special Makefile.am template for Qt programs. For
+simplicity, the Makefile is designed for a single binary per
+directory, but beside that, most of the above section also applies
+here. The only exception is, that we have to distinguish between
+normal source files (variable \texttt{sources}) and files (variable
+\texttt{tomocsources}) that need to be compiled with Qt's Meta Object
+Compile (\texttt{moc}). Be sure to \textbf{not} include the header
+files into the \texttt{tomocsources} variable, but to the
+\texttt{sources} variable, otherwise they get "cleaned".
+
+\subsection{Makefile.am.lib.a}
+This Makefile builds a static library. The name of the library can be
+specified in the variable \texttt{lib\_LIBRARIES}, the files building
+the library in the variable \texttt{sources} (with the .cpp suffix; or
+.xml in case of an xml-file for \miro's parameter framework). Headers
+that are not automatically considered because they don't have a
+corresponding cpp-file should be specified in the variable
+\texttt{extraheader}. Don't forget to name the prefix for the
+\texttt{\_SOURCES}-macro with the name of the resulting library.
+Therefore please substitued all occuring dots with underscores (e.g.\ 
+the usual \texttt{.a} a the end of an static library).  Additionally,
+replace the prefix for the macro \texttt{\_include\_HEADERS} with the
+name of the directory, to which the header files should be installed
+(see also the description of \texttt{Make-rules} below).
+
+\subsection{Makefile.am.lib.so}
+Makefiles for shared libraries look quite the same as for static
+libraries, to most of the above applies here too. The only difference
+from a users perspective is the name of the variable
+\texttt{lib\_LTLIBRARIES} where you name your library (note the
+\texttt{LT} within the variable (and the targets at the end of the
+\texttt{Makefile.am}) which indicates that the library is build using
+the libtool package).
+
+\subsection{Conditionally Compiled Sub-projects}
+
+If you programs or libraries need to be compiled differently depending
+on configuration options, please have a look at an existing
+\texttt{Makefile.am}, e.g.\ in
+\texttt{\$MIRO\_ROOT/\-examples/\-behaviours/\-engine/} or
+\texttt{\$MIRO\_ROOT/\-src/\-miro/}.
+
+\subsection{Create other {\tt Makefile.am}}
+
+Because auto-conf/\-make themself are quite unflexible if you intend to
+do something, that the autotools are not designed to, you can also
+insert an "`all-local"' target into the {\tt Makefile.am} that is
+treated as a normal Makefile part. Although this has to be necessarry
+sometimes, be careful with this, auto-conf/make may fail to calculate
+the correct dependencies which in turn may lead to incomplete and
+corrupt builds. Save places to write your own stuff are for example in
+the documentation directory. See {\tt \$MIRO\_ROOT/\-doc/\-html} and {\tt
+\$MIRO\_ROOT/\-doc/\-tex} for examples on building a doxygen or latex
+documentation.
+
+\subsection{Make-rules}
+Last you may have a look at the \texttt{Make-rules} file within the
+\texttt{\$MIRO\_ROOT/\-config/} directory. This file is included into each
+\texttt{Makefile.am}, so rules or variables that are needed globally,
+can be inserted here. If you want to define additional installation
+subdirectories for the header files, you can see examples here.
+
+\section{Build the beast}
+
+To finally build the new project, you have to call the different
+programs, which in turn convert the prepared files into a real,
+make-based project.
+
+Assuming that you have written appropriate {\tt Makefile.am} and {\tt
+configure.ac} files, you should be able to build your project by
+entering the following commands:
+
+\begin{description}
+\item[autoheader] Creates \texttt{config.h.in}.
+\item[aclocal -I config] Adds \texttt{aclocal.m4} to directory.
+  Defines some m4 macros used by the auto tools and the self-written
+  tests from the config-directory.
+
+\item[autoconf] Creates \texttt{configure} from \texttt{configure.ac}
+\item[automake] Creates \texttt{Makefile.in} from \texttt{Makefile.am} 
+\item[./\-configure] Creates \texttt{Makefile} from \texttt{Makefile.in}
+\item[make]
+\end{description}
+
+Just repeat the last 5 steps to completely rebuild the project. Most
+projects have an \texttt{autogen.sh} script that runs everything up to
+the configure step.
+
+
+\section{Additional sources of help}
+
+In case of problems, first have a look at the offical manuals of both,
+automake and autoconf. You can find them on the GNU webpage:
+
+\begin{verbatim}
+http://www.gnu.org/software/automake/manual/automake.html
+http://www.gnu.org/software/autoconf/manual/autoconf-2.57/autoconf.html
+\end{verbatim}
+
+There is also a book available under the terms of the Open Publication
+License:
+
+\begin{verbatim}
+http://sources.redhat.com/autobook/download.html
+\end{verbatim}
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

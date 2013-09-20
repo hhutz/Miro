@@ -1,0 +1,19 @@
+<!DOCTYPE xml SYSTEM "PolicyEditor_behaviour.dtd">
+<config> 
+  <!-- include for the Miro::Parameters base class -->
+  <config_global name="include" />
+
+  <!-- group names can be freely choosen -->
+  <!-- except for behaviours and arbiters -->
+  <config_group name="test">
+    
+    <!-- MyParameters are derived from Miro::ConfigParameters -->
+    <config_item name="My" parent="Miro::Config" instance="true" >
+      <config_parameter name="test1" type="bool" default="true" />
+      <config_parameter name="test2" type="int" default="3" measure="mm" />
+      <config_parameter name="Test3" type="std::string" default="test" />
+    </config_item>
+
+  </config_group>
+
+</config>

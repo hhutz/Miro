@@ -1,0 +1,162 @@
+%% styleguide.tex
+
+\section{Files}
+
+All files start with a leading upper case character.
+
+\subsection{Header Files vs.\ Source Files}
+
+\begin{description}
+\item[Header files:]
+  These files contain the {\em declarations} of
+  classes, functions, and constants that must be known to use the code. Header
+  files must not contain function bodies, methods, and variable
+  definitions. This is important, because each header file is included in
+  all source files that need the declarations and so it may only contain
+  declarations that may be duplicated.
+
+\item[Source files:]
+  These files contain the {\em implementations} of
+  methods, functions, and variables, declared in the corresponding header file.
+\end{description}
+
+Exceptions: 
+
+\begin{description}
+\item[Inline code:] Methods and functions that are very small or
+  mainly used in loops are often implemented as inline code. The
+  function is not called, but the function body is directly
+  substituted in the code.
+\item[Template definitions:]
+  These are generic class or function
+  definitions, eg.\ a generic vector. The exact type (eg.\ vector of strings)
+  is given at compile time. Template are mostly used in general class
+  libraries. Those also are to be located at the end of the header file.
+\end{description}
+
+Both exceptions must be known at compile time. This means that they can not be
+implemented in a source file ({\tt .c}-file), then compiled to an object
+file, and later linked to the application. 
+Therefore they are to be located at the end of the
+header file. Please do not inline inline function within the class
+declarations.
+
+\subsection{File Extensions}
+
+\begin{tabular}{ll}
+  {\tt .cpp}  & C++ file \\
+  {\tt .c}   & C file \\
+  {\tt .h}   & C header file
+\end{tabular}
+
+Note that especially the build rules for libraries and dependcies will
+fail, if other extensions are used.
+
+
+\subsection{File Names}
+
+\begin{enumerate}
+\item File names begin with a uppercase letter.
+\item In names which consist of more than one word the words are
+  written together and each word that follows the first is begun with an
+  uppercase letter. \\ 
+  Example: {\tt SickLaserService.cc}
+\end{enumerate}
+
+
+\subsection{File Structure}
+\label{SEC_FILE_STRUCTURE}
+
+\begin{enumerate}
+\item In C files, {\tt \#ifdef c\_plus\_plus extern "C"} must be
+  used in order to compile the files with a C++ compiler. \\
+  Remark: See the example in \ref{SEC_GENERIC_HEADER}.
+\item The directive {\tt \#include "Filename.h"} is used for
+  user-prepared include files.
+\item The directive {\tt \#include <filename.hh>} is used for
+  include files from libraries.
+\item To avoid multiple includes of files, each header file must
+  define the constant {\tt \_FILENAME\_H} and contain an
+  {\tt \#ifndef/\#define} block at the beginning and an
+  {\tt \#endif} at the end of the file. \\
+  Remark: See the example in \ref{SEC_GENERIC_HEADER}. 
+\end{enumerate}
+
+
+\subsubsection{Generic Header File}
+\label{SEC_GENERIC_HEADER}
+
+\lstinputlisting[frame=tb]{Generic_header.cpp}
+
+%% -----------------------------------------------------------------------------
+
+\section{Identifier Names}
+\label{SEC_IDENT_NAMES}
+
+\begin{enumerate}
+\item Classes begin with an uppercase letter. \\
+  Example: {\tt LaserScan, Vector}
+\item Methods, functions, objects (instances), and variables begin
+  with a lowercase letter. \\ 
+  Example: {\tt write(..), sonar.get(..), int number}
+\item Pointer variables have the prefix {\tt p}. \\
+  Example: {\tt Laser* pLaser;}
+\item \label{ITEM_NAME_CONVENTION} 
+  In names which consist of more than one word the words are
+  written together and each word that follows the first is begun with an
+  uppercase letter. \\ 
+  Example: {\tt sonarScanVector}
+\item Do not use underscores to begin identifiers. \\
+  Remark: Underscores at the beginning are often used by internal compiler
+  variables. One should be able to distinguish them easily from user variables.
+\item Do not use underscores to separate words in identifiers. \\
+  Exception: Item \ref{ITEM_UPPERCASE_CONSTANTS}.
+\item \label{ITEM_UPPERCASE_CONSTANTS} Constants are written in
+  uppercase letters where underscores are used to separate words. \\ 
+  Example: {\tt VECTOR\_LENGTH, PI\_TIMES\_PI} \\
+  Remark: See section \ref{SEC_GENERAL} item \ref{ITEM_NO_DEFINES} for the use
+  of constants.
+\item Names must differ by more than only the use of uppercase and
+  lowercase letters.
+\end{enumerate}
+
+%% -----------------------------------------------------------------------------
+
+\section{General}
+\label{SEC_GENERAL}
+
+\begin{enumerate}
+\item In {\tt \#include} statements, absolute path names must not be used. \\
+  Remark: Use compiler option {\tt -I} to specify include paths.
+\item In {\tt \#include} statements, relative path names should not be used. \\
+  Remark: Use compiler option {\tt -I} to specify include paths.
+\item \label{ITEM_NO_DEFINES} Constants should not be defined with
+  {\tt \#define}. Use the directive {\tt const} instead to indicate
+  constants whenever possible. \\ 
+  Example: {\tt const int VECTOR\_LENGTH = 20;} \\ 
+  {\em Not:} {\tt \#define VECTOR\_LENGTH 20} \\ 
+  Remark: This allows strict type checking by the compiler.
+\item \label{ITEM_NO_MACROS} Do not use macros ({\tt \#define}.) \\
+  Remark: Use inline functions for fast computation and templates functions for
+  genericity.
+\item Each function should contain a header explaining the
+  functionality, the parameters, and the return value.
+\item If data structures are passed as parameters to functions,
+  references should be used instead of pointers. \\ 
+  Example: {\tt void writeLaserScan(LaserScan\& laserScan);} \\
+  {\em Not:} {\tt void writeLaserScan(LaserScan* pLaserScan);} 
+\item The keyword {\tt const} has to be used to indicate that
+  parameters are not changed. \\ 
+  Example: {\tt void writeLaserScan(const LaserScan\& laserScan);} \\
+  {\em Not:} {\tt void writeLaserScan(LaserScan\& laserScan);}
+\item Names of objects should contain the class name. \\
+  Example: {\tt LaserScan laserScan;} \\
+  {\em Not:} {\tt LaserScan scan;} 
+\end{enumerate}
+
+
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "servers"
+%%% End: 

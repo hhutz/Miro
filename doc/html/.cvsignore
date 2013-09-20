@@ -1,0 +1,9 @@
+idl
+cpp
+Makefile
+Makefile.in
+dependencies.cpp
+dependencies.idl
+doxygen.cpp
+doxygen.idl
+

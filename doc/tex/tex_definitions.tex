@@ -1,0 +1,63 @@
+% configure the listings-environment
+\lstloadlanguages{C++}
+ \lstset{
+   basicstyle=\sf,
+%   commentstyle=\hfill \sl,
+   language=C++,
+   defaultdialect=ANSI,
+   flexiblecolumns=true,
+%   indent=\parindent,
+   extendedchars
+   %%  texcl
+   %% formfeed={}
+ }
+
+
+% command definitions
+
+% logo of the miro-software writing
+\newcommand{\miro}{\textit{Miro}\xspace}
+% logo of the Sparrow writing
+\newcommand{\sparrow}{\textit{Sparrow}\xspace}
+% logo of the Sparrow 99 writing
+\newcommand{\sparrowXCIX}{\textit{Sparrow-99}\xspace}
+% logo of the Sparrow 2003 writing
+\newcommand{\sparrowIII}{\textit{Sparrow-2003}\xspace}
+% logo of the b21 writing
+\newcommand{\bXXI}{\textit{B21}\xspace}
+
+
+% font definitions
+\newcommand{\Xbombastic}{\fontfamily{ppl}\fontseries{b}\fontsize{1.5in}{1.8in}\selectfont}
+
+
+% color definitions
+\definecolor{LightGrey}{rgb}{0.9,0.9,0.9}
+
+
+% page definitions
+\setlength{\parindent}{0pt} % Keine Absatzeinrückung
+\setlength{\parskip}{7pt plus 1pt minus 1pt} % Absatz Abstand 7pt
+
+
+% misc
+\makeindex
+\bibliographystyle{plain}
+
+%=============================== Examples ====================================
+
+%% code-parts as an extra paragraph
+%% \begin{lstlisting}[frame=tb]{}
+%% for (unsigned int i = 0; i < sonarScan.length(); ++i)
+%%   cout << sonarScan.[i] << " ";
+%% \end{lstlisting}
+
+%% Included code-parts from a file
+%% \lstinputlisting[frame=tb]{simpleTestClient.cc}
+
+%=============================== Examples (end) ====================================
+
+%%% Local Variables:  
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 

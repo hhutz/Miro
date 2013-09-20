@@ -1,0 +1,169 @@
+\chapter{Using \miro}
+\label{sec:using}
+
+In order to use \miro programs, the following steps have to be performed:
+\begin{itemize}
+  \item start the naming service
+  \item start the services
+  \item start the client program(s)
+\end{itemize}
+
+These steps are described in the following.
+
+
+\section{Starting the CORBA Naming Service}
+
+The CORBA naming service is some sort of telephone book service for
+the lookup of remote objects. Its organized like a file system. All
+entries in the naming service can be either object references, the
+pointer to a remote object, or naming context references that point to
+another subdirectory of the naming service.  All CORBA objects of
+\miro are registered by {\em name} at a CORBA {\em naming service}. In
+the \miro project, the TAO implementation of the CORBA naming service
+is used and therefore must be started before any service is run.
+
+The TAO naming service is started by the following command:
+
+\begin{lstlisting}[frame=tb]{}
+cd ${TAO_ROOT}/TAO/orbsvcs/Naming_Service
+./Naming_Service
+\end{lstlisting}
+
+In order to get debug messages it can also be started like this:
+
+\begin{lstlisting}[frame=tb]{}
+cd ${TAO_ROOT}/TAO/orbsvcs/Naming_Service
+./Naming_Service -ORBDebug -ORBDebugLevel <level>
+\end{lstlisting}
+
+where {\tt <level>} is a debug level of 1 to 10 (10 gives most debug information).
+
+
+\subsection{Naming Service Lookup by IP-Multicast}
+
+Programs that use the TAO ORB can locate the naming service by IP
+multicast as long as it resided in the same subnet, or within the same
+multicast group. This is a special (proprietary) feature of the TAO
+naming service. You have to enable this
+feature explicitly by the command line option {\tt -m 1}. To avoid
+conflicts, there should only be one naming service in a subnet. To
+make sure no other naming service is active or to check the entries in
+an active naming service, TAO provides a utility called {\tt nslist}.
+It can be started by calling:
+
+\begin{lstlisting}[frame=tb]{}
+${TAO_ROOT}/TAO/utils/nslist/nslist 
+\end{lstlisting}
+%%$
+
+It lists the contents of the currently running naming service and
+returns an error, if no naming service is found.
+
+\subsection{Naming Service Lookup by Environment Variable}
+
+Additionally it is possible to not use the multicast feature of the
+TAO naming service and provide the IOR of the naming service
+as command line arguments or via environment variables to any program
+that uses TAO. This is explained in detail in the TAO documentation
+under:
+
+\begin{lstlisting}[frame=tb]{}
+${TAO_ROOT}/TAO/docs/INS.html
+\end{lstlisting}
+%% $
+
+Note, that for retrieving the IOR of an already running naming service the
+little tool {\tt nsIOR} resides in the bin directory of \miro.
+
+You can also tell the Naming Service to listen to a specific endpoint
+instead of choosing its own by the use of the {\tt -ORBEndpoint}
+command line option. Ensuring that the IOR of the naming service is
+the same, after each restart. 
+
+\begin{lstlisting}[frame=tb]{}
+\${MIRO_ROOT}/scritps/naming_service
+\end{lstlisting}
+
+is a small init script for the SuSE Linux distribution, that can be
+installed in {\tt /etc/rc.d} for starting the naming service
+automatically at boot time.
+
+
+\subsection{Naming Contexts}
+
+To provide the possibility to operate multiple robots in parallel,
+\miro uses the concept of naming contexts to distinguish
+between services of individual robots. One can imagine {\em naming
+  contexts} as different folders, entries in different folders do not
+interact. The default naming context \miro services use is
+{\tt Miro}. The canonical naming convention in a multi robot
+scenario is, that every robot uses its own name. Therefore every
+\miro service and client accepts an additional command-line argument
+that sets the {\em naming context}: 
+{\tt -MiroNamingContext <name>}. Or as short form: 
+{\tt -MNC <name>}.
+To access services of different robots simultaneously, the
+{\em naming context} has to be specified for the resolution of
+each individual service (see Chapter \ref{sec:clients}).
+
+
+\section{Starting Services}
+
+When the naming service is running and can be accessed from all
+machines, the most difficult part of the setup of the distributed
+system environment is mastered. From now on we are back to the
+unbounded problem set of robotics.
+
+Simply change to the directory {\tt \$MIRO\_ROOT/bin} and start the
+service you want to run. For example {\tt b21Base},
+{\tt laserServer}, {\tt videoService}, {\tt dpPanTilt}. For
+an extensive list of all available services see Chapter
+\ref{sec:services}. Since the services depend on the {\tt *.conf}
+files provided in this directory, strange effects are bound to occur
+if the services are started from a different directory. Keep in mind,
+that the hardware dependent services must run on the computers the
+corresponding hardware is attached to.
+
+%Services register their interfaces at the naming service. To allow
+%multiple robots to register the same interfaces, each robot chooses a
+%naming context in the naming service. This can be seen as
+%subdirectories within a file system. Files with the same name can live
+%peacefully side by side within different directories. To chose a naming
+%context different than the default (which is {\tt Miro}) the command
+%line option {\tt -MiroNamingContext context} can be used.
+
+When a service is ended disgracefully, it probably doesn't deregister
+its interfaces at the naming service. This will prevent the restated
+service from registering the new interface references. TAO provides a
+utility to manually remove references from the naming service. 
+
+\begin{lstlisting}[frame=tb]{}
+${TAO_ROOT}/TAO/utils/nslist/nsdel
+\end{lstlisting}
+%%$
+
+But \miro also provides a command line option to force the service to
+rebind the interface: {\tt -MiroRebindIOR}.
+
+For a complete list of command line option see Chapter
+\ref{sec:command-line}.
+
+
+\section{Starting Client Programs}
+
+\miro comes with a rich set of client programs and utilities that help
+you to explore the robots sensory and actuatory devices. Starting a
+client program is basically the same as starting a service. Just
+change to the directory {\tt \$MIRO\_ROOT/bin} and start whatever
+you want. Since these programs aren't bound to specific hardware
+devices they can be run on almost any machine.
+
+Note, that to address a service that is registered within other than
+the default naming context at the naming service you also have to
+provide the {\tt -MiroNamingContext} {\em context} argument at the
+command line (in short {\tt -MNC} {\em context}).
+
+%%% Local Variables: 
+%%% mode: latex
+%%% TeX-master: "miro_manual"
+%%% End: 
