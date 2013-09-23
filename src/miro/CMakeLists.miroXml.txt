@@ -10,7 +10,7 @@ set( EXPORT_NAME  "${XML_LIB_NAME}_Export" )
 set( EXPORT_FILE  "${EXPORT_NAME}.h" )
 string( TOUPPER   "${XML_LIB_NAME}_BUILD_DLL" XML_EXPORT_DEFINE )
 
-miro_makeparams( ConfigParameters.xml  RobotParameters.xml )
+miro_makeparams( Parameters.xml  ConfigParameters.xml  RobotParameters.xml )
 
 set( XML_SOURCES
   ${MIRO_MAKEPARAMS_SOURCES}

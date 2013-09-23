@@ -17,10 +17,7 @@ set(ALL_IDL_FILENAMES
 )
 tao_wrap_idl( ${ALL_IDL_FILENAMES} )
 
-miro_makeparams( Parameters.xml )
-
 set( SOURCES
-  ${MIRO_MAKEPARAMS_SOURCES}
   AmiHandler.cpp
   AmiHelper.cpp
   AnyPrinter.cpp
@@ -46,7 +43,6 @@ set( SOURCES
 # headers need to be added for MSVC project generation
 set( HEADERS
   ${EXPORT_FILE}
-  ${MIRO_MAKEPARAMS_HEADERS}
   AmiHandler.h
   AmiHelper.h
   AnyPrinter.h
