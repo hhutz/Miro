@@ -158,7 +158,7 @@ if( TAO_INCLUDE_DIR AND TAO_LIBRARY_DIR AND TAO_IDL_COMMAND )
   
 else( TAO_INCLUDE_DIR AND TAO_LIBRARY_DIR AND TAO_IDL_COMMAND )
 
-  message( SEND_ERROR  "  TAO root and/or TAO IDL compiler were not found.")    
+  message( STATUS  "  TAO root and/or TAO IDL compiler were not found.")    
   
 endif( TAO_INCLUDE_DIR AND TAO_LIBRARY_DIR AND TAO_IDL_COMMAND )
 
