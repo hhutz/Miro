@@ -1,6 +1,6 @@
 set( TESTS_BIN_DIR /bin )
 
-add_subdirectory( log )
+#add_subdirectory( log )
 if ( TAO_FOUND )
   add_subdirectory( bidir  )
   add_subdirectory( client )
