@@ -1,0 +1,98 @@
+message(STATUS "Include CPack")
+
+set( GATHER_WHAT "RELEASE_ONLY" )
+if( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
+  unset( GATHER_WHAT )
+endif( "${CMAKE_BUILD_TYPE}" MATCHES "Debug" )
+
+## Gather external dlls (win32 only)
+######################################
+include( GatherDlls )
+gather_dlls( ${GATHER_WHAT} 
+  ${ACE_LIBRARIES} 
+  ${TAO_LIBRARIES}
+  ${RTIDDS_LIBRARIES}
+  ${QT_QTCORE_LIBRARY}
+  ${QT_QTXML_LIBRARY}
+  ${QT_QTGUI_LIBRARY}
+  ${JSONCPP_LIBRARIES}
+)
+gather_dlls_install()
+
+## Standard CPack stuff
+######################################
+include ( InstallRequiredSystemLibraries )
+
+# copy macro, will create empty dest file if src doesn't exist
+macro( filecopy SRC_FILE DST_FILE )
+  if( EXISTS ${SRC_FILE} )
+    exec_program("${CMAKE_COMMAND}" ARGS 
+                  -E copy_if_different        
+                  ${SRC_FILE}  
+                  ${DST_FILE} 
+    )
+  else( EXISTS ${SRC_FILE} )
+    file( WRITE ${DST_FILE} "" )
+  endif( EXISTS ${SRC_FILE} )
+endmacro( filecopy )
+
+# mac installer won't accept files w/o an extension, so copy 
+filecopy( "${PROJECT_SOURCE_DIR}/README"  "${PROJECT_BINARY_DIR}/README.txt"  )
+filecopy( "${PROJECT_SOURCE_DIR}/COPYING" "${PROJECT_BINARY_DIR}/COPYING.txt" )
+
+
+set( CPACK_PACKAGE_NAME                "miro-bots" )
+if( MIRO_BUILD_WITH_TAO )
+  set( CPACK_PACKAGE_NAME              "miro-bots-tao" )
+endif( MIRO_BUILD_WITH_TAO )
+
+set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME}" )
+set( CPACK_PACKAGE_VENDOR              "Miro" )
+set( CPACK_PACKAGE_DESCRIPTION_FILE    "${PROJECT_BINARY_DIR}/README.txt" )
+set( CPACK_RESOURCE_FILE_LICENSE       "${PROJECT_BINARY_DIR}/COPYING.txt" )
+set( CPACK_PACKAGE_VERSION_MAJOR       "1")
+set( CPACK_PACKAGE_VERSION_MINOR       "0")
+set( CPACK_PACKAGE_VERSION_PATCH       "0")
+set( CPACK_PACKAGE_VERSION             ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
+set( CPACK_PACKAGE_INSTALL_DIRECTORY   "${PROJECT_NAME}")
+set( CPACK_PACKAGE_CONTACT             "hans.utz@gmx.de")
+
+if( WIN32 AND NOT UNIX )
+  set( CPACK_NSIS_DISPLAY_NAME         "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+  set( CPACK_NSIS_URL_INFO_ABOUT       "https://github.com/hhutz/Miro/wiki")
+  set( CPACK_NSIS_HELP_LINK            "https://github.com/hhutz/Miro/wiki")
+  set( CPACK_NSIS_CONTACT              "hans.utz@gmx.de")
+  set( CPACK_NSIS_MODIFY_PATH          OFF) # ask whether bin should be added to system PATH variable
+endif( WIN32 AND NOT UNIX )
+
+# executable-label pairs
+set( MIRO_PACKAGE_EXECUTABLES
+  ConfigEditor  "ConfigEditor" 
+)
+if( MIRO_BUILD_WITH_TAO )
+  set( MIRO_PACKAGE_EXECUTABLES ${MIRO_PACKAGE_EXECUTABLES}
+    LogPlayer     "LogPlayer"
+  )
+endif( MIRO_BUILD_WITH_TAO )
+set( CPACK_PACKAGE_EXECUTABLES ${MIRO_PACKAGE_EXECUTABLES} )
+
+
+## DEB
+######################################
+find_program( DPKG_COMMAND dpkg )
+if( DPKG_COMMAND )
+  exec_program( ${DPKG_COMMAND} ARGS --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE )
+endif( DPKG_COMMAND )
+set( CPACK_DEBIAN_PACKAGE_SECTION    "Development" )
+set( CPACK_DEBIAN_PACKAGE_PRIORITY   "optional" )
+set( CPACK_DEBIAN_PACKAGE_RECOMMENDS "" )
+set( CPACK_DEBIAN_PACKAGE_SUGGESTS   "" )
+set( DEBIAN_PACKAGE_BUILDS_DEPENDS   "libqt4-dev, libace-dev")
+set( CPACK_DEBIAN_PACKAGE_DEPENDS    "libc6, libace-${ACE_VERSION}, libqt4-qt3support, libqt4-xml, libqt4-gui" )
+if( MIRO_BUILD_WITH_TAO )
+  set( DEBIAN_PACKAGE_BUILDS_DEPENDS  "${DEBIAN_PACKAGE_BUILDS_DEPENDS}, libtao-dev, libtao-orbsvcs-dev" )
+  set( CPACK_DEBIAN_PACKAGE_DEPENDS   "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libtao-${TAO_VERSION}, libtao-orbsvcs-${TAO_VERSION}" )
+endif( MIRO_BUILD_WITH_TAO )
+
+include(CPack)
+

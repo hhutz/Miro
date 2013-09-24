@@ -153,6 +153,27 @@ if( TAO_INCLUDE_DIR AND TAO_LIBRARY_DIR AND TAO_IDL_COMMAND )
     message( STATUS "  WARNING: Not all TAO libraries were found! Missing libraries:\n    ${TAO_MISSING_LIBRARIES}\n")
   endif( TAO_MISSING_LIBRARIES )
   
+  # Find TAO version by looking at Version.h
+  find_file(TAO_VERSION_HEADER "Version.h" 
+    PATHS ${TAO_INCLUDE_DIR}
+    PATH_SUFFIXES tao
+    DOC "TAO version file"
+  )
+  message( STATUS "TAO_VERSION_HEADER ${TAO_VERSION_HEADER}")
+  if( EXISTS ${TAO_VERSION_HEADER} )
+    file(STRINGS ${TAO_VERSION_HEADER} TAO_TEMP REGEX "^#define TAO_[A-Z]+_VERSION[ \t]+[0-9]+$")
+    string(REGEX REPLACE ".*#define TAO_MAJOR_VERSION[ \t]+([0-9]+).*" "\\1" TAO_VERSION_MAJOR ${TAO_TEMP})
+    string(REGEX REPLACE ".*#define TAO_MINOR_VERSION[ \t]+([0-9]+).*" "\\1" TAO_VERSION_MINOR ${TAO_TEMP})
+    string(REGEX REPLACE ".*#define TAO_BETA_VERSION[ \t]+([0-9]+).*" "\\1"  TAO_VERSION_PATCH ${TAO_TEMP})
+  else( EXISTS ${TAO_VERSION_HEADER} )
+    message(STATUS "  WARNING: Could not find TAO version header ${TAO_VERSION_HEADER}")
+    set( TAO_VERSION_MAJOR X )
+    set( TAO_VERSION_MINOR Y )
+    set( TAO_VERSION_PATCH Z )
+  endif( EXISTS ${TAO_VERSION_HEADER} )
+  set(TAO_VERSION ${TAO_VERSION_MAJOR}.${TAO_VERSION_MINOR}.${TAO_VERSION_PATCH})
+  message(STATUS "  Found TAO version ${TAO_VERSION} in ${TAO_ROOT_DIR}")
+  
   set(TAO_FOUND TRUE)
   message(STATUS "  Found TAO in ${TAO_LIBRARY_DIR}")
   

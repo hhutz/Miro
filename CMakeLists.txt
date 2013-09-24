@@ -93,5 +93,9 @@ add_build_switch( tests    BUILD_DEFAULT_TRUE )
 #------------------------------------
 install_export()
 
+# package script
+#------------------------------------
+include( CMakePack.txt )
+
 #------------------------------------
 print_build_switches()
