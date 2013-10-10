@@ -6,21 +6,21 @@ include_directories(
   ${JSONCPP_INCLUDE_DIR}
 )
 
-add_library( miroParamsExample STATIC
+add_library( miroParamsExample SHARED
   SimpleSurveyParameters.cpp
 )
 
 target_link_libraries( miroParamsExample
+  miroJson
   miroXml
 )
 if ( MIRO_BUILD_WITH_JSON )
-  target_link_libraries( miroParamsExample
+  target_link_libraries( 
     ${JSONCPP_LIBRARIES}
   )
 endif ( MIRO_BUILD_WITH_JSON )
 
 link_libraries(
-  miroJson
   miroParamsExample
 )
 

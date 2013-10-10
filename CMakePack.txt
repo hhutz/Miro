@@ -43,8 +43,11 @@ filecopy( "${PROJECT_SOURCE_DIR}/COPYING" "${PROJECT_BINARY_DIR}/COPYING.txt" )
 
 set( CPACK_PACKAGE_NAME                "miro-bots" )
 if( MIRO_BUILD_WITH_TAO )
-  set( CPACK_PACKAGE_NAME              "miro-bots-tao" )
+  set( CPACK_PACKAGE_NAME              "${CPACK_PACKAGE_NAME}-tao" )
 endif( MIRO_BUILD_WITH_TAO )
+if( MIRO_BUILD_WITH_JSON )
+  set( CPACK_PACKAGE_NAME              "${CPACK_PACKAGE_NAME}-json" )
+endif( MIRO_BUILD_WITH_JSON )
 
 set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Miro - Middleware for Robots" )
 set( CPACK_PACKAGE_VENDOR              "Hans Utz" )
@@ -95,6 +98,10 @@ if( MIRO_BUILD_WITH_TAO )
   set( DEBIAN_PACKAGE_BUILDS_DEPENDS  "${DEBIAN_PACKAGE_BUILDS_DEPENDS}, libtao-dev, libtao-orbsvcs-dev" )
   set( CPACK_DEBIAN_PACKAGE_DEPENDS   "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libtao-${TAO_VERSION}, libtao-orbsvcs-${TAO_VERSION}" )
 endif( MIRO_BUILD_WITH_TAO )
+if( MIRO_BUILD_WITH_JSON )
+  set( DEBIAN_PACKAGE_BUILDS_DEPENDS  "${DEBIAN_PACKAGE_BUILDS_DEPENDS}, libjsoncpp-dev" )
+  set( CPACK_DEBIAN_PACKAGE_DEPENDS   "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjsoncpp0" )
+endif( MIRO_BUILD_WITH_JSON )
 
 include(CPack)
 

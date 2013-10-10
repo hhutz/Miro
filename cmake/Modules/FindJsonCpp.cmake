@@ -1,3 +1,6 @@
+## !!! FIXME !!!
+## Update JsonCpp CMake build to mirror Ubuntu install paths and names 
+##
 ######################################################################
 # Find script for jsoncpp
 #
@@ -10,32 +13,45 @@
 #
 ######################################################################
 
-include( IrgPackageFind )
-include( GetLibraryList )
+include( SimplePackageFind )
 
-set(     PACKAGE jsoncpp )
-set( PACKAGE_DIR jsoncpp )
-set(    BASE_LIB json )
+set( PACKAGE_NAME           JsonCpp )
+set( PACKAGE_DIRS           jsoncpp )
+set( PACKAGE_REQ_LIBRARY    json jsoncpp)
+set( PACKAGE_REQ_INCLUDE    json/json.h jsoncpp/json/json.h )
 
-irg_package_find( "${PACKAGE}" "${PACKAGE_DIR}" "${BASE_LIB}" )
+simple_package_find("${PACKAGE_NAME}" 
+                    "${PACKAGE_DIRS}" 
+                    "${PACKAGE_REQ_LIBRARY}"
+                    "${PACKAGE_REQ_INCLUDE}"
+)
+
 
 ##
-## If additional libraries need to be found, do
-## so here
+## find paths to package libraries
+##
 ################################################
 if( ${PACKAGE_FOUND} )
 
   # json-c uses the same library name as jsoncpp and the same
   # include dir. Do a simple check for a unique jsoncpp header
-  if( EXISTS ${${PACKAGE_INCLUDE_DIR}}/json/value.h ) 
+  find_file( JSONCPP_UNIQUE_HEADER value.h
+             PATHS ${${PACKAGE_INCLUDE_DIR}}
+             PATH_SUFFIXES json
+             NO_DEFAULT_PATH )
+  
+  if( JSONCPP_UNIQUE_HEADER ) 
   
     add_definitions( -DJSONCPP_FOUND )
     set( LIBRARY_NAMES 
-      json
+      ${PACKAGE_REQ_LIBRARY}
     )
+    message( STATUS "  FIXME: IGNORE WARNING BELOW" )
     get_library_list(JSONCPP ${JSONCPP_LIBRARY_DIR} "d" "${LIBRARY_NAMES}")
     
-  else( EXISTS ${${PACKAGE_INCLUDE_DIR}}/json/value.h ) 
+    message(STATUS "JSONCPP_LIBRARIES = ${JSONCPP_LIBRARIES}")
+    
+  else( JSONCPP_UNIQUE_HEADER ) 
   
     message( STATUS "  ** No, jsoncpp was NOT found (json-c was found, but that's not what we want)" )
     message( STATUS "  ** JSONCPP_FOUND is FALSE" )
@@ -44,6 +60,9 @@ if( ${PACKAGE_FOUND} )
     unset( ${PACKAGE_INCLUDE_DIR} CACHE )
     unset( ${PACKAGE_BASE_LIBRARY} CACHE )
     
-  endif( EXISTS ${${PACKAGE_INCLUDE_DIR}}/json/value.h ) 
+  endif( JSONCPP_UNIQUE_HEADER ) 
   
+  unset( JSONCPP_UNIQUE_HEADER CACHE )
+
 endif( ${PACKAGE_FOUND} )
+
