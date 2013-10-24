@@ -16,12 +16,6 @@ include( SetupUtilities )
 include( UserOptions )
 include( SetupWarnLevel )
 
-## we have to play some tricks to get install
-## path to "stick" in Windows
-##------------------------------------------------
-#set( MIRO_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/../${ARCHITECTURE}" CACHE PATH "Miro install path")
-#set( CMAKE_INSTALL_PREFIX ${MIRO_INSTALL_PREFIX} CACHE INTERNAL "" )
-
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
 
@@ -38,6 +32,11 @@ build_with_var( WITH_JSON         JSONCPP_FOUND )
 ## we cannot continue
 ##-----------------------------------------------
 minimum_requirements( ACE_FOUND QT4_FOUND QT_QT3SUPPORT_FOUND )
+
+set( MIRO_SOVERSION_MAJOR    3 ) # epoch
+set( MIRO_SOVERSION_MINOR    1 ) # revision
+set( MIRO_SOVERSION_PATCH    1 ) # age
+set( MIRO_SOVERSION         "${MIRO_SOVERSION_MAJOR}.${MIRO_SOVERSION_MINOR}.${MIRO_SOVERSION_PATCH}" ) 
 
 ## this macro is normally pulled in through the
 ## FindMiro script

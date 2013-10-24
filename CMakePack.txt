@@ -53,22 +53,15 @@ set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Miro - Middleware for Robots" )
 set( CPACK_PACKAGE_VENDOR              "Hans Utz" )
 set( CPACK_PACKAGE_DESCRIPTION_FILE    "${PROJECT_BINARY_DIR}/README.txt" )
 set( CPACK_RESOURCE_FILE_LICENSE       "${PROJECT_BINARY_DIR}/COPYING.txt" )
-set( CPACK_PACKAGE_VERSION_MAJOR       "1")
-set( CPACK_PACKAGE_VERSION_MINOR       "0")
-set( CPACK_PACKAGE_VERSION_PATCH       "0")
+set( CPACK_PACKAGE_VERSION_MAJOR       "${MIRO_SOVERSION_MAJOR}")
+set( CPACK_PACKAGE_VERSION_MINOR       "${MIRO_SOVERSION_MINOR}")
+set( CPACK_PACKAGE_VERSION_PATCH       "${MIRO_SOVERSION_PATCH}")
 set( CPACK_PACKAGE_VERSION             ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
 set( CPACK_PACKAGE_INSTALL_DIRECTORY   "${PROJECT_NAME}")
 set( CPACK_PACKAGE_CONTACT             "hans.utz@gmx.de")
 
 set( CPACK_PACKAGE_FILE_NAME           "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${ARCH_CPU}" )
 
-if( WIN32 AND NOT UNIX )
-  set( CPACK_NSIS_DISPLAY_NAME         "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-  set( CPACK_NSIS_URL_INFO_ABOUT       "https://github.com/hhutz/Miro/wiki")
-  set( CPACK_NSIS_HELP_LINK            "https://github.com/hhutz/Miro/wiki")
-  set( CPACK_NSIS_CONTACT              "hans.utz@gmx.de")
-  set( CPACK_NSIS_MODIFY_PATH          OFF) # ask whether bin should be added to system PATH variable
-endif( WIN32 AND NOT UNIX )
 
 # executable-label pairs
 set( MIRO_PACKAGE_EXECUTABLES
@@ -81,6 +74,22 @@ if( MIRO_BUILD_WITH_TAO )
 endif( MIRO_BUILD_WITH_TAO )
 set( CPACK_PACKAGE_EXECUTABLES ${MIRO_PACKAGE_EXECUTABLES} )
 
+## WIN32
+######################################
+if( WIN32 AND NOT UNIX )
+  set( CPACK_NSIS_DISPLAY_NAME         "${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+  set( CPACK_NSIS_URL_INFO_ABOUT       "https://github.com/hhutz/Miro/wiki")
+  set( CPACK_NSIS_HELP_LINK            "https://github.com/hhutz/Miro/wiki")
+  set( CPACK_NSIS_CONTACT              "hans.utz@gmx.de")
+  set( CPACK_NSIS_MODIFY_PATH          OFF) # ask whether bin should be added to system PATH variable
+endif( WIN32 AND NOT UNIX )
+
+## RPM
+######################################
+set( CPACK_RPM_PACKAGE_ARCHITECTURE   "${ARCH_CPU}" )
+set( CPACK_RPM_PACKAGE_RELEASE        "${CPACK_PACKAGE_VERSION}" )
+set( CPACK_RPM_PACKAGE_LICENSE        "LGPL" )
+set( CPACK_RPM_PACKAGE_GROUP          "Development/Libraries" )
 
 ## DEB
 ######################################

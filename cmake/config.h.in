@@ -1,12 +1,13 @@
 #ifndef @PROJECT_NAME@Config_h
 #define @PROJECT_NAME@Config_h
 
+#define MIRO_VERSION_MAJOR @MIRO_SOVERSION_MAJOR@
+#define MIRO_VERSION_MINOR @MIRO_SOVERSION_MINOR@
+#define MIRO_VERSION_PATCH @MIRO_SOVERSION_PATCH@
+
 #define @PROJECT_UPPER@_INSTALL_PREFIX "@CMAKE_INSTALL_PREFIX@"
 
 #cmakedefine MIRO_HAS_TAO 1
-#cmakedefine MIRO_HAS_DDS 1
-#cmakedefine MIRO_HAS_DDS_LBPlugin 1
-#cmakedefine MIRO_HAS_DDS_Monitor  1
 #cmakedefine MIRO_HAS_JSON 1
 
 //==================================================

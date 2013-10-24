@@ -17,7 +17,7 @@ include( SimplePackageFind )
 
 set( PACKAGE_NAME           JsonCpp )
 set( PACKAGE_DIRS           jsoncpp )
-set( PACKAGE_REQ_LIBRARY    json jsoncpp)
+set( PACKAGE_REQ_LIBRARY    jsoncpp)
 set( PACKAGE_REQ_INCLUDE    json/json.h jsoncpp/json/json.h )
 
 simple_package_find("${PACKAGE_NAME}" 
