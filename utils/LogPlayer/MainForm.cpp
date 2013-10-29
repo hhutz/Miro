@@ -520,7 +520,6 @@ MainForm::setSpeed(int _speed)
 void
 MainForm::loadFile(QString const & _name )
 {
-  bool rc = true;
   try {
     LogFile * file = fileSet_.addFile(_name);
     try {
@@ -563,20 +562,17 @@ MainForm::loadFile(QString const & _name )
         QMessageBox::warning(this, "Error parsing file:",
                              QString("File ") + _name + QString(":\n") +
                              QString(e.what()));
-      rc = false;
     }
   }
   catch (Miro::CException const& e) {
     QMessageBox::warning(this, "Error loading file:",
                          QString("File ") + _name + QString(":\n") +
                          QString(e.what()));
-    rc = false;
   }
   catch (Miro::Exception const& e) {
     QMessageBox::warning(this, "Error parsing file:",
                          QString("File ") + _name + QString(":\n") +
                          QString(e.what()));
-    rc = false;
   }
   createEventMenu();
   enableButtons(fileSet_.size() != 0);

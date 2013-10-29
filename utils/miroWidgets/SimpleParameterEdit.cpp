@@ -74,7 +74,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	     parameter_.type_ == "Text") {
     textEdit_ = new QTextEdit(_parent, "text_edit");
     textEdit_->setAcceptRichText(false);
-    textEdit_->setAutoFormatting(false);
+    textEdit_->setAutoFormatting(QTextEdit::AutoNone);
     editWidget_ = textEdit_;
   } else {
     lineEdit_ = new QLineEdit(_parent, "line_edit");

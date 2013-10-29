@@ -142,7 +142,6 @@ Item *
 Item::predecessor()
 {
   // find the pre predecessor of the item
-  Q3ListViewItem * prePre = NULL;
   Q3ListViewItem * pre = NULL;
   Q3ListViewItem * self = NULL;
 
@@ -155,7 +154,6 @@ Item::predecessor()
   while (self != listViewItem()) {
     assert(self != NULL);
 
-    prePre = pre;
     pre = self;
     self = self->nextSibling();
   }

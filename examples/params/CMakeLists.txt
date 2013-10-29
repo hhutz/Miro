@@ -22,6 +22,7 @@ endif ( MIRO_BUILD_WITH_JSON )
 
 link_libraries(
   miroParamsExample
+  miroJson
 )
 
 set( LOCAL_TARGETS
