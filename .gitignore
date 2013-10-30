@@ -1,0 +1,9 @@
+## build directory
+####################
+build
+
+## backup files 
+####################
+*.bck
+*.bak
+*~
