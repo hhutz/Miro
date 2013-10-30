@@ -48,7 +48,7 @@ namespace Miro
 {
   Singleton<ConfigDocument> Configuration::document;
 
-  void Configuration::init(int& argc, char * argv[]) throw(Exception)
+  void Configuration::init(int& argc, char * argv[], const std::string& etcPath) throw(Exception)
   {
     if (initialized)
       return;
@@ -87,7 +87,7 @@ namespace Miro
     if (name == host)
       fileName += std::string(".xml");
 
-    SearchPaths paths;
+    SearchPaths paths(true, etcPath);
     paths.addMiroEtcPaths();
 
     if (explicitlySet)

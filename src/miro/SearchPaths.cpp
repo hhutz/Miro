@@ -33,19 +33,33 @@
 
 namespace Miro
 {
-  SearchPaths::StringList SearchPaths::s_etcPaths;
+  Singleton<SearchPaths::StringList> SearchPaths::s_etcPaths;
   
   using namespace std;
 
-  SearchPaths::SearchPaths(bool currentPath) :
+  SearchPaths::SearchPaths(bool currentPath, const std::string& etcPath) :
     m_currentPath(currentPath)
   {
+    if(!etcPath.empty()) {
+      prependMiroEtcPath(etcPath);
+    }
+  }
+  
+  /**
+   * init with default search path and set useCurrentPath to true
+   */
+  SearchPaths::SearchPaths(const std::string& etcPath) :
+    m_currentPath(true)
+  {
+    if(!etcPath.empty()) {
+      prependMiroEtcPath(etcPath);
+    }
   }
 
   void
   SearchPaths::addMiroEtcPaths()
   {
-    for(StringList::iterator it = s_etcPaths.begin(); it != s_etcPaths.end(); ++it) {
+    for(StringList::iterator it = s_etcPaths()->begin(); it != s_etcPaths()->end(); ++it) {
       m_paths.push_back(*it);
     }
     
@@ -58,14 +72,15 @@ namespace Miro
   }
 
   /**
-   * Add a static etc path to be prepended to those 
+   * Add a runtime etc path to be prepended to those 
    * hard coded in addMiroEtcPaths() 
    */
   void 
-  SearchPaths::addEtcPath(const std::string& etcPath) {
+  SearchPaths::prependMiroEtcPath(const std::string& etcPath) {
     QFileInfo fi(etcPath.c_str());
     string canonicalPath = fi.canonicalFilePath().toStdString();
-    s_etcPaths.push_front(canonicalPath);
+    if(!canonicalPath.empty())
+      s_etcPaths()->push_front(canonicalPath);
   }
 
   /** The first existing file that matches the name is returned. */

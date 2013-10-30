@@ -21,11 +21,13 @@
 #ifndef Miro_SearchPaths_h
 #define Miro_SearchPaths_h
 
+#include "Singleton.h"
+
 #include "miroXml_Export.h"
 
 #include <list>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace Miro
 {
@@ -35,16 +37,21 @@ namespace Miro
     typedef std::vector<std::string> StringVector;
     typedef std::list<std::string> StringList;
 
-    SearchPaths(bool currentPath = true);
+    SearchPaths(bool currentPath = true, const std::string& etcPath = "");
+    SearchPaths(const std::string& etcPath);
 
-    void addEtcPath(const std::string& etcPath);
+    void prependMiroEtcPath(const std::string& etcPath);
     void addMiroEtcPaths();
 
     /** The absolute path to first existing file that matches the name is returned. */
     std::string findFile(std::string const& name) const;
 
-    void addPath(std::string const& path) {
+    void appendPath(std::string const& path) {
       m_paths.push_back(path);
+    }
+    /** @deprecated use appendPath */
+    void addPath(std::string const& path) {
+      appendPath(path);
     }
 
     StringVector const& paths() const throw() {
@@ -55,7 +62,10 @@ namespace Miro
     StringVector m_paths;
     bool         m_currentPath;
     
-    static StringList s_etcPaths;
+    static Singleton<StringList> s_etcPaths;
   };
 }
+
+MIROXML_SINGLETON_DECLARE(ACE_Singleton, Miro::SearchPaths::StringList, ACE_SYNCH_RECURSIVE_MUTEX);
+
 #endif // Miro_SearchPaths_h
