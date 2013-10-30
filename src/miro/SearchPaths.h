@@ -23,6 +23,7 @@
 
 #include "miroXml_Export.h"
 
+#include <list>
 #include <vector>
 #include <string>
 
@@ -32,9 +33,11 @@ namespace Miro
   {
   public:
     typedef std::vector<std::string> StringVector;
+    typedef std::list<std::string> StringList;
 
     SearchPaths(bool currentPath = true);
 
+    void addEtcPath(const std::string& etcPath);
     void addMiroEtcPaths();
 
     /** The absolute path to first existing file that matches the name is returned. */
@@ -50,7 +53,9 @@ namespace Miro
 
   protected:
     StringVector m_paths;
-    bool m_currentPath;
+    bool         m_currentPath;
+    
+    static StringList s_etcPaths;
   };
 }
 #endif // Miro_SearchPaths_h

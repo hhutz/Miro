@@ -33,6 +33,8 @@
 
 namespace Miro
 {
+  SearchPaths::StringList SearchPaths::s_etcPaths;
+  
   using namespace std;
 
   SearchPaths::SearchPaths(bool currentPath) :
@@ -43,6 +45,10 @@ namespace Miro
   void
   SearchPaths::addMiroEtcPaths()
   {
+    for(StringList::iterator it = s_etcPaths.begin(); it != s_etcPaths.end(); ++it) {
+      m_paths.push_back(*it);
+    }
+    
     char* miroRoot = ACE_OS::getenv("MIRO_ROOT");
     if (miroRoot) {
       m_paths.push_back(std::string(miroRoot) + std::string("/etc"));
@@ -51,6 +57,16 @@ namespace Miro
     m_paths.push_back(string(MIRO_INSTALL_PREFIX "/etc"));
   }
 
+  /**
+   * Add a static etc path to be prepended to those 
+   * hard coded in addMiroEtcPaths() 
+   */
+  void 
+  SearchPaths::addEtcPath(const std::string& etcPath) {
+    QFileInfo fi(etcPath.c_str());
+    string canonicalPath = fi.canonicalFilePath().toStdString();
+    s_etcPaths.push_front(canonicalPath);
+  }
 
   /** The first existing file that matches the name is returned. */
   std::string
@@ -62,7 +78,7 @@ namespace Miro
     {
       QFileInfo f(name.c_str());
       if (m_currentPath && f.exists())
-	return f.absoluteFilePath().toAscii().data();
+        return f.absoluteFilePath().toAscii().data();
     }
 
     for (first = m_paths.rbegin(); first != last; ++first) {
