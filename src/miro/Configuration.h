@@ -27,6 +27,8 @@
 
 #include "miroXml_Export.h"
 
+#include <string>
+
 namespace Miro
 {
   //! Class holding static methods for initializing and accessing the configuration.
@@ -36,7 +38,7 @@ namespace Miro
      * Loading the document from default location if not overridden
      * by command line parameter -MiroConfigFile (-MCF).
      */
-    static void init(int& argc, char * argv[]) throw(Exception);
+    static void init(int& argc, char * argv[], const std::string& etcPath = "") throw(Exception);
     //! Singleton accesor for the robots configuation document.
     static Singleton<ConfigDocument> document;
   };
