@@ -1,3 +1,6 @@
+2013-10-30 version 3.1.2 
+  * add param to Configuration::init() to add default etc search path
+
 2007-02-28  Hans Utz  <hutz@owl>
 
 	* utils/logPlayer/LogPlayer.cpp:
