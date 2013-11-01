@@ -62,7 +62,7 @@ namespace Miro
       void addType(const QString& _group, const Type& _class);
 
       void generateHeader(std::ostream& ostr, const QString& exportDirective = QString::null) const;
-      void generateSource(std::ostream& ostr) const;
+      void generateSource(std::ostream& ostr, const QString& etcSearchPath = QString::null) const;
 
       QStringVector groups() const;
       void getGroupedTypes(const QString& _group,

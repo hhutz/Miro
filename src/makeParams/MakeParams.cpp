@@ -48,11 +48,12 @@ bool verbose = false;
 bool useJson = false;
 #endif
 
-QString baseName = "Parameters";
+QString baseName        = "Parameters";
 QString headerExtension = "h";
 QString sourceExtension = "cpp";
-QString fileName = "Parameters.xml";
+QString fileName        = "Parameters.xml";
 QString exportDirective;
+QString etcSearchPath;
 
 int
 parseArgs(int& argc, char* argv[])
@@ -60,7 +61,7 @@ parseArgs(int& argc, char* argv[])
   int rc = 0;
   int c;
 
-  ACE_Get_Opt get_opts(argc, argv, "f:h:n:s:x:vj?");
+  ACE_Get_Opt get_opts(argc, argv, "f:h:n:s:x:p:vj?");
 
   while ((c = get_opts()) != -1) {
     switch (c) {
@@ -82,6 +83,9 @@ parseArgs(int& argc, char* argv[])
       case 'x':
         exportDirective = get_opts.optarg;
         break;
+      case 'p':
+        etcSearchPath = get_opts.optarg;
+        break;
 #if JSONCPP_FOUND
       case 'j':
 	useJson = true;
@@ -95,6 +99,7 @@ parseArgs(int& argc, char* argv[])
         << "  -s <extension> extension of the generated source file (cpp)" << std::endl
         << "  -h <extension> extension of the generated header file (h)" << std::endl
         << "  -x <directive> add export directive to generated header" << std::endl
+        << "  -p <path> add default search path to generated header (typically ${installation_path}/etc)" << std::endl
 #if JSONCPP_FOUND
 	<< "  -j Include JSON support in generated files" << std::endl
 #endif
@@ -151,7 +156,7 @@ main(int argc, char * argv[])
         QString headerFilename(baseName + "." + headerExtension);
         ofstream headerFile(qPrintable(headerFilename));
 
-        generator.generateSource(sourceFile);
+        generator.generateSource(sourceFile, etcSearchPath);
         generator.generateHeader(headerFile, exportDirective);
       }
       else {

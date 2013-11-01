@@ -233,7 +233,7 @@ namespace Miro
     }
 
     void
-    Generator::generateSource(std::ostream& ostr) const
+    Generator::generateSource(std::ostream& ostr, const QString& etcSearchPath) const
     {
       if (fileName_.isEmpty())
         throw QString("No file name specified.");
@@ -249,6 +249,7 @@ namespace Miro
         ostr << "#include <" << *i << ">" << std::endl;
 
       ostr << "#include <miro/XmlParse.h>" << std::endl
+      << "#include <miro/SearchPaths.h>" << std::endl
       << "#include <qdom.h>" << std::endl
       << std::endl;
 
@@ -283,7 +284,7 @@ namespace Miro
         if (first != type_.begin())
           ostr << std::endl;
         if (!first->isDummy())
-          first->generateSource(ostr, indent);
+          first->generateSource(ostr, indent, etcSearchPath);
       }
 
       while (indent) {

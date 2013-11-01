@@ -37,30 +37,52 @@ namespace Miro
     typedef std::vector<std::string> StringVector;
     typedef std::list<std::string> StringList;
 
-    SearchPaths(bool currentPath = true, const std::string& etcPath = "");
+    SearchPaths(bool useCurrentPath = true, bool useMiroEtcPaths = true, const std::string& etcPath = "");
     SearchPaths(const std::string& etcPath);
 
-    void prependMiroEtcPath(const std::string& etcPath);
-    void addMiroEtcPaths();
-
+    static void prependMiroEtcPath(const std::string& etcPath, bool replace = false);
+    /** @deprecated use setUseMiroEtcPaths(true) */
+    void addMiroEtcPaths() {
+      m_useMiroEtcPaths = true;
+    }
+    
     /** The absolute path to first existing file that matches the name is returned. */
     std::string findFile(std::string const& name) const;
 
+    void prependPath(std::string const& path) {
+      m_paths.push_front(path);
+    }
     void appendPath(std::string const& path) {
       m_paths.push_back(path);
     }
+    int removePath(std::string const& path);
     /** @deprecated use appendPath */
     void addPath(std::string const& path) {
       appendPath(path);
     }
 
-    StringVector const& paths() const throw() {
-      return m_paths;
+    StringVector paths() const throw();
+
+    void setUseMiroEtcPaths(bool state) {
+      m_useMiroEtcPaths = state;
+    }
+    bool useMiroEtcPaths() const {
+      return m_useMiroEtcPaths;
+    }
+
+    void setUseCurrentPath(bool state) {
+      m_useCurrentPath = state;
+    }
+    bool useCurrentPath() const {
+      return m_useCurrentPath;
     }
 
   protected:
-    StringVector m_paths;
-    bool         m_currentPath;
+    StringList   m_paths;
+    bool         m_useCurrentPath;
+    bool         m_useMiroEtcPaths;
+    
+    void initMiroEtcPaths(const std::string& etcPath);
     
     static Singleton<StringList> s_etcPaths;
   };

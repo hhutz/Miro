@@ -111,7 +111,7 @@ namespace Miro
 			     QString const& namespaceQualifier,
 			     QString const& exportDirective) const;
       //! Generate source file code.
-      void generateSource(std::ostream& ostr, unsigned int _indent) const;
+      void generateSource(std::ostream& ostr, unsigned int _indent, const QString& etcSearchPath = QString::null) const;
 
       //! Accessor to the parameters of the type.
       ParameterVector const& parameterSet() const;

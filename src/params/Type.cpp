@@ -275,7 +275,7 @@ namespace Miro
     }
 
     void
-    Type::generateSource(std::ostream& ostr, unsigned int _indent) const
+    Type::generateSource(std::ostream& ostr, unsigned int _indent, const QString& etcSearchPath) const
     {
       //   if(name_.isEmpty())
       //     throw QString("No class name specified.");
@@ -339,6 +339,10 @@ namespace Miro
         << spaces.left(indent) << "{" << std::endl;
 
         indent += STEP;
+	
+	if (!etcSearchPath.isEmpty()) {
+	  ostr << spaces.left(indent) << "Miro::SearchPaths::prependMiroEtcPath(\"" << etcSearchPath.toStdString() <<"\");" << std::endl;
+	}
         for (i = ctor_.begin(); i != ctor_.end(); ++i)
           ostr << spaces.left(indent) << *i << std::endl;
         indent -= STEP;

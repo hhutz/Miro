@@ -37,75 +37,152 @@ namespace Miro
   
   using namespace std;
 
-  SearchPaths::SearchPaths(bool currentPath, const std::string& etcPath) :
-    m_currentPath(currentPath)
+  /**
+   * @param useCurrentPath use current path when searching for files
+   * @param useMiroEtcPaths use list of statically defined etc paths when searching for files 
+   * @param etcPath path to be added to etc path list
+   */
+  SearchPaths::SearchPaths(bool useCurrentPath, bool useMiroEtcPaths, const std::string& etcPath) :
+    m_useCurrentPath(useCurrentPath),
+    m_useMiroEtcPaths(useMiroEtcPaths)
   {
-    if(!etcPath.empty()) {
-      prependMiroEtcPath(etcPath);
-    }
+    initMiroEtcPaths(etcPath);
   }
   
   /**
    * init with default search path and set useCurrentPath to true
    */
   SearchPaths::SearchPaths(const std::string& etcPath) :
-    m_currentPath(true)
+    m_useCurrentPath(true),
+    m_useMiroEtcPaths(true)
   {
-    if(!etcPath.empty()) {
-      prependMiroEtcPath(etcPath);
+    initMiroEtcPaths(etcPath);
+  }
+  
+  /**
+   * if default paths is empty, initialize with 
+   *  - ${MIRO_ROOT}/etc (if MIRO_ROOT environment variable is defined)
+   *  - MIRO_INSTALL_PREFIX/etc
+   * then prepend etcPath to the default paths
+   */
+  void SearchPaths::initMiroEtcPaths(const std::string& etcPath) {
+    if(s_etcPaths()->size() == 0) {
+      char* miroRoot = ACE_OS::getenv("MIRO_ROOT");
+      if (miroRoot) {
+	s_etcPaths()->push_back(std::string(miroRoot) + std::string("/etc"));
+      }
+      s_etcPaths()->push_back(string(MIRO_INSTALL_PREFIX "/etc"));
     }
+    prependMiroEtcPath(etcPath);
   }
 
-  void
-  SearchPaths::addMiroEtcPaths()
-  {
-    for(StringList::iterator it = s_etcPaths()->begin(); it != s_etcPaths()->end(); ++it) {
-      m_paths.push_back(*it);
+  bool listContains(SearchPaths::StringList& strList, const std::string& str) {
+    for(SearchPaths::StringList::iterator it = strList.begin(); it != strList.end(); ++it) {
+      if(str == *it)
+	return true;
     }
-    
-    char* miroRoot = ACE_OS::getenv("MIRO_ROOT");
-    if (miroRoot) {
-      m_paths.push_back(std::string(miroRoot) + std::string("/etc"));
+    return false;
+  }
+  
+  int listRemove(SearchPaths::StringList& strList, const std::string& str) {
+    int retVal = 0;
+    for(SearchPaths::StringList::iterator it = strList.begin(); it != strList.end(); ) {
+      if(str == *it) {
+	it = strList.erase(it);
+	retVal++;
+      }
+      else {
+	it++;
+      }
     }
-
-    m_paths.push_back(string(MIRO_INSTALL_PREFIX "/etc"));
+    return retVal;
+  }
+  
+  /**
+   * Prepend a path to the list of default search paths. 
+   * @param etcPath path to prepended
+   * @param replace by default, the path list will not be modified if  
+   *                etcPath is already in the list. If replace is true, etcPath
+   *                will be moved to the top of the list
+   *    
+   * @see initEtcPaths
+   */
+  void 
+  SearchPaths::prependMiroEtcPath(const std::string& etcPath, bool replace) {
+    QFileInfo fi(etcPath.c_str());
+    string canonicalPath = fi.canonicalFilePath().toStdString();
+    if(!canonicalPath.empty()) {
+      if(listContains(*s_etcPaths(), canonicalPath)) {
+	if(replace) {
+	  listRemove(*s_etcPaths(), canonicalPath);
+	  s_etcPaths()->push_front(canonicalPath);
+	}
+      }
+      else {
+	s_etcPaths()->push_front(canonicalPath);
+      }
+    }
+  }
+  
+  /** @return number of paths removed from list */
+  int SearchPaths::removePath(std::string const& path) {
+    return listRemove(m_paths, path);
   }
 
   /**
-   * Add a runtime etc path to be prepended to those 
-   * hard coded in addMiroEtcPaths() 
+   * The first existing file that matches the name is returned. 
+   * Search order is: 
+   *  - currentPath (if m_useCurrentPath is true)
+   *  - path list 
+   *  - default etc path list (if m_useMiroEtcPaths is true)
    */
-  void 
-  SearchPaths::prependMiroEtcPath(const std::string& etcPath) {
-    QFileInfo fi(etcPath.c_str());
-    string canonicalPath = fi.canonicalFilePath().toStdString();
-    if(!canonicalPath.empty())
-      s_etcPaths()->push_front(canonicalPath);
-  }
-
-  /** The first existing file that matches the name is returned. */
   std::string
   SearchPaths::findFile(std::string const& name) const
   {
     string fullName;
-    StringVector::const_reverse_iterator first, last = m_paths.rend();
 
-    {
+    if (m_useCurrentPath) {
       QFileInfo f(name.c_str());
-      if (m_currentPath && f.exists())
+      if (f.exists())
         return f.absoluteFilePath().toAscii().data();
     }
 
-    for (first = m_paths.rbegin(); first != last; ++first) {
-      fullName = *first + "/" + name;
+    for(StringList::const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
+      fullName = *it + "/" + name;
       QFileInfo f(fullName.c_str());
       if (f.exists())
         return f.absoluteFilePath().toAscii().data();
     }
 
-    for (first = m_paths.rbegin(); first != last; ++first) {
-      MIRO_LOG_OSTR(LL_ERROR, "File not found: " <<  *first << "/" << name);
+    if (m_useMiroEtcPaths) {
+      for(StringList::const_iterator it = s_etcPaths()->begin(); it != s_etcPaths()->end(); ++it) {
+	fullName = *it + "/" + name;
+	QFileInfo f(fullName.c_str());
+	if (f.exists())
+	  return f.absoluteFilePath().toAscii().data();
+      }
+    }
+
+    StringVector paths = this->paths();
+    for (StringVector::iterator it = paths.begin(); it != paths.end(); ++it) {
+      MIRO_LOG_OSTR(LL_ERROR, "File not found: " <<  *it << "/" << name);
     }
     return string();
   }
+  
+  SearchPaths::StringVector SearchPaths::paths() const throw() {
+    int sz = m_paths.size() + (m_useMiroEtcPaths ? s_etcPaths()->size() : 0);
+    StringVector retVal(sz);
+    
+    for(StringList::const_iterator it = m_paths.begin(); it != m_paths.end(); ++it) {
+      retVal.push_back(*it);
+    }
+    if(m_useMiroEtcPaths) {
+      for(StringList::const_iterator it = s_etcPaths()->begin(); it != s_etcPaths()->end(); ++it) {
+	retVal.push_back(*it);
+      }
+    }
+    return retVal;
+  }
+
 }

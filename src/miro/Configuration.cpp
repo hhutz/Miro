@@ -87,7 +87,7 @@ namespace Miro
     if (name == host)
       fileName += std::string(".xml");
 
-    SearchPaths paths(true, etcPath);
+    SearchPaths paths(true, true, etcPath);
     paths.addMiroEtcPaths();
 
     if (explicitlySet)
