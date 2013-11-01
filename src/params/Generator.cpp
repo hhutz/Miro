@@ -249,9 +249,12 @@ namespace Miro
         ostr << "#include <" << *i << ">" << std::endl;
 
       ostr << "#include <miro/XmlParse.h>" << std::endl
-      << "#include <miro/SearchPaths.h>" << std::endl
       << "#include <qdom.h>" << std::endl
       << std::endl;
+      
+      if(!etcSearchPath.isEmpty()) {
+        ostr << "#include <miro/SearchPaths.h>" << std::endl;
+      }
 
 #if JSONCPP_FOUND
       if (useJson_) {
