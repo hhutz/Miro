@@ -6,7 +6,7 @@ include_directories(
   ${JSONCPP_INCLUDE_DIR}
 )
 
-add_library( miroParamsExample SHARED
+add_library( miroParamsExample STATIC
   SimpleSurveyParameters.cpp
 )
 
