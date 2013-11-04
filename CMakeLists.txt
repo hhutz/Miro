@@ -98,3 +98,5 @@ include( CMakePack.txt )
 
 #------------------------------------
 print_build_switches()
+
+message(STATUS "Miro version is ${MIRO_SOVERSION}")
