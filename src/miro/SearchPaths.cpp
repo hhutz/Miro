@@ -70,17 +70,39 @@ namespace Miro
 
     m_paths.push_back(string(MIRO_INSTALL_PREFIX "/etc"));
   }
+  
+  bool listContains(SearchPaths::StringList& strList, const std::string& str)
+  {
+    for(SearchPaths::StringList::const_iterator it = strList.begin(); it != strList.end(); ++it) {
+      if(str == *it)
+        return true;
+    }
+    return false;
+  }
 
   /**
    * Add a runtime etc path to be prepended to those 
-   * hard coded in addMiroEtcPaths() 
+   * hard coded in addMiroEtcPaths(). 
+   * The path list will not be modified if etcPath is 
+   * already in the list.
    */
   void 
   SearchPaths::prependMiroEtcPath(const std::string& etcPath) {
+    const bool reorder = false; // todo: make this a method parameter on next version bump
     QFileInfo fi(etcPath.c_str());
     string canonicalPath = fi.canonicalFilePath().toStdString();
-    if(!canonicalPath.empty())
-      s_etcPaths()->push_front(canonicalPath);
+    if(!canonicalPath.empty()) {
+      if(listContains(*s_etcPaths(), canonicalPath)) {
+        if(reorder) {
+          s_etcPaths()->remove(canonicalPath);
+          s_etcPaths()->push_front(canonicalPath);
+        }
+        // else, ignore
+      }
+      else {
+        s_etcPaths()->push_front(canonicalPath);
+      }
+    }
   }
 
   /** The first existing file that matches the name is returned. */

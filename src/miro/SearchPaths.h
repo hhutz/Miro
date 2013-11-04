@@ -40,7 +40,7 @@ namespace Miro
     SearchPaths(bool currentPath = true, const std::string& etcPath = "");
     SearchPaths(const std::string& etcPath);
 
-    void prependMiroEtcPath(const std::string& etcPath);
+    static void prependMiroEtcPath(const std::string& etcPath);
     void addMiroEtcPaths();
 
     /** The absolute path to first existing file that matches the name is returned. */
