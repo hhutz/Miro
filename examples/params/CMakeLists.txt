@@ -15,7 +15,7 @@ target_link_libraries( miroParamsExample
   miroXml
 )
 if ( MIRO_BUILD_WITH_JSON )
-  target_link_libraries( 
+  target_link_libraries( miroParamsExample 
     ${JSONCPP_LIBRARIES}
   )
 endif ( MIRO_BUILD_WITH_JSON )
