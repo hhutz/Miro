@@ -139,11 +139,27 @@ namespace Miro
         ostr << spaces.left(indent - STEP) << "public: " << std::endl;
 
         // data members
+        QString commentIndent(QString(indent+1,' ')+"* ");
         ParameterVector::const_iterator j;
-        for (j = parameter_.begin(); j != parameter_.end(); ++j)
+        for (j = parameter_.begin(); j != parameter_.end(); ++j) {
+          ostr << spaces.left(indent) << "/** \n";
+          if(!j->description_.isEmpty()) {
+            QString description = j->description_;
+            description.replace("\n", QString("\n"+commentIndent));
+            ostr << commentIndent << description << std::endl << commentIndent << std::endl;
+          }
+          if(!j->fullDefault_.isEmpty()) {
+            ostr << commentIndent << j->name_ << " default value is " << j->fullDefault_ << ".\n";
+          }
+          if(!j->measure_.isEmpty()) {
+            ostr << commentIndent <<  j->name_ << " unit of measure is " << j->measure_ << ".\n";
+          }
+          ostr << spaces.left(indent) << " */\n";
+          
           ostr << spaces.left(indent)
-          << ((j->type_ != "angle") ? j->type_ : QString("double"))
-          << " " << j->name_ << ";" << std::endl;
+               << ((j->type_ != "angle") ? j->type_ : QString("double"))
+               << " " << j->name_ << ";" << std::endl;
+        }
         if (parameter_.size() != 0)
           ostr << std::endl;
 
