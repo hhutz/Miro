@@ -6,7 +6,15 @@
     
     <config_group name="Notification">    
       <config_item name="NotifySvc" parent="Miro::Config" instance="true" final="true" >
-	<config_parameter name="factoryName" type="string" default="NotifyEventChannelFactory" />
+        <documentation>Class documentation.</documentation>
+        <documentation></documentation>
+        <documentation>
+          Dummy documentation2.
+          spanning multiple lines.
+        </documentation>
+	<config_parameter name="factoryName" type="string" default="NotifyEventChannelFactory">
+          <documentation>Member documentation.</documentation>
+        </config_parameter>
 	<config_parameter name="channelNames" type="std::vector&lt;std::string&gt;" />
 	<constructor>
 	  channelNames.push_back(Miro::RobotParameters::instance()->eventChannelName);

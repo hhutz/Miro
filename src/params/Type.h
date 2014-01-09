@@ -39,6 +39,8 @@ namespace Miro
       //------------------------------------------------------------------------
       // public types
       //------------------------------------------------------------------------
+      typedef std::vector<QString> QStringVector;
+      typedef std::map<QString, QStringVector> QStringMap;
 
       //! Initializing constructor.
       Type();
@@ -90,6 +92,10 @@ namespace Miro
 #if JSONCPP_FOUND
       void setUseJson(bool _useJson) { useJson_ = _useJson; }
 #endif
+      //! Query the documentation of the type.
+      QString documentation() const;
+      //! Query the documentation of a parameter.
+      QString parameterDocumentation(QString const& _name) const;
 
       //! Add as static member.
       void addStatic(QString const& _type, QString const& _name);
@@ -125,8 +131,6 @@ namespace Miro
 
       typedef std::pair<QString, QString> QStringPair;
       typedef std::vector<QStringPair> QStringPairVector;
-      typedef std::vector<QString> QStringVector;
-      typedef std::map<QString, QStringVector> QStringMap;
 
       enum InstanceType { INSTANCE_NONE, INSTANCE_MANAGED, INSTANCE_UNMANAGED, INSTANCE_DLL, INSTANCE_USER };
 
