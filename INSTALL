@@ -90,6 +90,8 @@ for packages, Miro did not find.
 Installation:
 =============
 
+Using 'make'
+-----------
 Miro can be installed with the a simple:
 
 make install
@@ -98,12 +100,25 @@ By default, the package's files will be installed in `/usr/local/bin',
 `/usr/local/lib', etc.  You can specify an installation prefix other
 than `/usr/local' by giving `configure' the option `--prefix=PATH'.
 
-Beside that, Miro can be used already without installation. Therefor,
+Beside that, Miro can be used already without installation. Therefore,
 a make run install the libraries and the binaries during the
 compilation into the `lib/` and `bin/` directory. This enlarges the
 Miro directory, but can be quite useful, if you work on Miro itself
 and a derived application at the same time.
 
+
+Using CPack:
+------------
+Miro also supports CPack (http://www.cmake.org/Wiki/CMake:Packaging_With_CPack) 
+for packaging an installer. For example, to create and install a .deb package 
+for Ubuntu:
+
+make
+cpack -G DEB
+dpkg -i miro-bots-tao-json_3.1.3_x86_64.deb
+
+(Note that the name of the installer will be different depending on version, 
+platform, and whether Miro was built with tao and/or json)
 
 Developer information:
 ======================
