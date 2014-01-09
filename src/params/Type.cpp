@@ -209,7 +209,7 @@ namespace Miro
         // debug output operator
         if (parameter_.size() > 0 || parent_.isEmpty()) {
           ostr << spaces.left(indent - STEP) << "protected:" << std::endl
-          << spaces.left(indent) << "virtual void printToStream(std::ostream&) const;" << std::endl;
+          << spaces.left(indent) << "virtual void printToStream(std::ostream&, bool isSuper=false) const;" << std::endl;
         }
 
         if (parent_.isEmpty())
@@ -415,34 +415,35 @@ namespace Miro
           << spaces.left(indent) << name_ << "Parameters::printToStream(std::ostream&";
           if (parameter_.size() > 0 || !parent_.isEmpty())
             ostr << " ostr";
-          ostr << ") const" << std::endl
+          ostr << ", bool isSuper) const" << std::endl
           << spaces.left(indent) << "{" << std::endl;
           indent += STEP;
+          
+          if (!parent_.isEmpty()) {
+            ostr << spaces.left(indent) << "if (!isSuper) {" << std::endl;
+            //ostr << spaces.left(indent) << "  ostr << \"" << name_ << "Parameters {\" << std::endl;" << std::endl;
+            ostr << spaces.left(indent) << "  ostr << \"" << name_ << "Parameters\" << std::endl;" << std::endl;
+            ostr << spaces.left(indent) << "}" << std::endl << std::endl;
 
-          if (!parent_.isEmpty())
-            ostr << spaces.left(indent) << "Super::printToStream(ostr);" << std::endl
-            << std::endl;
-
+            ostr << spaces.left(indent) << "Super::printToStream(ostr, true);" << std::endl << std::endl;
+          }
+          
           if (parameter_.size() > 0) {
             ostr << spaces.left(indent) << "ostr << ";
             indent += 5;
             for (j = parameter_.begin(); j != parameter_.end(); ++j) {
-              if (j != parameter_.begin())
-                ostr << std::endl
-                << spaces.left(indent) << "<< ";
-              if (!j->description_.isEmpty())
-                ostr << "\"" << j->description_;
-              else {
-                QString name(j->name_);
-#if QT_VERSION >= 0x040000
-                name[0] = name[0].toUpper();
-#else
-                name[0] = name[0].upper();
-#endif
-
-                ostr << "\"" << name;
+              if (j != parameter_.begin()) {
+                ostr << std::endl << spaces.left(indent) << "<< ";
               }
-              ostr << ": \" << ";
+              
+              if (!j->description_.isEmpty()) {
+                ostr << "\"  /* " << j->description_ << " */\" << std::endl\n" << spaces.left(indent) << "<< ";
+              }
+
+              QString name;
+              name.sprintf("\"  %-18s %-12s", qPrintable(j->type_), qPrintable(j->name_) );
+              ostr << name;
+              ostr << " { \" << ";
 
               if (j->type_ != "angle")
                 ostr << j->name_;
@@ -450,12 +451,21 @@ namespace Miro
                 ostr << "Miro::rad2Deg(" << j->name_ << ")" << std::endl;
 
               if (!j->measure_.isEmpty())
-                ostr << " << \"" << j->measure_ << "\"";
-              ostr << " << std::endl";
+                ostr << " << \" " << j->measure_ << "\"";
+                
+              ostr << " << \" } \" << std::endl";
             }
             ostr << ";" << std::endl;
             indent -= 5;
           }
+          
+          //if (!parent_.isEmpty()) {
+          //  ostr << std::endl;
+          //  ostr << spaces.left(indent) << "if (!isSuper) {" << std::endl;
+          //  ostr << spaces.left(indent) << "  ostr << \"}\" << std::endl;" << std::endl;
+          //  ostr << spaces.left(indent) << "}" << std::endl << std::endl;
+          //}
+          
           indent -= STEP;
           ostr << spaces.left(indent) << "}" << std::endl;
         }
