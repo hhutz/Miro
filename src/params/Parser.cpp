@@ -346,6 +346,14 @@ namespace Miro
             if (def.isNull())
               def = "";
 
+            QString doc = attributes.value("doc");
+            if (doc.isNull()) {
+              doc = docu_;
+            }
+            else if(!doc.endsWith('.')) {
+              doc += ".";
+            }
+            
             // parse for common ACE_Time_Value default error
             QString fullDef;
 #if QT_VERSION >= 0x040000
@@ -353,7 +361,7 @@ namespace Miro
 #else
             if (type == "ACE_Time_Value" && def.find('.') != -1)
 #endif
-	    {
+            {
               error_ = "ACE_Time_Value format is (x, y), no dot.";
               break;
             }
@@ -426,10 +434,10 @@ namespace Miro
                 unit = attributes.value("unit");
 
               if (!staticConst_) {
-                type_.addParameter(Parameter(type, name, def, fullDef, unit, docu_));
+                type_.addParameter(Parameter(type, name, def, fullDef, unit, doc));
               }
               else {
-                type_.addStaticConstParameter(Parameter(type, name, def, fullDef, unit, docu_));
+                type_.addStaticConstParameter(Parameter(type, name, def, fullDef, unit, doc));
               }
             }
           }
