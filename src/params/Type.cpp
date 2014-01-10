@@ -45,6 +45,37 @@ namespace Miro
 #endif
     {}
 
+    namespace
+    {
+      QString collapseStrings(Type::QStringVector const& v) 
+      { 
+        QString doc;
+        Type::QStringVector::const_iterator first, last = v.end();
+        for (first = v.begin(); first != last; ++first) {
+          if (first != v.begin()) {
+            doc += "\n";
+          }
+          doc += *first;
+        }
+        return doc;
+      }
+    }
+
+    QString
+    Type::documentation() const 
+    { 
+      return collapseStrings(doc_);
+    }
+
+    QString Type::parameterDocumentation(QString const& _name) const {
+      QString doc;
+      QStringMap::const_iterator it = parameterDocumentation_.find(_name);
+      if (it != parameterDocumentation_.end()) {
+        doc = collapseStrings(it->second);
+      }
+      return doc; 
+    }
+
     void
     Type::addStatic(QString const& _type, QString const& _name)
     {
@@ -123,6 +154,16 @@ namespace Miro
           << std::endl;
         }
 
+        // doxygen class documentation
+        QString doc = documentation();
+        if(!doc.isEmpty()) {
+          QString commentIndent(QString(indent+1,' ')+"* ");
+          ostr << spaces.left(indent) << "/**" << std::endl;
+          doc.replace("\n", QString("\n"+commentIndent));
+          ostr << commentIndent << doc << std::endl
+               << spaces.left(indent) << "*/" << std::endl;
+        }
+
         ostr << spaces.left(indent) << "class " << expStr.c_str() << name_ << "Parameters";
 
         if (!parent_.isEmpty())
@@ -143,10 +184,12 @@ namespace Miro
         ParameterVector::const_iterator j;
         for (j = parameter_.begin(); j != parameter_.end(); ++j) {
           ostr << spaces.left(indent) << "/** \n";
-          if(!j->description_.isEmpty()) {
-            QString description = j->description_;
-            description.replace("\n", QString("\n"+commentIndent));
-            ostr << commentIndent << description << std::endl << commentIndent << std::endl;
+
+          // documentation of member
+          QString doc = parameterDocumentation(j->name_);
+          if(!doc.isEmpty()) {
+            doc.replace("\n", QString("\n"+commentIndent));
+            ostr << commentIndent << doc << std::endl << commentIndent << std::endl;
           }
           if(!j->fullDefault_.isEmpty()) {
             ostr << commentIndent << j->name_ << " default value is " << j->fullDefault_ << ".\n";
