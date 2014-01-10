@@ -347,10 +347,7 @@ namespace Miro
               def = "";
 
             QString doc = attributes.value("doc");
-            if (doc.isNull()) {
-              doc = docu_;
-            }
-            else if(!doc.endsWith('.')) {
+            if (!doc.isNull() && !doc.endsWith('.')) {
               doc += ".";
             }
             
@@ -435,9 +432,13 @@ namespace Miro
 
               if (!staticConst_) {
                 type_.addParameter(Parameter(type, name, def, fullDef, unit, doc));
+                if(!doc.isEmpty())
+                  type_.addToParameterDocumentation(name, doc);
               }
               else {
                 type_.addStaticConstParameter(Parameter(type, name, def, fullDef, unit, doc));
+                if(!doc.isEmpty())
+                  type_.addToParameterDocumentation(name, doc);
               }
             }
           }
