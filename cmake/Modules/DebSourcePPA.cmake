@@ -23,6 +23,10 @@
 # set(CPACK_DEBIAN_DISTRIBUTION_NAME ubuntu)
 # set(CPACK_DEBIAN_DISTRIBUTION_RELEASES karmic lucid maverick natty)
 # set(CPACK_DEBIAN_CHANGELOG "  * Extra change log lines")
+#
+# Notes:
+# control:Homepage will be set to CPACK_PACKAGE_VENDOR
+# CPACK_PACKAGE_CONTACT must be in "Contact Name <contactname@email.adr>" form
 ##
 
 find_program(DEBUILD_EXECUTABLE debuild)
@@ -88,7 +92,7 @@ foreach(RELEASE ${CPACK_DEBIAN_DISTRIBUTION_RELEASES})
     "Priority: ${CPACK_DEBIAN_PACKAGE_PRIORITY}\n"
     "DM-Upload-Allowed: yes\n"
     "Maintainer: ${CPACK_PACKAGE_CONTACT}\n"
-    "Build-Depends: "
+    "Build-Depends: ${CPACK_DEBIAN_PACKAGE_BUILD_DEPENDS}"
     )
 
   foreach(DEP ${CPACK_DEBIAN_BUILD_DEPENDS})
