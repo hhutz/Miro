@@ -68,6 +68,13 @@ if( ${PACKAGE_BASE_LIBRARY} )
   endif( _${PACKAGE_ROOT_DIR} )
   
   #message( STATUS "  (dbg) ${PACKAGE_ROOT_DIR}=${${PACKAGE_ROOT_DIR}}" )
+  if( NOT EXISTS "${${PACKAGE_ROOT_DIR}}/include/" )
+    # if PACKAGE_LIBRARY_DIR/../include is not a directory, then it's likely 
+    # the lib is in a multiarch dir. Pop up one more directory.
+    string(REGEX REPLACE "/[^/]*$" "" _TEMP ${${PACKAGE_ROOT_DIR}} )
+    set(${PACKAGE_ROOT_DIR} ${_TEMP})
+    #message( STATUS "  (dbg) ${PACKAGE_ROOT_DIR}=${${PACKAGE_ROOT_DIR}}" )
+  endif( NOT EXISTS "${${PACKAGE_ROOT_DIR}}/include/" )
   
   set( ROOT_INCLUDE_DIR "${${PACKAGE_ROOT_DIR}}/include" )  
   if( PACKAGE_REQ_INCLUDE )
@@ -75,6 +82,7 @@ if( ${PACKAGE_BASE_LIBRARY} )
       NAMES ${PACKAGE_REQ_INCLUDE}
       HINTS ${ROOT_INCLUDE_DIR}
       PATH_SUFFIXES "" ${PACKAGE_INCLUDE_SUFFIX}
+      NO_DEFAULT_PATH
     )
     
     if ( TEMP_INCLUDE_FILE ) 
