@@ -24,6 +24,7 @@
 #define Miro_CFG_Generator_h
 
 #include "Type.h"
+#include "MiroConfig.h"
 
 #include <vector>
 #include <map>
@@ -53,7 +54,7 @@ namespace Miro
 
       void setBaseName(const QString& _baseName);
       void setHeaderExtension(const QString& _extensionName);
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       void setUseJson(bool _useJson) { useJson_ = _useJson; }
 #endif
       void addNamespace(const QString& _namespace);
@@ -91,7 +92,7 @@ namespace Miro
       QString fileName_;
       QString extensionName_;
       QStringVector namespace_;
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       bool useJson_;
 #endif
 

@@ -73,14 +73,15 @@ macro( miro_makeparams )
       if( EXPORT_NAME )
         set( EXTRA_MIRO_PARAMS_ARGS -x ${EXPORT_NAME} )
       endif( EXPORT_NAME )
-
+      
       add_custom_command(
         OUTPUT  ${PARAMS_OUTPUT}
         DEPENDS ${PARAMS_FILENAME}
         COMMAND ${MAKEPARAMS_LIB_VAR} ${MIRO_MAKEPARAMS_EXECUTABLE}
         ARGS
           -f ${CMAKE_CURRENT_SOURCE_DIR}/${PARAMS_FILENAME}
-          -n ${PARAMS_BASE_FULL_PATH} ${MIRO_PARAMS_ARGS}
+          -n ${PARAMS_BASE_FULL_PATH} 
+          ${MIRO_PARAMS_ARGS}
           ${EXTRA_MIRO_PARAMS_ARGS}
       )
 

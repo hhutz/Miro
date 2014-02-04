@@ -35,6 +35,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "MiroConfig.h"
 #include "qt_compatibility.h"
 
 using std::cout;
@@ -44,7 +45,7 @@ using std::ofstream;
 using namespace Miro::CFG;
 
 bool verbose = false;
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
 bool useJson = false;
 #endif
 
@@ -82,7 +83,7 @@ parseArgs(int& argc, char* argv[])
       case 'x':
         exportDirective = get_opts.optarg;
         break;
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       case 'j':
 	useJson = true;
         break;
@@ -95,7 +96,7 @@ parseArgs(int& argc, char* argv[])
         << "  -s <extension> extension of the generated source file (cpp)" << std::endl
         << "  -h <extension> extension of the generated header file (h)" << std::endl
         << "  -x <directive> add export directive to generated header" << std::endl
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
 	<< "  -j Include JSON support in generated files" << std::endl
 #endif
         << "  -v verbose mode" << std::endl
@@ -124,7 +125,7 @@ main(int argc, char * argv[])
       generator.setHeaderExtension(headerExtension);
 
       Parser handler(generator);
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       handler.setUseJson(useJson);
 #endif
 
