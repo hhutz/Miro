@@ -45,7 +45,12 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
 
   groupBox_ = new Q3VGroupBox(this, "groupbox");
+#ifdef LSB_Q3FRAME
+  QWidget * const parent = groupBox_;
+  frame_ = new QFrame(parent);
+#else
   frame_ = new Q3Frame(groupBox_, "parameterframe");
+#endif
 
   Q3HBoxLayout * dialogButtonsBox = new Q3HBoxLayout(NULL, 0, -1, "hBoxLayout");
   QSpacerItem * dBSpace = new QSpacerItem(0, 0);

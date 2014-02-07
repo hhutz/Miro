@@ -18,6 +18,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3FILEDIALOG
+#define LSB_Q3LISTBOX
+
 #ifndef FileListDialog_h
 #define FileListDialog_h
 
@@ -26,11 +31,19 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
+#ifdef LSB_Q3LISTBOX
+class QListWidget;
+#else
 class Q3ListBox;
+#endif
 class QPushButton;
 class QString;
 class QStringList;
+#ifdef LSB_Q3FILEDIALOG
+class QFileDialog;
+#else
 class Q3FileDialog;
+#endif
 
 /**
  * This class shows a dialog for the behaviour parameters.
@@ -58,9 +71,17 @@ public slots:
 protected:
   void selectListItem();
 
+#ifdef LSB_Q3LISTBOX
+  QListWidget * list_;
+#else
   Q3ListBox * list_;
+#endif
   QPushButton * delButton_;  
+#ifdef LSB_Q3FILEDIALOG
+  QFileDialog * fileDialog_;
+#else
   Q3FileDialog * fileDialog_;
+#endif
 
   bool modified_;
 };

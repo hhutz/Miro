@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3FRAME
+
 #include "ParameterDialog.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
@@ -38,7 +41,11 @@
 #include <qobject.h>
 //Added by qt3to4:
 #include <Q3GridLayout>
+#ifdef LSB_Q3FRAME
+#include <QFrame>
+#else
 #include <Q3Frame>
+#endif
 
 #include <cassert>
 
@@ -64,7 +71,12 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
 
     delete frame_;
     Q3ScrollView * sv = new Q3ScrollView(groupBox_, "scrollview");
+#ifdef LSB_Q3FRAME
+    QWidget * const parent = sv->viewport();
+    frame_ = new QFrame(parent);
+#else
     frame_ = new Q3Frame(sv->viewport());
+#endif
     sv->addChild(frame_);
     sv->setResizePolicy(Q3ScrollView::AutoOneFit);
     

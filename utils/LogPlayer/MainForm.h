@@ -18,12 +18,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3MAINWINDOW
+
 #ifndef Mainform_h
 #define MainForm_h
 
 #include <ace/Time_Value.h>
 
+#ifdef LSB_Q3MAINWINDOW
+#include <QMainWindow>
+#else
 #include <q3mainwindow.h>
+#endif
 #include <qstring.h>
 
 #include <Q3PopupMenu>
@@ -63,11 +71,21 @@ signals:
   void activated(QObject *, int);
 };
 
-class MainForm : public Q3MainWindow
+class MainForm : public
+#ifdef LSB_Q3MAINWINDOW
+QMainWindow
+#else
+Q3MainWindow
+#endif
 {
   Q_OBJECT
 
+#ifdef LSB_Q3MAINWINDOW
+  typedef QMainWindow Super;
+#else
   typedef Q3MainWindow Super;
+#endif
+
 public:
   MainForm(QApplication& _app, FileSet& _fileSet,
            QWidget * parent = 0, const char * name = 0 );
