@@ -24,7 +24,7 @@ message(STATUS "Looking for ACE")
 include( GetPackageLibSearchPath )
 include( GetLibraryList )
 
-# do this manually, rather than using IrgPackageFind because 
+# do this manually, rather than using SimplePackageFind because 
 # ACE's include directory path is 'non-standard' i.e., not
 # ${PACKAGE_ROOT_DIR}/include
 

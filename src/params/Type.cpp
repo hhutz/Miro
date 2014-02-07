@@ -25,6 +25,7 @@
 #include <iostream>
 #include <algorithm>
 
+#include "MiroConfig.h"
 #include "qt_compatibility.h"
 
 namespace
@@ -34,21 +35,22 @@ namespace
 
 namespace Miro
 {
-  namespace CFG {
+  namespace CFG
+  {
     Type::Type() :
-        final_(true),
-        dummy_(false),
-        extern_(false),
-        instance_(INSTANCE_NONE)
-#if JSONCPP_FOUND
-	, useJson_(false)
+      final_(true),
+      dummy_(false),
+      extern_(false),
+      instance_(INSTANCE_NONE)
+#if MIRO_HAS_JSON
+      ,useJson_(false)
 #endif
     {}
 
     namespace
     {
-      QString collapseStrings(Type::QStringVector const& v) 
-      { 
+      QString collapseStrings(Type::QStringVector const& v)
+      {
         QString doc;
         Type::QStringVector::const_iterator first, last = v.end();
         for (first = v.begin(); first != last; ++first) {
@@ -62,18 +64,19 @@ namespace Miro
     }
 
     QString
-    Type::documentation() const 
-    { 
+    Type::documentation() const
+    {
       return collapseStrings(doc_);
     }
 
-    QString Type::parameterDocumentation(QString const& _name) const {
+    QString Type::parameterDocumentation(QString const& _name) const
+    {
       QString doc;
       QStringMap::const_iterator it = parameterDocumentation_.find(_name);
       if (it != parameterDocumentation_.end()) {
         doc = collapseStrings(it->second);
       }
-      return doc; 
+      return doc;
     }
 
     void
@@ -98,7 +101,7 @@ namespace Miro
     Type::addToParameterDocumentation(QString const& _name, QString const& _doc)
     {
       if (_name != "") {
-	parameterDocumentation_[_name].push_back(_doc);
+        parameterDocumentation_[_name].push_back(_doc);
       }
     }
 
@@ -149,9 +152,9 @@ namespace Miro
         // debug ostream operator
         if (parent_.isEmpty()) {
           ostr << spaces.left(indent) << "class " << name_ << "Parameters;" << std::endl
-          << spaces.left(indent) << expStr.c_str() << "std::ostream&" << std::endl
-          << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs);" << std::endl
-          << std::endl;
+               << spaces.left(indent) << expStr.c_str() << "std::ostream&" << std::endl
+               << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs);" << std::endl
+               << std::endl;
         }
 
         // doxygen class documentation
@@ -170,12 +173,12 @@ namespace Miro
           ostr << " : public " << parent_;
 
         ostr << std::endl
-        << spaces.left(indent) << "{" << std::endl;
+             << spaces.left(indent) << "{" << std::endl;
         indent += STEP;
 
         if (!parent_.isEmpty())
           ostr << spaces.left(indent) << "typedef " << parent_ << " Super;" << std::endl
-          << std::endl;
+               << std::endl;
 
         ostr << spaces.left(indent - STEP) << "public: " << std::endl;
 
@@ -198,7 +201,7 @@ namespace Miro
             ostr << commentIndent <<  j->name_ << " unit of measure is " << j->measure_ << ".\n";
           }
           ostr << spaces.left(indent) << " */\n";
-          
+
           ostr << spaces.left(indent)
                << ((j->type_ != "angle") ? j->type_ : QString("double"))
                << " " << j->name_ << ";" << std::endl;
@@ -209,9 +212,9 @@ namespace Miro
         // const static data members
         for (j = staticConstParameter_.begin(); j != staticConstParameter_.end(); ++j) {
           ostr << spaces.left(indent)
-          << "static const "
-          << ((j->type_ != "angle") ? j->type_ : QString("double"))
-          << " " << j->name_;
+               << "static const "
+               << ((j->type_ != "angle") ? j->type_ : QString("double"))
+               << " " << j->name_;
 
           if (isIntegralType(j->type_)) {
             ostr << " = " << j->fullDefault_;
@@ -242,23 +245,23 @@ namespace Miro
         if (parameter_.size() > 0 || parent_.isEmpty()) {
           ostr << spaces.left(indent) << "virtual void operator <<= (const QDomNode&);" << std::endl;
           ostr << spaces.left(indent) << "virtual QDomElement operator >>= (QDomNode&) const;" << std::endl;
-#if JSONCPP_FOUND
-	  if (useJson_) {
-	      ostr << spaces.left(indent) << "virtual void operator <<= (const Json::Value&);" << std::endl;
-	      ostr << spaces.left(indent) << "virtual Json::Value operator >>= (Json::Value&) const;" << std::endl;
-	  }
+#if MIRO_HAS_JSON
+          if (useJson_) {
+            ostr << spaces.left(indent) << "virtual void operator <<= (const Json::Value&);" << std::endl;
+            ostr << spaces.left(indent) << "virtual Json::Value operator >>= (Json::Value&) const;" << std::endl;
+          }
 #endif
         }
         // debug output operator
         if (parameter_.size() > 0 || parent_.isEmpty()) {
           ostr << spaces.left(indent - STEP) << "protected:" << std::endl
-          << spaces.left(indent) << "virtual void printToStream(std::ostream&, bool isSuper=false) const;" << std::endl;
+               << spaces.left(indent) << "virtual void printToStream(std::ostream&, bool isSuper=false) const;" << std::endl;
         }
 
         if (parent_.isEmpty())
           ostr << spaces.left(indent) << "friend" << std::endl
-          << spaces.left(indent) << expStr.c_str() << "std::ostream&" << std::endl
-          << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs);" << std::endl;
+               << spaces.left(indent) << expStr.c_str() << "std::ostream&" << std::endl
+               << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs);" << std::endl;
       }
       else {
         // if this is a externally defined class,
@@ -274,61 +277,61 @@ namespace Miro
       }
 
       switch (instance_) {
-      case INSTANCE_MANAGED:
-	ostr << std::endl
-             << spaces.left(indent) << "typedef ACE_Singleton<"    
-             << name_  << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX> "
-	     << name_ << "ParametersInstance;" << std::endl;
-	break;
-      case INSTANCE_UNMANAGED:
-	ostr << std::endl
-	     << spaces.left(indent) << "typedef ACE_Unmanaged_Singleton<"
-	     << name_  << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX> "
-	     << name_ << "ParametersInstance;" << std::endl;
-	break;
-      case INSTANCE_USER:
-	ostr << std::endl
-	     << spaces.left(indent) << "typedef " << userSingleton_ << "<"
-	     << name_  << "Parameters> "
-	     << name_ << "ParametersInstance;" << std::endl;
-	break;
-      case INSTANCE_DLL:
-      case INSTANCE_NONE:
-	break;
+        case INSTANCE_MANAGED:
+          ostr << std::endl
+               << spaces.left(indent) << "typedef ACE_Singleton<"
+               << name_  << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX> "
+               << name_ << "ParametersInstance;" << std::endl;
+          break;
+        case INSTANCE_UNMANAGED:
+          ostr << std::endl
+               << spaces.left(indent) << "typedef ACE_Unmanaged_Singleton<"
+               << name_  << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX> "
+               << name_ << "ParametersInstance;" << std::endl;
+          break;
+        case INSTANCE_USER:
+          ostr << std::endl
+               << spaces.left(indent) << "typedef " << userSingleton_ << "<"
+               << name_  << "Parameters> "
+               << name_ << "ParametersInstance;" << std::endl;
+          break;
+        case INSTANCE_DLL:
+        case INSTANCE_NONE:
+          break;
       }
     }
 
     void
     Type::generateSingleton(std::ostream& ostr, unsigned int indent,
-			    QString const& namespaceQualifier,
-			    QString const& exportDirective) const
+                            QString const& namespaceQualifier,
+                            QString const& exportDirective) const
     {
       // add instance declarations
       QString exportUpper = exportDirective.toUpper();
       exportUpper.chop(7); // get rid of _Export
 
       switch (instance_) {
-      case INSTANCE_MANAGED:
-	ostr << spaces.left(indent) << exportUpper
-             << "_SINGLETON_DECLARE(ACE_Singleton, "               
-	     << namespaceQualifier << name_
-             << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
-	break;
-      case INSTANCE_UNMANAGED:
-	ostr << spaces.left(indent) << exportUpper
-	     << "_SINGLETON_DECLARE(ACE_Unmanaged_Singleton, "
-	     << namespaceQualifier << name_
-	     << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
-	break;
-      case INSTANCE_USER:
-	ostr << spaces.left(indent) << exportUpper
-	     << "_SINGLETON_DECLARATION(" << userSingleton_ << "< "
-	     << namespaceQualifier << name_
-	     << "Parameters >);" << std::endl;
-	break;
-      case INSTANCE_DLL:
-      case INSTANCE_NONE:
-	break;
+        case INSTANCE_MANAGED:
+          ostr << spaces.left(indent) << exportUpper
+               << "_SINGLETON_DECLARE(ACE_Singleton, "
+               << namespaceQualifier << name_
+               << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
+          break;
+        case INSTANCE_UNMANAGED:
+          ostr << spaces.left(indent) << exportUpper
+               << "_SINGLETON_DECLARE(ACE_Unmanaged_Singleton, "
+               << namespaceQualifier << name_
+               << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
+          break;
+        case INSTANCE_USER:
+          ostr << spaces.left(indent) << exportUpper
+               << "_SINGLETON_DECLARATION(" << userSingleton_ << "< "
+               << namespaceQualifier << name_
+               << "Parameters >);" << std::endl;
+          break;
+        case INSTANCE_DLL:
+        case INSTANCE_NONE:
+          break;
       }
 
     }
@@ -348,14 +351,14 @@ namespace Miro
         // debug ostream operator
         if (parent_.isEmpty()) {
           ostr << spaces.left(indent) << "std::ostream&" << std::endl
-          << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs)" << std::endl
-          << spaces.left(indent) << "{" << std::endl;
+               << spaces.left(indent) << "operator << (std::ostream& ostr, const " << name_ << "Parameters& rhs)" << std::endl
+               << spaces.left(indent) << "{" << std::endl;
           indent += STEP;
           ostr << spaces.left(indent) << "rhs.printToStream(ostr);" << std::endl
-          << spaces.left(indent) << "return ostr;" << std::endl;
+               << spaces.left(indent) << "return ostr;" << std::endl;
           indent -= STEP;
           ostr << spaces.left(indent) << "}" << std::endl
-          << std::endl;
+               << std::endl;
         }
 
         // static data members
@@ -368,8 +371,8 @@ namespace Miro
         // const static data members
         for (j = staticConstParameter_.begin(); j != staticConstParameter_.end(); ++j) {
           ostr << spaces.left(indent) << "const "
-          << ((j->type_ != "angle") ? j->type_ : QString("double"))
-          << " " << name_ << "Parameters::" << j->name_;
+               << ((j->type_ != "angle") ? j->type_ : QString("double"))
+               << " " << name_ << "Parameters::" << j->name_;
 
           if (!isIntegralType(j->type_)) {
             ostr << "(" << j->fullDefault_ << ")";
@@ -390,12 +393,12 @@ namespace Miro
             if (j != parameter_.begin())
               ostr << ",";
             ostr << std::endl
-            << spaces.left(indent) << j->name_ << "(" << j->fullDefault_ << ")";
+                 << spaces.left(indent) << j->name_ << "(" << j->fullDefault_ << ")";
           }
           indent -= 2;
         }
         ostr << std::endl
-        << spaces.left(indent) << "{" << std::endl;
+             << spaces.left(indent) << "{" << std::endl;
 
         indent += STEP;
         for (i = ctor_.begin(); i != ctor_.end(); ++i)
@@ -403,27 +406,27 @@ namespace Miro
         indent -= STEP;
 
         ostr << spaces.left(indent) << "}" << std::endl
-        << std::endl;
+             << std::endl;
 
         // destructor
         if (parent_.isEmpty())
           ostr << spaces.left(indent) << name_ << "Parameters::~" << name_ << "Parameters()" << std::endl
-          << spaces.left(indent) << "{}" << std::endl
-          << std::endl;
+               << spaces.left(indent) << "{}" << std::endl
+               << std::endl;
 
         // type information
         ostr << spaces.left(indent) << "char const *" << std::endl
-        << spaces.left(indent) << name_ << "Parameters::fullTypeName() const throw()" << std::endl
-        << spaces.left(indent) << "{" << std::endl
-        << spaces.left(indent + 2) << "return \"" << fullName() << "\";" << std::endl
-        << spaces.left(indent) << "}" << std::endl
-        << std::endl;
+             << spaces.left(indent) << name_ << "Parameters::fullTypeName() const throw()" << std::endl
+             << spaces.left(indent) << "{" << std::endl
+             << spaces.left(indent + 2) << "return \"" << fullName() << "\";" << std::endl
+             << spaces.left(indent) << "}" << std::endl
+             << std::endl;
 
         if (parameter_.size() > 0 || parent_.isEmpty()) {
 
           // operator <<=
           ostr << spaces.left(indent) << "void" << std::endl
-          << spaces.left(indent) << name_ << "Parameters::operator <<= (const QDomNode&";
+               << spaces.left(indent) << name_ << "Parameters::operator <<= (const QDomNode&";
           if (parameter_.size() > 0 || !parent_.isEmpty())
             ostr << " _node";
           ostr << ")" << std::endl;
@@ -432,36 +435,36 @@ namespace Miro
 
           // operator >>=
           ostr << spaces.left(indent) << "QDomElement" << std::endl
-          << spaces.left(indent) << name_ << "Parameters::operator >>= (QDomNode& _node) const" << std::endl;
+               << spaces.left(indent) << name_ << "Parameters::operator >>= (QDomNode& _node) const" << std::endl;
           generateQDomInOperator(ostr, "this->", indent);
 
-#if JSONCPP_FOUND
-	  if (useJson_) {
-	      // operator <<=
-	    ostr << spaces.left(indent) << "void" << std::endl
-		 << spaces.left(indent) << name_ << "Parameters::operator <<= (const Json::Value&";
-	    if (parameter_.size() > 0 || !parent_.isEmpty())
-		ostr << " _node";
-	    ostr << ")" << std::endl;
-	    generateJsonOutOperator(ostr, "this->", indent);
+#if MIRO_HAS_JSON
+          if (useJson_) {
+            // operator <<=
+            ostr << spaces.left(indent) << "void" << std::endl
+                 << spaces.left(indent) << name_ << "Parameters::operator <<= (const Json::Value&";
+            if (parameter_.size() > 0 || !parent_.isEmpty())
+              ostr << " _node";
+            ostr << ")" << std::endl;
+            generateJsonOutOperator(ostr, "this->", indent);
 
-	    // operator >>=
-	    ostr << spaces.left(indent) << "Json::Value" << std::endl
-		 << spaces.left(indent) << name_ << "Parameters::operator >>= (Json::Value& _node) const" << std::endl;
-	    generateJsonInOperator(ostr, "this->", indent);
-	  }
-#endif // JSONCPP_FOUND
+            // operator >>=
+            ostr << spaces.left(indent) << "Json::Value" << std::endl
+                 << spaces.left(indent) << name_ << "Parameters::operator >>= (Json::Value& _node) const" << std::endl;
+            generateJsonInOperator(ostr, "this->", indent);
+          }
+#endif // MIRO_HAS_JSON
 
           // stream output
           ostr << std::endl
-          << spaces.left(indent) << "void" << std::endl
-          << spaces.left(indent) << name_ << "Parameters::printToStream(std::ostream&";
+               << spaces.left(indent) << "void" << std::endl
+               << spaces.left(indent) << name_ << "Parameters::printToStream(std::ostream&";
           if (parameter_.size() > 0 || !parent_.isEmpty())
             ostr << " ostr";
           ostr << ", bool isSuper) const" << std::endl
-          << spaces.left(indent) << "{" << std::endl;
+               << spaces.left(indent) << "{" << std::endl;
           indent += STEP;
-          
+
           if (!parent_.isEmpty()) {
             ostr << spaces.left(indent) << "if (!isSuper) {" << std::endl;
             //ostr << spaces.left(indent) << "  ostr << \"" << name_ << "Parameters {\" << std::endl;" << std::endl;
@@ -470,7 +473,7 @@ namespace Miro
 
             ostr << spaces.left(indent) << "Super::printToStream(ostr, true);" << std::endl << std::endl;
           }
-          
+
           if (parameter_.size() > 0) {
             ostr << spaces.left(indent) << "ostr << ";
             indent += 5;
@@ -478,7 +481,7 @@ namespace Miro
               if (j != parameter_.begin()) {
                 ostr << std::endl << spaces.left(indent) << "<< ";
               }
-              
+
               if (!j->description_.isEmpty()) {
                 ostr << "\"  /* " << j->description_ << " */\" << std::endl\n" << spaces.left(indent) << "<< ";
               }
@@ -495,20 +498,20 @@ namespace Miro
 
               if (!j->measure_.isEmpty())
                 ostr << " << \" " << j->measure_ << "\"";
-                
+
               ostr << " << \" } \" << std::endl";
             }
             ostr << ";" << std::endl;
             indent -= 5;
           }
-          
+
           //if (!parent_.isEmpty()) {
           //  ostr << std::endl;
           //  ostr << spaces.left(indent) << "if (!isSuper) {" << std::endl;
           //  ostr << spaces.left(indent) << "  ostr << \"}\" << std::endl;" << std::endl;
           //  ostr << spaces.left(indent) << "}" << std::endl << std::endl;
           //}
-          
+
           indent -= STEP;
           ostr << spaces.left(indent) << "}" << std::endl;
         }
@@ -516,29 +519,29 @@ namespace Miro
       else {
         // operator <<=
         ostr << spaces.left(indent) << "void" << std::endl
-        << spaces.left(indent) << "operator<<= (" << name_ << "& _lhs, const QDomNode& _node)" << std::endl;
+             << spaces.left(indent) << "operator<<= (" << name_ << "& _lhs, const QDomNode& _node)" << std::endl;
 
         generateQDomOutOperator(ostr, "_lhs.", indent);
 
         // operator >>=
         ostr << spaces.left(indent) << "QDomElement" << std::endl
-        << spaces.left(indent) << "operator>>= (const " << name_ << "& _lhs, QDomNode& _node)" << std::endl;
+             << spaces.left(indent) << "operator>>= (const " << name_ << "& _lhs, QDomNode& _node)" << std::endl;
         generateQDomInOperator(ostr, "_lhs.", indent);
 
-#if JSONCPP_FOUND
-	if (useJson_) {
+#if MIRO_HAS_JSON
+        if (useJson_) {
           // operator <<=
           ostr << spaces.left(indent) << "void" << std::endl
-	       << spaces.left(indent) << "operator<<= (" << name_ << "& _lhs, const Json::Value& _node)" << std::endl;
+               << spaces.left(indent) << "operator<<= (" << name_ << "& _lhs, const Json::Value& _node)" << std::endl;
 
-	  generateJsonOutOperator(ostr, "_lhs.", indent);
+          generateJsonOutOperator(ostr, "_lhs.", indent);
 
-	  // operator >>=
-	  ostr << spaces.left(indent) << "Json::Value" << std::endl
-	       << spaces.left(indent) << "operator>>= (const " << name_ << "& _lhs, Json::Value& _node)" << std::endl;
-	  generateJsonInOperator(ostr, "_lhs.", indent);
-	}
-#endif // JSONCPP_FOUND
+          // operator >>=
+          ostr << spaces.left(indent) << "Json::Value" << std::endl
+               << spaces.left(indent) << "operator>>= (const " << name_ << "& _lhs, Json::Value& _node)" << std::endl;
+          generateJsonInOperator(ostr, "_lhs.", indent);
+        }
+#endif // MIRO_HAS_JSON
       }
     }
 
@@ -554,20 +557,20 @@ namespace Miro
 
       if (!parent_.isEmpty())
         ostr << spaces.left(indent) << classPrefix << "Super::operator <<= (_node);" << std::endl
-        << std::endl;
+             << std::endl;
       if (parameter_.size() > 0) {
         ostr << spaces.left(indent) << "if (!_node.isNull()) {" << std::endl;
         indent += STEP;
         ostr << spaces.left(indent) << "QDomNode n = _node.firstChild();" << std::endl
-        << spaces.left(indent) << "while(!n.isNull() ) {" << std::endl;
+             << spaces.left(indent) << "while(!n.isNull() ) {" << std::endl;
         indent += STEP;
 
         ostr << spaces.left(indent) << "QDomElement e = n.toElement();" << std::endl
-        << spaces.left(indent) << "if( !e.isNull() ) {" << std::endl;
+             << spaces.left(indent) << "if( !e.isNull() ) {" << std::endl;
         indent += STEP;
 
         ostr << spaces.left(indent) << "QDomAttr a = e.attributeNode(\"name\");" << std::endl
-        << spaces.left(indent) << "if (!a.isNull()) {" << std::endl;
+             << spaces.left(indent) << "if (!a.isNull()) {" << std::endl;
         indent += STEP;
 
         ostr << spaces.left(indent) << "QString i = a.value();" << std::endl;
@@ -575,11 +578,7 @@ namespace Miro
         ParameterVector::const_iterator j;
         for (j = parameter_.begin(); j != parameter_.end(); ++j) {
           QString name(j->name_);
-#if QT_VERSION >= 0x040000
           name[0] = name[0].toUpper();
-#else
-          name[0] = name[0].upper();
-#endif
           ostr << spaces.left(indent);
           if (j != parameter_.begin())
             ostr << "else ";
@@ -588,7 +587,7 @@ namespace Miro
           ostr << spaces.left(indent) << classPrefix << j->name_ << " <<= n;" << std::endl;
           if (j->type_ == "angle")
             ostr << spaces.left(indent) << classPrefix << j->name_
-            << " = Miro::deg2Rad(" << classPrefix << j->name_ << ");" << std::endl;
+                 << " = Miro::deg2Rad(" << classPrefix << j->name_ << ");" << std::endl;
 
           indent -= STEP;
           ostr << spaces.left(indent) << "}" << std::endl;
@@ -598,7 +597,7 @@ namespace Miro
         ostr << spaces.left(indent) << "}" << std::endl;
         indent -= STEP;
         ostr << spaces.left(indent) << "}" << std::endl
-        << spaces.left(indent) << "n = n.nextSibling();" << std::endl;
+             << spaces.left(indent) << "n = n.nextSibling();" << std::endl;
         indent -= STEP;
         ostr << spaces.left(indent) << "}" << std::endl;
       }
@@ -630,11 +629,7 @@ namespace Miro
       ParameterVector::const_iterator j;
       for (j = parameter_.begin(); j != parameter_.end(); ++j) {
         QString name(j->name_);
-#if QT_VERSION >= 0x040000
         name[0] = name[0].toUpper();
-#else
-        name[0] = name[0].upper();
-#endif
 
         if (j->type_ != "angle")
           ostr << spaces.left(indent) << "g = (" << classPrefix << j->name_ << " >>= e);" << std::endl;
@@ -645,12 +640,12 @@ namespace Miro
       }
 
       ostr << std::endl
-      << spaces.left(indent) << "return e;" << std::endl;
+           << spaces.left(indent) << "return e;" << std::endl;
       indent -= STEP;
       ostr << spaces.left(indent) << "}" << std::endl;
     }
 
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
     // operator <<=
     void
     Type::generateJsonOutOperator(std::ostream& ostr,
@@ -663,7 +658,7 @@ namespace Miro
 
       if (!parent_.isEmpty())
         ostr << spaces.left(indent) << classPrefix << "Super::operator <<= (_node);" << std::endl
-	     << std::endl;
+             << std::endl;
       if (parameter_.size() > 0) {
         ostr << spaces.left(indent) << "if (!_node.isNull()) {" << std::endl;
         indent += STEP;
@@ -673,8 +668,8 @@ namespace Miro
           ostr << spaces.left(indent) << classPrefix << j->name_ << " <<= _node[\"" << j->name_ << "\"];" << std::endl;
           if (j->type_ == "angle") {
             ostr << spaces.left(indent) << classPrefix << j->name_
-		 << " = Miro::deg2Rad(" << classPrefix << j->name_ << ");" << std::endl;
-	  }
+                 << " = Miro::deg2Rad(" << classPrefix << j->name_ << ");" << std::endl;
+          }
         }
 
         indent -= STEP;
@@ -700,19 +695,20 @@ namespace Miro
 
       ParameterVector::const_iterator j;
       for (j = parameter_.begin(); j != parameter_.end(); ++j) {
-	if (j->type_ != "angle") {
-	  ostr << spaces.left(indent) << classPrefix << j->name_ << " >>= _node[\"" << j->name_ << "\"];" << std::endl;
-        } else {
-	  ostr << spaces.left(indent) << "Miro::rad2Deg(" << classPrefix << j->name_ << ") >>= _node[\"" << j->name_ << "\"];" << std::endl;
-	}
+        if (j->type_ != "angle") {
+          ostr << spaces.left(indent) << classPrefix << j->name_ << " >>= _node[\"" << j->name_ << "\"];" << std::endl;
+        }
+        else {
+          ostr << spaces.left(indent) << "Miro::rad2Deg(" << classPrefix << j->name_ << ") >>= _node[\"" << j->name_ << "\"];" << std::endl;
+        }
       }
 
       ostr << std::endl
-	   << spaces.left(indent) << "return _node;" << std::endl;
+           << spaces.left(indent) << "return _node;" << std::endl;
       indent -= STEP;
       ostr << spaces.left(indent) << "}" << std::endl;
     }
-#endif // JSONCPP_FOUND
+#endif // MIRO_HAS_JSON
 
     bool
     Type::isIntegralType(QString const& _type)

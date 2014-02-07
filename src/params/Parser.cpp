@@ -23,44 +23,46 @@
 #include "Parser.h"
 #include "Generator.h"
 #include "Parameter.h"
+#include "MiroConfig.h"
 
 #include <qstring.h>
 
-namespace 
+namespace
 {
   QString currentParameterName;
 }
 
 namespace Miro
 {
-  namespace CFG {
+  namespace CFG
+  {
     Parser::Parser(Generator& _generator) :
-        type_(),
-        generator_(_generator),
-        parsing_(false),
-        parameterParsing_(false),
-        docuParsing_(false),
-        ctorParsing_(false),
+      type_(),
+      generator_(_generator),
+      parsing_(false),
+      parameterParsing_(false),
+      docuParsing_(false),
+      ctorParsing_(false),
 
-        staticConst_(false),
-        instance_(false),
-        unmanaged_(false),
-        userSingleton_(false),
-        userSingletonName_(),
-        string_(false),
-        enumeration_(false),
-        enumerationMultiple_(false),
-        vector_(false),
-        set_(false),
-        angle_(false),
-        timeValue_(false),
-        inetAddr_(false),
-        serialParams_(false),
-        scanDescription_(false),
-        schedParams_(false),
-        text_(false)
-#if JSONCPP_FOUND
-	, useJson_(false)
+      staticConst_(false),
+      instance_(false),
+      unmanaged_(false),
+      userSingleton_(false),
+      userSingletonName_(),
+      string_(false),
+      enumeration_(false),
+      enumerationMultiple_(false),
+      vector_(false),
+      set_(false),
+      angle_(false),
+      timeValue_(false),
+      inetAddr_(false),
+      serialParams_(false),
+      scanDescription_(false),
+      schedParams_(false),
+      text_(false)
+#if MIRO_HAS_JSON
+      ,useJson_(false)
 #endif
     {
     }
@@ -98,7 +100,7 @@ namespace Miro
 
     bool Parser::startDocument()
     {
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       generator_.setUseJson(useJson_);
 #endif
       return true;
@@ -182,18 +184,14 @@ namespace Miro
             error_ = "No group name specified.";
             break;
           }
-#if QT_VERSION >= 0x040000
           str[0] = str[0].toUpper();
-#else
-          str[0] = str[0].upper();
-#endif
           group_ = str;
         }
         else if (qName == "config_item") {
 
           type_ = Type();
-#if JSONCPP_FOUND
-	  type_.setUseJson(useJson_);
+#if MIRO_HAS_JSON
+          type_.setUseJson(useJson_);
 #endif
 
           // get class name
@@ -236,12 +234,12 @@ namespace Miro
           else if (instance == QString("unmanaged")) {
             instance_ = true;
             unmanaged_ = true;
-          } 
+          }
           else if (!instance.isEmpty()) {
             instance_ = true;
             userSingleton_ = true;
             userSingletonName_ = instance;
-          } 
+          }
         }
         else if (parsing_) {
           if (qName == "config_parameter") {
@@ -252,13 +250,9 @@ namespace Miro
               error_ = "No parameter name specified.";
               break;
             }
-	    currentParameterName = name;
+            currentParameterName = name;
 
-#if QT_VERSION >= 0x040000
             name[0] = name[0].toLower();
-#else
-            name[0] = name[0].lower();
-#endif
             QString type = attributes.value("type");
             if (type.isEmpty()) {
               error_ = "No parameter type specified.";
@@ -350,14 +344,10 @@ namespace Miro
             if (!doc.isNull() && !doc.endsWith('.')) {
               doc += ".";
             }
-            
+
             // parse for common ACE_Time_Value default error
             QString fullDef;
-#if QT_VERSION >= 0x040000
             if (type == "ACE_Time_Value" && def.contains('.'))
-#else
-            if (type == "ACE_Time_Value" && def.find('.') != -1)
-#endif
             {
               error_ = "ACE_Time_Value format is (x, y), no dot.";
               break;
@@ -400,15 +390,7 @@ namespace Miro
                 error_ = "Static const declaration without default value for " + type_.name();
                 break;
               }
-              // XXX mallan: qstring generating ambiguous overload errors on windows
-              //for (unsigned int i = 0; i < name.length(); ++i) {
-              //  name[i] = name[i].upper();
-              //}
-#if QT_VERSION >= 0x040000
               name = name.toUpper();
-#else
-              name = name.upper();
-#endif
             }
 
             // inherited parameter handling
@@ -509,40 +491,40 @@ namespace Miro
             generator_.addInclude("ace/Time_Value.h");
             generator_.addSrcInclude("miro/TimeHelper.h");
             generator_.addSrcInclude("miro/XmlParseAce.h");
-#if JSONCPP_FOUND
-	    if (useJson_) {
-		generator_.addSrcInclude("miro/JsonParseAce.h");
-	    }
+#if MIRO_HAS_JSON
+            if (useJson_) {
+              generator_.addSrcInclude("miro/JsonParseAce.h");
+            }
 #endif
           }
           if (serialParams_) {
             generator_.addInclude("ace/TTY_IO.h");
             generator_.addSrcInclude("miro/MiroIO.h");
             generator_.addSrcInclude("miro/XmlParseAce.h");
-#if JSONCPP_FOUND
-	    if (useJson_) {
-		generator_.addSrcInclude("miro/JsonParseAce.h");
-	    }
+#if MIRO_HAS_JSON
+            if (useJson_) {
+              generator_.addSrcInclude("miro/JsonParseAce.h");
+            }
 #endif
           }
           if (schedParams_) {
             generator_.addInclude("ace/Sched_Params.h");
             generator_.addSrcInclude("miro/MiroIO.h");
             generator_.addSrcInclude("miro/XmlParseAce.h");
-#if JSONCPP_FOUND
-	    if (useJson_) {
-		generator_.addSrcInclude("miro/JsonParseAce.h");
-	    }
+#if MIRO_HAS_JSON
+            if (useJson_) {
+              generator_.addSrcInclude("miro/JsonParseAce.h");
+            }
 #endif
           }
           if (inetAddr_) {
             generator_.addInclude("ace/INET_Addr.h");
             generator_.addSrcInclude("miro/MiroIO.h");
             generator_.addSrcInclude("miro/XmlParseAce.h");
-#if JSONCPP_FOUND
-	    if (useJson_) {
-		generator_.addSrcInclude("miro/JsonParseAce.h");
-	    }
+#if MIRO_HAS_JSON
+            if (useJson_) {
+              generator_.addSrcInclude("miro/JsonParseAce.h");
+            }
 #endif
           }
           if (scanDescription_) {
@@ -550,17 +532,17 @@ namespace Miro
             generator_.addSrcInclude("idl/RangeSensorC.h");
             generator_.addSrcInclude("miro/ScanDescriptionHelper.h");
           }
-#if JSONCPP_FOUND
-	  if (useJson_) {
-	    generator_.addSrcInclude("miro/JsonCpp.h");
-	  }
+#if MIRO_HAS_JSON
+          if (useJson_) {
+            generator_.addSrcInclude("miro/JsonCpp.h");
+          }
 #endif
           generator_.addType(group_, type_);
 
           reset();
         }
         else if (parameterParsing_ && qName == "config_parameter") {
-	  currentParameterName = "";
+          currentParameterName = "";
           parameterParsing_ = false;
         }
         else if (ctorParsing_ && qName == "constructor") {
@@ -570,12 +552,12 @@ namespace Miro
         }
         else if (docuParsing_ && qName == "documentation") {
           docuParsing_ = false;
-	  if (parameterParsing_) {
-	    type_.addToParameterDocumentation(currentParameterName, docu_);
-	  }
-	  else {
-	    type_.addToDocumentation(docu_);
-	  }
+          if (parameterParsing_) {
+            type_.addToParameterDocumentation(currentParameterName, docu_);
+          }
+          else {
+            type_.addToDocumentation(docu_);
+          }
           docu_ = "";
         }
 
@@ -586,7 +568,8 @@ namespace Miro
     }
 
     QString
-    Parser::errorString() const {
+    Parser::errorString() const
+    {
       return error_;
     }
 

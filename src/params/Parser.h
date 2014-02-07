@@ -34,7 +34,8 @@ class QString;
 
 namespace Miro
 {
-  namespace CFG {
+  namespace CFG
+  {
     // forward declarations
     class Generator;
 
@@ -52,9 +53,13 @@ namespace Miro
       QString errorString() const;
       bool characters(QString const& ch);
 
-#if JSONCPP_FOUND
-      void setUseJson(bool _useJson) { useJson_ = _useJson; }
-      bool getUseJson(void) { return useJson_; }
+#if MIRO_HAS_JSON
+      void setUseJson(bool _useJson) {
+        useJson_ = _useJson;
+      }
+      bool getUseJson(void) {
+        return useJson_;
+      }
 #endif
 
     private:
@@ -92,7 +97,7 @@ namespace Miro
       QString ctor_;
       QString error_;
 
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       bool useJson_;
 #endif
     };

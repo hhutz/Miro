@@ -37,6 +37,7 @@
 #include <qdatetime.h>
 #endif // WIN32
 
+#include "MiroConfig.h"
 #include "qt_compatibility.h"
 
 
@@ -50,9 +51,10 @@ namespace
 
 namespace Miro
 {
-  namespace CFG {
+  namespace CFG
+  {
     Generator::Generator()
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       : useJson_(false)
 #endif
     {
@@ -144,11 +146,11 @@ namespace Miro
 
       ostr << head << std::endl;
       ostr << "#ifndef " << includeGuard
-      << "_" << unique // make it truely unique
-      << std::endl
-      << "#define " << includeGuard
-      << "_" << unique // make it truely unique
-      << std::endl;
+           << "_" << unique // make it truely unique
+           << std::endl
+           << "#define " << includeGuard
+           << "_" << unique // make it truely unique
+           << std::endl;
 
       QStringSet::const_iterator i;
       if (include_.size() > 0)
@@ -174,7 +176,7 @@ namespace Miro
         ostr << std::endl;
       }
 
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       if (useJson_) {
         ostr << "namespace Json {" << std::endl;
         ostr << "  class Value;" << std::endl;
@@ -185,7 +187,7 @@ namespace Miro
       QStringVector::const_iterator f, l = namespace_.end();
       for (f = namespace_.begin(); f != l; ++f) {
         ostr << spaces.left(indent) << "namespace " <<  *f << std::endl
-        << spaces.left(indent) << "{" << std::endl;
+             << spaces.left(indent) << "{" << std::endl;
         indent += STEP;
       }
 
@@ -211,25 +213,25 @@ namespace Miro
       }
 
       if (!exportDirective.isEmpty()) {
-	QString namespaceQualifier;
-	QStringVector::const_iterator f, l = namespace_.end();
-	for (f = namespace_.begin(); f != l; ++f) {
-	  namespaceQualifier += *f;
-	  namespaceQualifier += "::";
-	}
-	TypeVector::const_iterator first, last = type_.end();
-	for (first = type_.begin(); first != last; ++first) {
-	  if (first != type_.begin())
-	    ostr << std::endl;
-	  if (!first->isDummy())
-	    first->generateSingleton(ostr, indent,
-				     namespaceQualifier,
-				     exportDirective);
-	}
+        QString namespaceQualifier;
+        QStringVector::const_iterator f, l = namespace_.end();
+        for (f = namespace_.begin(); f != l; ++f) {
+          namespaceQualifier += *f;
+          namespaceQualifier += "::";
+        }
+        TypeVector::const_iterator first, last = type_.end();
+        for (first = type_.begin(); first != last; ++first) {
+          if (first != type_.begin())
+            ostr << std::endl;
+          if (!first->isDummy())
+            first->generateSingleton(ostr, indent,
+                                     namespaceQualifier,
+                                     exportDirective);
+        }
       }
 
       ostr << std::endl
-      << "#endif // " << fileName_ << "_" << extensionName_ << std::endl;
+           << "#endif // " << fileName_ << "_" << extensionName_ << std::endl;
     }
 
     void
@@ -242,40 +244,40 @@ namespace Miro
 
       ostr << head << std::endl;
       ostr << "#include \"" << fileName_ << "." << extensionName_ << "\"" << std::endl
-      << std::endl;
+           << std::endl;
 
       QStringSet::const_iterator i;
       for (i = srcInclude_.begin(); i != srcInclude_.end(); ++i)
         ostr << "#include <" << *i << ">" << std::endl;
 
       ostr << "#include <miro/XmlParse.h>" << std::endl
-      << "#include <qdom.h>" << std::endl
-      << std::endl;
+           << "#include <qdom.h>" << std::endl
+           << std::endl;
 
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       if (useJson_) {
         ostr << "#include <miro/JsonParse.h>" << std::endl;
       }
 #endif
 
       ostr << "#ifdef  HAVE_CONFIG_H\n"
-      "#include \"config.h\"\n"
-      "#endif//HAVE_CONFIG_H\n\n";
+           "#include \"config.h\"\n"
+           "#endif//HAVE_CONFIG_H\n\n";
 
       QStringVector::const_iterator f, l = namespace_.end();
       for (f = namespace_.begin(); f != l; ++f) {
         ostr << spaces.left(indent) << "namespace " <<  *f << std::endl
-        << spaces.left(indent) << "{" << std::endl;
+             << spaces.left(indent) << "{" << std::endl;
         indent += STEP;
       }
 
       // match the operator <<= from Miro into local namespace
       if (namespace_.empty() ||
-	  namespace_.front() != QString("Miro")) {
+          namespace_.front() != QString("Miro")) {
         ostr << spaces.left(indent) << "using Miro::operator<<=;" << std::endl
-	     << spaces.left(indent) << "using Miro::operator>>=;" << std::endl
-	     << spaces.left(indent) << "using Miro::operator<<;" << std::endl
-	     << std::endl;
+             << spaces.left(indent) << "using Miro::operator>>=;" << std::endl
+             << spaces.left(indent) << "using Miro::operator<<;" << std::endl
+             << std::endl;
       }
 
       TypeVector::const_iterator first, last = type_.end();
@@ -301,11 +303,7 @@ namespace Miro
       GroupMap::const_iterator first, last = groups_.end();
       for (first = groups_.begin(); first != last; ++first) {
         result.push_back(first->first);
-#if QT_VERSION >= 0x040000
         result.back()[0] = result.back()[0].toUpper();
-#else // QT_VERSION >= 0x040000
-        result.back()[0] = result.back()[0].upper();
-#endif // QT_VERSION >= 0x040000
       }
       std::sort(result.begin(), result.end());
       // FIXME: this should actually
@@ -328,9 +326,9 @@ namespace Miro
       TypeVector::const_iterator first, last = type_.end();
       for (first = type_.begin(); first != last; ++first)
         if (first->name() == _name ||
-              first->name() + "Parameters" == _name ||
-              first->fullName() == _name ||
-              first->fullName() == _name + "Parameters") {
+            first->name() + "Parameters" == _name ||
+            first->fullName() == _name ||
+            first->fullName() == _name + "Parameters") {
 
 #ifdef GCC_MAJOR_VERSION
 #if GCC_MAJOR_VERSION > 2

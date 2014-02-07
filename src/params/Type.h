@@ -24,6 +24,7 @@
 #define Miro_CFG_Type_h
 
 #include "Parameter.h"
+#include "MiroConfig.h"
 
 #include <vector>
 #include <set>
@@ -31,7 +32,8 @@
 
 namespace Miro
 {
-  namespace CFG {
+  namespace CFG
+  {
     //! Class defining a parameter type.
     class Type
     {
@@ -89,8 +91,10 @@ namespace Miro
       void setUserInstance(QString const& singletonType);
       //! Predicate inidcating the type has a single global instance.
       bool instance() const;
-#if JSONCPP_FOUND
-      void setUseJson(bool _useJson) { useJson_ = _useJson; }
+#if MIRO_HAS_JSON
+      void setUseJson(bool _useJson) {
+        useJson_ = _useJson;
+      }
 #endif
       //! Query the documentation of the type.
       QString documentation() const;
@@ -113,9 +117,9 @@ namespace Miro
 
       //! Generate header file code.
       void generateHeader(std::ostream& ostr, unsigned int _indent, const QString& exportDirective = QString::null) const;
-      void generateSingleton(std::ostream& ostr, unsigned int _indent, 
-			     QString const& namespaceQualifier,
-			     QString const& exportDirective) const;
+      void generateSingleton(std::ostream& ostr, unsigned int _indent,
+                             QString const& namespaceQualifier,
+                             QString const& exportDirective) const;
       //! Generate source file code.
       void generateSource(std::ostream& ostr, unsigned int _indent) const;
 
@@ -143,10 +147,10 @@ namespace Miro
       void generateQDomInOperator(std::ostream& ostr,
                                   QString const& classPrefix,
                                   unsigned int indent) const;
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       void generateJsonOutOperator(std::ostream& ostr,
-				   QString const& classPrefix,
-				   unsigned int indent) const;
+                                   QString const& classPrefix,
+                                   unsigned int indent) const;
       void generateJsonInOperator(std::ostream& ostr,
                                   QString const& classPrefix,
                                   unsigned int indent) const;
@@ -178,7 +182,7 @@ namespace Miro
       ParameterVector staticConstParameter_;
 
       QStringMap parameterDocumentation_;
-#if JSONCPP_FOUND
+#if MIRO_HAS_JSON
       bool useJson_;
 #endif
 
@@ -295,12 +299,14 @@ namespace Miro
     {
       return nameSpace_;
     }
+
     inline
     bool
     Type::instance() const
     {
       return instance_ != INSTANCE_NONE;
     }
+
     inline
     void
     Type::setInstance()
@@ -311,6 +317,7 @@ namespace Miro
 
       instance_ = INSTANCE_MANAGED;
     }
+
     inline
     void
     Type::setUnmanagedInstance()
@@ -321,6 +328,7 @@ namespace Miro
 
       instance_ = INSTANCE_UNMANAGED;
     }
+
     inline
     void
     Type::setUserInstance(QString const& singletonType)

@@ -13,7 +13,6 @@
 # MIRO_miro_LIBRARY     
 # MIRO_miroBase_LIBRARY    
 # MIRO_miroCore_LIBRARY    
-# MIRO_miroDds_LIBRARY    
 # MIRO_miroParams_LIBRARY    
 # MIRO_miroWidgets_LIBRARY    
 # MIRO_miroXml_LIBRARY    
@@ -39,14 +38,16 @@ include( GenerateMiroMakeParams )
 if( NOT MIRO_MAKEPARAMS_EXECUTABLE )
   # verify the presence of the miro "MakeParams" 
   # executable
-  #------------------------------------------------
-  find_program( MIRO_MAKEPARAMS_EXECUTABLE MakeParams
-    ${MIRO_ROOT_DIR}/bin
-    $ENV{MIRO_ROOT}/bin
-    ${PROJ_SRC_PARENT}/${ARCHITECTURE}/bin
-    ${PROJ_SRC_PARENT}/Miro/bin
-    ${LOCAL_RELEASES}/roversw/${ARCHITECTURE}/bin
-    NO_SYSTEM_ENVIRONMENT_PATH
+ #------------------------------------------------
+  find_program( MIRO_MAKEPARAMS_EXECUTABLE 
+    NAME MakeParams
+    HINTS
+      ${MIRO_ROOT_DIR}
+      $ENV{MIRO_ROOT}
+      ${PROJ_SRC_PARENT}/${ARCHITECTURE}
+      ${PROJ_SRC_PARENT}
+      ${IRG_PACKAGES_DIR}/Miro
+    PATH_SUFFIXES bin
     DOC "Miro MakeParams executable"
   )
 endif( NOT MIRO_MAKEPARAMS_EXECUTABLE )
@@ -67,7 +68,6 @@ if( MIRO_ROOT_DIR )
     miro 
     miroBase
     miroCore
-    miroDds
     miroParams
     miroWidgets
     miroXml
@@ -75,12 +75,21 @@ if( MIRO_ROOT_DIR )
   )
 
   get_library_list(MIRO ${MIRO_LIBRARY_DIR} "d" "${LIBRARY_NAMES}")
-
-  # experimental:
   get_library_imports(Miro "${MIRO_LIBRARY_DIR}" "${LIBRARY_NAMES}")
 
+  find_file( MIRO_CONFIG_H MiroConfig.h PATHS ${MIRO_INCLUDE_DIR} NO_DEFAULT_PATH)
+  if(MIRO_CONFIG_H)
+    file(STRINGS ${MIRO_CONFIG_H} Miro_VERSIONS_TMP REGEX "^#define MIRO_VERSION_[A-Z]+[ \t]+[0-9]+$")
+    string(REGEX REPLACE ".*#define MIRO_VERSION_MAJOR[ \t]+([0-9]+).*" "\\1" MIRO_VERSION_MAJOR ${Miro_VERSIONS_TMP})
+    string(REGEX REPLACE ".*#define MIRO_VERSION_MINOR[ \t]+([0-9]+).*" "\\1" MIRO_VERSION_MINOR ${Miro_VERSIONS_TMP})
+    string(REGEX REPLACE ".*#define MIRO_VERSION_PATCH[ \t]+([0-9]+).*" "\\1" MIRO_VERSION_PATCH ${Miro_VERSIONS_TMP})
+    set(MIRO_VERSION ${MIRO_VERSION_MAJOR}.${MIRO_VERSION_MINOR}.${MIRO_VERSION_PATCH} CACHE STRING "" FORCE)
+  else(MIRO_CONFIG_H)
+    set(MIRO_VERSION "UNKNOWN")
+  endif(MIRO_CONFIG_H)
+  
   set( MIRO_FOUND TRUE )
-  message(STATUS "  Found Miro in ${MIRO_ROOT_DIR}")
+  message(STATUS "  Found Miro version ${MIRO_VERSION} in ${MIRO_ROOT_DIR}")
   
   set(MIRO_DEPEND_FILE "${MIRO_ROOT_DIR}/cmake/Miro.cmake")
 
