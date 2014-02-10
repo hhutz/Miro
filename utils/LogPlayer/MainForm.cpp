@@ -18,6 +18,10 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3PROGRESSDIALOG
+
 #include "MainForm.h"
 #include "LogFile.h"
 #include "FileSet.h"
@@ -43,7 +47,11 @@
 #include <qlcdnumber.h>
 #include <qtimer.h>
 #include <qdial.h>
+#ifdef LSB_Q3PROGRESSDIALOG
+#include <QProgressDialog>
+#else
 #include <q3progressdialog.h>
+#endif
 #include <qmessagebox.h>
 #include <qinputdialog.h>
 #include <q3filedialog.h>
@@ -523,18 +531,39 @@ MainForm::loadFile(QString const & _name )
   try {
     LogFile * file = fileSet_.addFile(_name);
     try {
+#ifdef LSB_Q3PROGRESSDIALOG
+      const QString labelText("Parsing log file " + _name);
+      const QString cancelButtonText("Cancel");
+      const int minimum = 0;
+      const int maximum = 100;
+      QWidget * const parent = this;
+      QProgressDialog progress(labelText, cancelButtonText, minimum, maximum,
+			       parent);
+      progress.setValue(0);
+#else
       Q3ProgressDialog progress("Parsing log file " + _name, "Cancel", 100,
                                 this, "progress", TRUE);
       progress.setProgress(0);
+#endif
       int percent;
 
       while ((percent = file->parse()) != 100) {
+#ifdef LSB_Q3PROGRESSDIALOG
+	progress.setValue(percent);
+#else
         progress.setProgress(percent);
+#endif
         qApp->processEvents();
-
+#ifdef LSB_Q3PROGRESSDIALOG
+	if (progress.wasCanceled())
+#else
         if (progress.wasCancelled())
+#endif
           throw Miro::Exception("canceled");
       }
+#ifdef LSB_Q3PROGRESSDIALOG
+      progress.setValue(100);
+#endif
 
       if (file->endTime() > ACE_OS::gettimeofday())
         throw Miro::Exception("Clock screw detected:\nEnd time of file lies in the future.");
