@@ -18,6 +18,8 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3VBOXLAYOUT
 
 #include "OkCancelDialog.h"
 #include "ItemXML.h"
@@ -36,7 +38,11 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 //Added by qt3to4:
+#ifdef LSB_Q3VBOXLAYOUT
+#include <QVBoxLayout>
+#else
 #include <Q3VBoxLayout>
+#endif
 #include <Q3HBoxLayout>
 
 #include <cassert>
@@ -51,7 +57,17 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
   n[0] = n[0].upper();
   setCaption(n);
 
+#ifdef LSB_Q3VBOXLAYOUT
+  QWidget * const pTopBoxParent = this;
+  QVBoxLayout * const topBox = new QVBoxLayout(pTopBoxParent);
+  assert(topBox != NULL);
+  const int margin = 0;
+  topBox->setContentsMargins(margin, margin, margin, margin);
+  const int spacing = -1;
+  topBox->setSpacing(spacing);
+#else
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
+#endif
 
 #ifdef LSB_Q3VGROUPBOX
   // Create the Group Box

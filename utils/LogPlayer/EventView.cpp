@@ -19,6 +19,7 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3VBOXLAYOUT
 #define LSB_Q3VGROUPBOX
 
 #include "EventView.h"
@@ -38,7 +39,11 @@
 #endif
 //Added by qt3to4:
 #include <QHideEvent>
+#ifdef LSB_Q3VBOXLAYOUT
+#include <QVBoxLayout>
+#else
 #include <Q3VBoxLayout>
+#endif
 
 #include <sstream>
 
@@ -54,11 +59,13 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
 
 #ifdef LSB_Q3VBOXLAYOUT
   // Create the Group
-  const QWidget * const pVBoxLayoutParent = this;
-  const QWidget * const pTopBoxParent = this;
+  QWidget * const pTopBoxParent = this;
+  QVBoxLayout * topBox = new QVBoxLayout(pTopBoxParent);
+  assert(topBox != NULL);
   const int margin = 0;
+  topBox->setContentsMargins(margin, margin, margin, margin);
   const int spacing = -1;
-  QVBoxLayout * topBox = new QVBoxLayout(parent);
+  topBox->setSpacing(spacing);
 #else
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
 #endif
@@ -96,7 +103,7 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
 
 #ifdef LSB_Q3VGROUPBOX
   // Title set in constructor
-  topBox->setSpacing(10);
+  topBox->addSpacing(10);
   topBox->addWidget(eventBox);
 #else
   eventBox->setTitle("Events");

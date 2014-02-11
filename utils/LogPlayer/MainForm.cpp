@@ -21,6 +21,7 @@
 
 // Enable migration from Qt v3 to Qt v4
 #define LSB_Q3PROGRESSDIALOG
+#define LSB_Q3VBOXLAYOUT
 
 #include "MainForm.h"
 #include "LogFile.h"
@@ -59,7 +60,11 @@
 
 #include <Q3HBoxLayout>
 #include <Q3GridLayout>
+#ifdef LSB_Q3VBOXLAYOUT
+#include <QVBoxLayout>
+#else
 #include <Q3VBoxLayout>
+#endif
 #include <QFileDialog>
 #include <QMenuItem>
 
@@ -179,7 +184,15 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
 
   // ... add to the layout
   Q3BoxLayout *topLayout = new Q3HBoxLayout(cw, 5);
+#ifdef LSB_Q3VBOXLAYOUT
+  Q3BoxLayout * const layout1Parent = topLayout;
+  QVBoxLayout * layout1 = new QVBoxLayout(layout1Parent);
+  assert(layout1 != NULL);
+  const int margin = 5;
+  layout1->setContentsMargins(margin, margin, margin, margin);
+#else
   Q3BoxLayout *layout1 = new Q3VBoxLayout(topLayout, 5);
+#endif
   Q3GridLayout *layout2 = new Q3GridLayout(layout1, 2, 3, 5);
   Q3BoxLayout *layout3 = new Q3HBoxLayout(-1, "time layout");
 
