@@ -18,12 +18,21 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #include "OkCancelDialog.h"
 #include "ItemXML.h"
 
+#ifdef LSB_Q3VGROUPBOX
+#include <Q3GroupBox>
+#else
 #include <q3vgroupbox.h>
+#endif
 #include <q3hgroupbox.h>
+#ifdef LSB_Q3FRAME
+#include <QFrame>
+#else
 #include <q3frame.h>
+#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
 //Added by qt3to4:
@@ -44,11 +53,42 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
 
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
 
+#ifdef LSB_Q3VGROUPBOX
+  // Create the Group Box
+  const QString groupBoxTitle("");
+  QWidget * const pGroupBoxParent = this;
+  groupBox_ = new QGroupBox(groupBoxTitle, pGroupBoxParent);
+  assert(groupBox_ != NULL);
+
+  // Create the Vertical Box Layout
+  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
+  assert(pGroupBoxLayout != NULL);
+
+  // Assign the Vertical Box Layout to the Group Box
+  groupBox_->setLayout(pGroupBoxLayout);
+#else
   groupBox_ = new Q3VGroupBox(this, "groupbox");
-#ifdef LSB_Q3FRAME
+#endif
+
+#if defined(LSB_Q3FRAME) && defined(LSB_Q3VGROUPBOX)
+  // Create the Frame with no parent
+  QWidget * const pFrameParent = NULL;
+  frame_ = new QFrame(pFrameParent);
+  // Add the Frame to the Group Box's Layout
+  pGroupBoxLayout->addWidget(frame_);
+#elif defined(LSB_Q3FRAME) && !defined(LSB_Q3VGROUPBOX)
+  // Create the Frame with the Group Box as parent
   QWidget * const parent = groupBox_;
   frame_ = new QFrame(parent);
+#elif !defined(LSB_Q3FRAME) && defined(LSB_Q3VGROUPBOX)
+  // Create the Frame with no parent
+  QWidget * const pFrameParent = NULL;
+  const QString frameName("parameterframe");
+  frame_ = new Q3Frame(pFrameParent, frameName);
+  // Add the Frame to the Group Box's Layout
+  pGroupBoxLayout->addWidget(frame_);
 #else
+  // Create the Frame with the Group Box as parent
   frame_ = new Q3Frame(groupBox_, "parameterframe");
 #endif
 

@@ -18,10 +18,17 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3VGROUPBOX
+
 #include "FileListDialog.h"
 
 #include <q3groupbox.h>
+#ifdef LSB_Q3VGROUPBOX
+#include <QGroupBox>
+#else
 #include <q3vgroupbox.h>
+#endif
 #include <q3hgroupbox.h>
 #include <q3hbox.h>
 #include <qlayout.h>
@@ -58,10 +65,43 @@ FileListDialog::FileListDialog(QWidget* parent,
 
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
 
-  Q3VGroupBox * fileBox = new Q3VGroupBox(this, "fileBox");
-#ifdef LSB_Q3LISTBOX
-  list_ = new QListWidget(fileBox);
+#ifdef LSB_Q3VGROUPBOX
+  // Create the Group Box
+  const QString groupBoxTitle("");
+  QWidget * const pGroupBoxParent = this;
+  QGroupBox * const fileBox = new QGroupBox(groupBoxTitle, pGroupBoxParent);
+  assert(fileBox != NULL);
+
+  // Create the Vertical Box Layout
+  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
+  assert(pGroupBoxLayout != NULL);
+
+  // Assign the Vertical Box Layout to the Group Box
+  fileBox->setLayout(pGroupBoxLayout);
+
 #else
+  Q3VGroupBox * fileBox = new Q3VGroupBox(this, "fileBox");
+#endif
+
+#if defined(LSB_Q3LISTBOX) && defined(LSB_Q3VGROUPBOX)
+  // Create the List Widget with no parent
+  QWidget * const pListWidgetParent = NULL;
+  list_ = new QListWidget(pListWidgetParent);
+  // Add the List Widget to the Group Box's Layout
+  pGroupBoxLayout->addWidget(list_);
+#elif defined(LSB_Q3LISTBOX) && !defined(LSB_Q3VGROUPBOX)
+  // Create the List Widget with the Group Box as parent
+  QWidget * const pListWidgetParent = fileBox;
+  list_ = new QListWidget(pListWidgetParent);
+#elif !defined(LSB_Q3LISTBOX) && defined(LSB_Q3VGROUPBOX)
+  // Create the List Box with no parent
+  QWidget * const pListBoxParent = NULL;
+  const QString listBoxName("list");
+  list_ = new Q3ListBox(pListBoxParent, listBoxName);
+  // Add the List Box to the Group Box's Layout
+  pGroupBoxLayout->addWidget(list_);
+#else
+  // Create the List Box with the Group Box as parent
   list_ = new Q3ListBox(fileBox, "list");
 #endif
 
@@ -247,7 +287,7 @@ FileListDialog::add()
       modified_ = true;
     }
 #else
-    if (list_->find_item(fileDialog_-selectedFile()) != NULL) {
+    if (list_->findItem(fileDialog_->selectedFile()) != NULL) {
       list_->insertItem(fileDialog_->selectedFile());
       modified_ = true;
     }

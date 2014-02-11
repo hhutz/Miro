@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3VGROUPBOX
+
 #include "EventView.h"
 #include "FileSet.h"
 
@@ -28,7 +31,11 @@
 
 #include <q3listview.h>
 #include <qlayout.h>
+#ifdef LSB_Q3VGROUPBOX
+#include <Q3GroupBox>
+#else
 #include <q3vgroupbox.h>
+#endif
 //Added by qt3to4:
 #include <QHideEvent>
 #include <Q3VBoxLayout>
@@ -45,10 +52,40 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
 {
   setCaption("Event View");
 
+#ifdef LSB_Q3VBOXLAYOUT
+  // Create the Group
+  const QWidget * const pVBoxLayoutParent = this;
+  const QWidget * const pTopBoxParent = this;
+  const int margin = 0;
+  const int spacing = -1;
+  QVBoxLayout * topBox = new QVBoxLayout(parent);
+#else
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
+#endif
 
+#ifdef LSB_Q3VGROUPBOX
+  // Create the Group Box
+  const QString groupBoxTitle("Events");
+  QWidget * const pGroupBoxParent = this;
+  QGroupBox * eventBox = new QGroupBox(groupBoxTitle, pGroupBoxParent);
+  assert(eventBox != NULL);
+
+  // Create the Vertical Box Layout
+  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
+  assert(pGroupBoxLayout != NULL);
+
+  // Assign the Vertical Box Layout to the Group Box
+  eventBox->setLayout(pGroupBoxLayout);
+
+  // Create the List View
+  list_ = new Q3ListView();
+
+  // Add the ListView to the Group Box's Vertical Box Layout
+  pGroupBoxLayout->addWidget(list_);
+#else
   Q3VGroupBox * eventBox = new Q3VGroupBox(this, "eventBox");
   list_ = new Q3ListView(eventBox, "list");
+#endif
 
   list_->addColumn("Time Stamp");
   list_->addColumn("Domain Name");
@@ -57,9 +94,15 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
   list_->setSorting(-1);
   list_->setAllColumnsShowFocus(true);
 
+#ifdef LSB_Q3VGROUPBOX
+  // Title set in constructor
+  topBox->setSpacing(10);
+  topBox->addWidget(eventBox);
+#else
+  eventBox->setTitle("Events");
   topBox->addSpacing(10);
   topBox->addWidget(eventBox);
-  eventBox->setTitle("Events");
+#endif
 
   // connect to file set events
   FileSet::FileVector::iterator first, last = fileSet_->fileVector().end();
