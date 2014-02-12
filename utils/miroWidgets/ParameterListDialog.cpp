@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3HBOX
+
 #include "ParameterListDialog.h"
 #include "SimpleParameter.h"
 #include "CompoundParameter.h"
@@ -31,7 +34,11 @@
 #include <q3groupbox.h>
 #include <q3vgroupbox.h>
 #include <q3hgroupbox.h>
+#ifdef LSB_Q3HBOX
+#include <QWidget>
+#else
 #include <q3hbox.h>
+#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
@@ -87,11 +94,40 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   list_->setResizeMode(Q3ListView::AllColumns);
   list_->setRootIsDecorated(true);
 
+#ifdef LSB_Q3HBOX
+  // Create the box to hold the buttons
+  QWidget * const fileButtonsBoxParent = groupBox_;
+  QWidget * const fileButtonsBox = new QWidget(fileButtonsBoxParent);
+  assert(fileButtonsBox != NULL);
+
+  // Create the button box's layout
+  QHBoxLayout * fileButtonsBoxLayout = new QHBoxLayout;
+  assert(fileButtonsBoxLayout != NULL);
+  fileButtonsBox->setLayout(fileButtonsBoxLayout);
+
+  // Create the Add button and add it to the layout
+  const QString addButtonText("Add...");
+  QPushButton * const addButton = new QPushButton(addButtonText);
+  assert(addButton != NULL);
+  fileButtonsBoxLayout->addWidget(addButton);
+
+  // Create the Delete button and add it to the layout
+  const QString delButtonText("Remove");
+  delButton_ = new QPushButton(delButtonText);
+  assert(delButton_ != NULL);
+  fileButtonsBoxLayout->addWidget(delButton_);
+
+  // Create the Edit button and add it to the layout
+  const QString editButtonText("Edit");
+  editButton_ = new QPushButton(editButtonText);
+  assert(editButton_ != NULL);
+  fileButtonsBoxLayout->addWidget(editButton_);
+#else
   Q3HBox * fileButtonsBox = new Q3HBox(groupBox_, "fileButtons");
   QPushButton * addButton = new QPushButton("Add...", fileButtonsBox);
   delButton_ = new QPushButton("Delete", fileButtonsBox);
   editButton_ = new QPushButton("Edit", fileButtonsBox);
-
+#endif
 
   //----------------------------------------------------------------------------
   // add the list view items

@@ -19,6 +19,7 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3HBOX
 #define LSB_Q3VBOXLAYOUT
 #define LSB_Q3VGROUPBOX
 
@@ -31,7 +32,11 @@
 #include <q3vgroupbox.h>
 #endif
 #include <q3hgroupbox.h>
+#ifdef LSB_Q3HBOX
+#include <QWidget>
+#else
 #include <q3hbox.h>
+#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
@@ -120,9 +125,33 @@ FileListDialog::FileListDialog(QWidget* parent,
   list_ = new Q3ListBox(fileBox, "list");
 #endif
 
+#ifdef LSB_Q3HBOX
+  // Create the box to hold the buttons
+  QWidget * const fileButtonsBoxParent = fileBox;
+  QWidget * const fileButtonsBox = new QWidget(fileBox);
+  assert(fileButtonsBox != NULL);
+
+  // Create the button box's layout
+  QHBoxLayout * fileButtonsBoxLayout = new QHBoxLayout;
+  assert(fileButtonsBoxLayout != NULL);
+  fileButtonsBox->setLayout(fileButtonsBoxLayout);
+
+  // Create the Add button and add it to the layout
+  const QString addButtonText("Add...");
+  QPushButton * const addButton = new QPushButton(addButtonText);
+  assert(addButton != NULL);
+  fileButtonsBoxLayout->addWidget(addButton);
+
+  // Create the Remove button and add it to the layout
+  const QString delButtonText("Remove");
+  delButton_ = new QPushButton(delButtonText);
+  assert(delButton_ != NULL);
+  fileButtonsBoxLayout->addWidget(delButton_);
+#else
   Q3HBox * fileButtonsBox = new Q3HBox(fileBox, "fileButtons");
   QPushButton * addButton = new QPushButton("Add...", fileButtonsBox);
   delButton_ = new QPushButton("Remove", fileButtonsBox);
+#endif
 
 #ifdef LSB_Q3FILEDIALOG
   QWidget * const fdParent = this;
