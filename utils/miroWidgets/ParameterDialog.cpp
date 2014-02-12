@@ -21,6 +21,8 @@
 // Enable migration from Qt v3 to Qt v4
 #define LSB_Q3FRAME
 #define LSB_Q3GRIDLAYOUT
+#define LSB_Q3HGROUPBOX
+#define LSB_Q3SCROLLVIEW
 
 #include "ParameterDialog.h"
 #include "SimpleParameter.h"
@@ -33,12 +35,20 @@
 #include "params/Generator.h"
 
 #include <qstring.h>
+#ifdef LSB_Q3HGROUPBOX
+#include <QGroupBox>
+#else
 #include <q3hgroupbox.h>
+#endif
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qtooltip.h>
 #include <qmessagebox.h>
+#ifdef LSB_Q3SCROLLVIEW
+#include <QScrollArea>
+#else
 #include <q3scrollview.h>
+#endif
 #include <qobject.h>
 #ifdef LSB_Q3GRIDLAYOUT
 #include <QGridLayout>
@@ -75,15 +85,26 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
       s.height() > 600) {
 
     delete frame_;
+#ifdef LSB_Q3SCROLLVIEW
+    QWidget * const pScrollAreaParent = groupBox_;
+    QScrollArea * const sv = new QScrollArea(pScrollAreaParent);
+    assert(sv != NULL);
+#else
     Q3ScrollView * sv = new Q3ScrollView(groupBox_, "scrollview");
+#endif
 #ifdef LSB_Q3FRAME
     QWidget * const parent = sv->viewport();
     frame_ = new QFrame(parent);
 #else
     frame_ = new Q3Frame(sv->viewport());
 #endif
+#ifdef LSB_Q3SCROLLVIEW
+    sv->setWidget(frame_);
+    /// @todo What is the counterpart of setting the resize policy?
+#else
     sv->addChild(frame_);
     sv->setResizePolicy(Q3ScrollView::AutoOneFit);
+#endif
     
     initDialog();
 
