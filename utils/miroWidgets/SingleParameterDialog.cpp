@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3GRIDLAYOUT
+
 #include "SingleParameterDialog.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
@@ -32,8 +35,12 @@
 #include <qtooltip.h>
 #include <qmessagebox.h>
 #include <q3scrollview.h>
+#ifdef LSB_Q3GRIDLAYOUT
+#include <QGridLayout>
+#else
 //Added by qt3to4:
 #include <Q3GridLayout>
+#endif
 
 #include <cassert>
 
@@ -58,8 +65,16 @@ SingleParameterDialog(Miro::CFG::Parameter const& _parameter,
 {
   assert(!_node.isNull());
 
+#ifdef LSB_Q3GRIDLAYOUT
+  QWidget * const pGridLayoutParent = frame_;
+  QGridLayout * const gridLayout = new QGridLayout(pGridLayoutParent);
+  assert(gridLayout != 0);
+  const int margin = 5;
+  gridLayout->setContentsMargins(margin, margin, margin, margin);
+#else
   Q3GridLayout * gridLayout = 
     new Q3GridLayout(frame_, 1, 3, 2, 5, "gridLayout"); 
+#endif
 
   // add parameter struct:
   QLabel * name = new QLabel(frame_);

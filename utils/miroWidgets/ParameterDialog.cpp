@@ -20,6 +20,7 @@
 //
 // Enable migration from Qt v3 to Qt v4
 #define LSB_Q3FRAME
+#define LSB_Q3GRIDLAYOUT
 
 #include "ParameterDialog.h"
 #include "SimpleParameter.h"
@@ -39,8 +40,12 @@
 #include <qmessagebox.h>
 #include <q3scrollview.h>
 #include <qobject.h>
+#ifdef LSB_Q3GRIDLAYOUT
+#include <QGridLayout>
+#else
 //Added by qt3to4:
 #include <Q3GridLayout>
+#endif
 #ifdef LSB_Q3FRAME
 #include <QFrame>
 #else
@@ -107,8 +112,16 @@ ParameterDialog::initDialog()
 {
   editFelds_.clear();
 
+#ifdef LSB_Q3GRIDLAYOUT
+  QWidget * const pGridLayoutParent = frame_;
+  QGridLayout * const gridLayout = new QGridLayout(pGridLayoutParent);
+  assert(gridLayout != 0);
+  const int margin = 5;
+  gridLayout->setContentsMargins(margin, margin, margin, margin);
+#else
   Q3GridLayout * gridLayout = 
-    new Q3GridLayout(frame_, params_.size(), 3, 2, 5, "gridLayout"); 
+    new Q3GridLayout(frame_, params_.size(), 3, 2, 5, "gridLayout");
+#endif 
 
   // add parameter structs:
   unsigned long i = 0;

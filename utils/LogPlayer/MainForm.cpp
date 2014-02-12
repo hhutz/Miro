@@ -20,6 +20,7 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3GRIDLAYOUT
 #define LSB_Q3HBOXLAYOUT
 #define LSB_Q3PROGRESSDIALOG
 #define LSB_Q3VBOXLAYOUT
@@ -64,7 +65,11 @@
 #else
 #include <Q3HBoxLayout>
 #endif
+#ifdef LSB_Q3GRIDLAYOUT
+#include <QGridLayout>
+#else
 #include <Q3GridLayout>
+#endif
 #ifdef LSB_Q3VBOXLAYOUT
 #include <QVBoxLayout>
 #else
@@ -210,7 +215,19 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
 #else
   Q3BoxLayout *layout1 = new Q3VBoxLayout(topLayout, 5);
 #endif
+#ifdef LSB_Q3GRIDLAYOUT
+  // A layout is not a widget, and the parent is a layout
+  QWidget * const pLayout2Parent = 0;
+  QGridLayout * const layout2 = new QGridLayout(pLayout2Parent);
+  assert(layout2 != NULL);
+  // The grid that contains the buttons is the first of two child widgets
+  // Add it to the parent before doing anything to it
+  layout1->addLayout(layout2);
+  const int margin = 5;
+  layout2->setContentsMargins(margin, margin, margin, margin);
+#else
   Q3GridLayout *layout2 = new Q3GridLayout(layout1, 2, 3, 5);
+#endif
 #ifdef LSB_Q3HBOXLAYOUT
   QWidget * const layout3Parent = NULL;
   QBoxLayout * const layout3 = new QHBoxLayout(layout3Parent);
