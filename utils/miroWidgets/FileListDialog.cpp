@@ -20,6 +20,7 @@
 //
 // Enable migration from Qt v3 to Qt v4
 #define LSB_Q3HBOX
+#define LSB_Q3HBOXLAYOUT
 #define LSB_Q3VBOXLAYOUT
 #define LSB_Q3VGROUPBOX
 
@@ -52,7 +53,11 @@
 #include <q3filedialog.h>
 #endif
 //Added by qt3to4:
+#ifdef LSB_Q3HBOXLAYOUT
+#include <QHBoxLayout>
+#else
 #include <Q3HBoxLayout>
+#endif
 #ifdef LSB_Q3VBOXLAYOUT
 #include <QVBoxLayout>
 #else
@@ -127,8 +132,8 @@ FileListDialog::FileListDialog(QWidget* parent,
 
 #ifdef LSB_Q3HBOX
   // Create the box to hold the buttons
-  QWidget * const fileButtonsBoxParent = fileBox;
-  QWidget * const fileButtonsBox = new QWidget(fileBox);
+  QWidget * const pFileButtonsBoxParent = fileBox;
+  QWidget * const fileButtonsBox = new QWidget(pFileButtonsBoxParent);
   assert(fileButtonsBox != NULL);
 
   // Create the button box's layout
@@ -185,7 +190,23 @@ FileListDialog::FileListDialog(QWidget* parent,
   fileBox->setTitle(_listTitle);
 
   topBox->addSpacing(10);
+#ifdef LSB_Q3HBOXLAYOUT
+  // Create the Horizontal Box Layout
+#ifdef LSB_Q3VBOXLAYOUT
+  QVBoxLayout * const pDialogButtonsBoxParent = topBox;
+#else
+  Q3VBoxLayout * const pDialogButtonsBoxParent = topBox;
+#endif
+  QHBoxLayout * const dialogButtonsBox =
+    new QHBoxLayout(pDialogButtonsBoxParent);
+  assert(dialogButtonsBox != NULL);
+  {
+    const int spacing = -1;
+    dialogButtonsBox->setSpacing(spacing);
+  }
+#else
   Q3HBoxLayout * dialogButtonsBox = new Q3HBoxLayout(topBox, -1, "hBoxLayout");
+#endif
   QSpacerItem * dBSpace = new QSpacerItem(0, 0);
   QPushButton * okButton = new QPushButton("OK", this);
   QPushButton * cancelButton = new QPushButton("Cancel", this);

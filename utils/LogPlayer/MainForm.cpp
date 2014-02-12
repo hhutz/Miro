@@ -20,6 +20,7 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3HBOXLAYOUT
 #define LSB_Q3PROGRESSDIALOG
 #define LSB_Q3VBOXLAYOUT
 
@@ -58,7 +59,11 @@
 #include <q3filedialog.h>
 #include <qobject.h>
 
+#ifdef LSB_Q3HBOXLAYOUT
+#include <QHBoxLayout>
+#else
 #include <Q3HBoxLayout>
+#endif
 #include <Q3GridLayout>
 #ifdef LSB_Q3VBOXLAYOUT
 #include <QVBoxLayout>
@@ -183,18 +188,38 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
   speedDial->setPageStep(5);
 
   // ... add to the layout
+#ifdef LSB_Q3HBOXLAYOUT
+  QWidget * const topLayoutParent = cw;
+  QHBoxLayout * const topLayout = new QHBoxLayout(topLayoutParent);
+  assert(topLayout != NULL);
+  {
+    const int margin = 5;
+    topLayout->setContentsMargins(margin, margin, margin, margin);
+  }
+#else
   Q3BoxLayout *topLayout = new Q3HBoxLayout(cw, 5);
+#endif
 #ifdef LSB_Q3VBOXLAYOUT
-  Q3BoxLayout * const layout1Parent = topLayout;
+  QHBoxLayout * const layout1Parent = topLayout;
   QVBoxLayout * layout1 = new QVBoxLayout(layout1Parent);
   assert(layout1 != NULL);
-  const int margin = 5;
-  layout1->setContentsMargins(margin, margin, margin, margin);
+  {
+    const int margin = 5;
+    layout1->setContentsMargins(margin, margin, margin, margin);
+  }
 #else
   Q3BoxLayout *layout1 = new Q3VBoxLayout(topLayout, 5);
 #endif
   Q3GridLayout *layout2 = new Q3GridLayout(layout1, 2, 3, 5);
+#ifdef LSB_Q3HBOXLAYOUT
+  QWidget * const layout3Parent = NULL;
+  QBoxLayout * const layout3 = new QHBoxLayout(layout3Parent);
+  assert(layout3 != NULL);
+  const int spacing = -1;
+  layout3->setSpacing(spacing);
+#else
   Q3BoxLayout *layout3 = new Q3HBoxLayout(-1, "time layout");
+#endif
 
   layout2->addWidget(playButton, 0, 0);
   layout2->addWidget(stopButton, 0, 1);

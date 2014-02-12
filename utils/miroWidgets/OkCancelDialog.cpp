@@ -19,6 +19,7 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3HBOXLAYOUT
 #define LSB_Q3VBOXLAYOUT
 
 #include "OkCancelDialog.h"
@@ -43,7 +44,11 @@
 #else
 #include <Q3VBoxLayout>
 #endif
+#ifdef LSB_Q3HBOXLAYOUT
+#include <QHBoxLayout>
+#else
 #include <Q3HBoxLayout>
+#endif
 
 #include <cassert>
 
@@ -61,10 +66,12 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
   QWidget * const pTopBoxParent = this;
   QVBoxLayout * const topBox = new QVBoxLayout(pTopBoxParent);
   assert(topBox != NULL);
-  const int margin = 0;
-  topBox->setContentsMargins(margin, margin, margin, margin);
-  const int spacing = -1;
-  topBox->setSpacing(spacing);
+  {
+    const int margin = 0;
+    topBox->setContentsMargins(margin, margin, margin, margin);
+    const int spacing = -1;
+    topBox->setSpacing(spacing);
+  }
 #else
   Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
 #endif
@@ -108,7 +115,21 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
   frame_ = new Q3Frame(groupBox_, "parameterframe");
 #endif
 
+#ifdef LSB_Q3HBOXLAYOUT
+  // Create the Horizontal Box Layout
+  QWidget * const pDialogButtonsBoxParent = NULL;
+  QHBoxLayout * const dialogButtonsBox =
+    new QHBoxLayout(pDialogButtonsBoxParent);
+  assert(dialogButtonsBox != NULL);
+  {
+    const int margin = 0;
+    dialogButtonsBox->setContentsMargins(margin, margin, margin, margin);
+    const int spacing = -1;
+    dialogButtonsBox->setSpacing(spacing);
+  }
+#else
   Q3HBoxLayout * dialogButtonsBox = new Q3HBoxLayout(NULL, 0, -1, "hBoxLayout");
+#endif
   QSpacerItem * dBSpace = new QSpacerItem(0, 0);
   QPushButton * okButton = new QPushButton("OK", this);
   QPushButton * cancelButton = new QPushButton("Cancel", this);
