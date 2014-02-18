@@ -113,6 +113,9 @@ Miro also supports CPack (http://www.cmake.org/Wiki/CMake:Packaging_With_CPack)
 for packaging an installer. For example, to create and install a .deb package 
 for Ubuntu:
 
+cd Miro
+mkdir build
+cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=/usr
 make
 cpack -G DEB
