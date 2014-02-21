@@ -43,7 +43,11 @@
 #include <qpushbutton.h>
 #include <qmessagebox.h>
 #include <q3listview.h>
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 
 #include <cassert>
 
@@ -470,10 +474,21 @@ ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
   Item::ItemMap::const_iterator i = Item::itemMap().find(_item);
   assert(i != Item::itemMap().end());
 
+#ifdef LSB_Q3POPUPMENU
+  QMenu menu(NULL);
+  const std::pair<Q3ListViewItem*, Item*>& p = *i;
+  Item * const pItem = p.second;
+  assert(pItem != 0);
+  // Populate this context menu based on the Item
+  pItem->contextMenu(menu);
+
+  menu.exec(pos);
+#else
   Q3PopupMenu menu(NULL, "plistpopu");
   i->second->contextMenu(menu);
 
   menu.exec(pos);
+#endif
 }
 
 void

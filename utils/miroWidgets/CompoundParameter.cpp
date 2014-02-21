@@ -30,8 +30,14 @@
 
 #include "miro/Exception.h"
 
+
+
 #if QT_VERSION >= 0x040000
+#ifdef LSB_Q3POPUPMENU
+// Not needed
+#else
   #include <Q3PopupMenu>
+#endif
   #include <Q3ListView>
 #else 
   #include <q3popupmenu.h>

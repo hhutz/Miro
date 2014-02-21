@@ -20,7 +20,11 @@
 //
 #include "ParameterInstance.h"
 
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 
 #include <cassert>
 
@@ -83,6 +87,35 @@ ParameterInstance::moveDown()
 }
 
 void
+#ifdef LSB_Q3POPUPMENU
+ParameterInstance::contextMenu(QMenu& _menu)
+{
+  QAction * pAction = NULL;
+
+  pAction = new QAction(tr("Set Name"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(slotRename()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Set Parameters"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(slotSetParameters()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+
+  pAction = new QAction(tr("Up"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(up()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Down"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(down()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+ 
+  pAction = new QAction(tr("Delete"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(slotDelete()));
+  _menu.addAction(pAction);
+#else
 ParameterInstance::contextMenu(Q3PopupMenu& _menu)
 {
   _menu.insertItem("Set Name", this, SLOT(slotRename()));
@@ -92,5 +125,6 @@ ParameterInstance::contextMenu(Q3PopupMenu& _menu)
   _menu.insertItem("Down", this, SLOT(down()));
   _menu.insertSeparator();
   _menu.insertItem("Delete", this, SLOT(slotDelete()));
+#endif
 }
 

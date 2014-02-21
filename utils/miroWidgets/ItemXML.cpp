@@ -20,7 +20,11 @@
 //
 #include "ItemXML.h"
 
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 #include <qobject.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -90,12 +94,22 @@ ItemXML::setModified(bool _modified, bool _recurse)
   }
 }
 
+#ifdef LSB_Q3POPUPMENU
+void 
+ItemXML::contextMenu(QMenu& _menu)
+{
+  QAction * const pAction = new QAction(tr("Set Name"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(slotRename()));
+  _menu.addAction(pAction);
+}
+#else
 void 
 ItemXML::contextMenu(Q3PopupMenu& _menu)
 {
   _menu.insertItem("Set Name", this, SLOT(slotRename()));
   _menu.insertSeparator();
 }
+#endif
 
 void
 ItemXML::slotRename()

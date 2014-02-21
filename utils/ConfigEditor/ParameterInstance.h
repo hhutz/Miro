@@ -18,12 +18,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+// #define LSB_Q3POPUPMENU
 #ifndef ParameterInstance_h
 #define ParameterInstance_h
 
 #include "miroWidgets/CompoundParameter.h"
+#ifdef LSB_Q3POPUPMENU
+class QMenu;
+#else
 //Added by qt3to4:
 #include <Q3PopupMenu>
+#endif
 
 // forward declarations
 class ConfigFile;
@@ -51,7 +57,11 @@ public:
   //! Inherited method.
   virtual void moveDown();
   //! Inherited method.
+#ifdef LSB_Q3POPUPMENU
+  virtual void contextMenu(QMenu& _menu);
+#else
   virtual void contextMenu(Q3PopupMenu& _menu);
+#endif
 
   //----------------------------------------------------------------------------
   // public constants

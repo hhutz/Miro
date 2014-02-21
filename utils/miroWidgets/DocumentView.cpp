@@ -33,7 +33,11 @@
 #endif
 #include <qmessagebox.h>
 #include <qstatusbar.h>
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 //Added by qt3to4:
 #include <QCloseEvent>
 
@@ -315,11 +319,24 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
   ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
   assert(item != ItemXML::itemMap().end());
 
+#ifdef LSB_Q3POPUPMENU
+  QMenu menu(NULL);
+  const std::pair<Q3ListViewItem*, Item*>& p = *item;
+  Item * const pItem = p.second;
+  assert(pItem != 0);
+  // Populate this context menu based on the Item
+  pItem->contextMenu(menu);
+  if (!menu.isEmpty())
+  {
+    menu.exec(_pos);
+  }
+#else
   Q3PopupMenu menu(NULL, "conext_menu");
   item->second->contextMenu(menu);
 
   if (menu.count() > 0)
     menu.exec(_pos);
+#endif
 }
 
 void

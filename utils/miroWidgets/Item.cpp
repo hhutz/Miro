@@ -23,8 +23,12 @@
 #include <qstring.h>
 #include <qobject.h>
 #include <q3listview.h>
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 //Added by qt3to4:
 #include <Q3PopupMenu>
+#endif
 
 #include <cassert>
 
@@ -77,7 +81,11 @@ Item::update()
 }
 
 void 
+#ifdef LSB_Q3POPUPMENU
+Item::contextMenu(QMenu&)
+#else
 Item::contextMenu(Q3PopupMenu&)
+#endif
 {
 }
 

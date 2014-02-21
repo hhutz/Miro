@@ -18,6 +18,10 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3POPUPMENU
+
 #ifndef ItemXML_h
 #define ItemXML_h
 
@@ -25,7 +29,11 @@
 
 #include <qstring.h>
 #include <qdom.h>
+#ifdef LSB_Q3POPUPMENU
+class QMenu;
+#else
 #include <Q3PopupMenu>
+#endif
 
 #include <vector>
 
@@ -103,7 +111,11 @@ public:
   //----------------------------------------------------------------------------
 
   //! Provide the context menu.
+#ifdef LSB_Q3POPUPMENU
+  virtual void contextMenu(QMenu& _menu);
+#else
   virtual void contextMenu(Q3PopupMenu& _menu);
+#endif
   //! Move item up in the list view and in the document.
   virtual void moveUp();
   //! Move item down  in the list view and in the document.

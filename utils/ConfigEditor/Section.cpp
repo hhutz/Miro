@@ -28,7 +28,11 @@
 #include "params/Generator.h"
 #include "params/Type.h"
 
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 #include <q3listview.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
@@ -55,7 +59,11 @@ Section::Section(QDomNode const& _node,
 }
 
 void
+#ifdef LSB_Q3POPUPMENU
+Section::contextMenu(QMenu& _menu)
+#else
 Section::contextMenu(Q3PopupMenu& _menu)
+#endif
 {
   // get all current parameters
   Miro::CFG::QStringVector childParameters;
@@ -100,10 +108,17 @@ Section::contextMenu(Q3PopupMenu& _menu)
     }
   }
 
+#ifdef LSB_Q3POPUPMENU
+  // create a new parameter selection menu
+  menuAddParameter_ = _menu.addMenu(tr("Add Parameter"));
+  // create a new instance selection menu
+  menuAddInstance_ = _menu.addMenu(tr("Add Instance"));
+#else
   // create a new parameter selection menu
   menuAddParameter_ = new Q3PopupMenu(&_menu);
   // create a new instance selection menu
   menuAddInstance_ = new Q3PopupMenu(&_menu);
+#endif
 
   {
     std::sort(paramsList.begin(), paramsList.end());
@@ -124,6 +139,26 @@ Section::contextMenu(Q3PopupMenu& _menu)
   connect(menuAddParameter_, SIGNAL(activated(int)), 
 	  this, SLOT(onAddParameter(int)));
 
+#ifdef LSB_Q3POPUPMENU
+  // Sub-menus handled above
+
+  _menu.addSeparator();
+
+  QAction* pAction = 0;
+  pAction = new QAction(tr("Up"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(up()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Down"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(down()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+
+  pAction = new QAction(tr("Delete"), this);
+  connect(pAction, SIGNAL(triggered), this, SLOT(slotDelete()));
+  _menu.addAction(pAction); 
+#else
   _menu.insertItem("Add Parameter", menuAddParameter_);
   _menu.insertItem("Add Instance", menuAddInstance_);
   _menu.insertSeparator();
@@ -131,6 +166,7 @@ Section::contextMenu(Q3PopupMenu& _menu)
   _menu.insertItem("Down", this, SLOT(down()));
   _menu.insertSeparator();
   _menu.insertItem("Delete", this, SLOT(slotDelete()));
+#endif
 }
 
 void

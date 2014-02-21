@@ -18,6 +18,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #define QT_ALTERNATE_QTSMANIP
 
 #include "ConfigDocumentXML.h"
@@ -28,7 +29,11 @@
 #include "params/Generator.h"
 
 #include <q3listview.h>
+#ifdef LSB_Q3POPUPMENU
+#include <QMenu>
+#else
 #include <q3popupmenu.h>
+#endif
 #include <qstring.h>
 
 #include <algorithm>
@@ -58,11 +63,20 @@ ConfigDocumentXML::~ConfigDocumentXML()
 // inherited public methods
 
 void
+#ifdef LSB_Q3POPUPMENU
+ConfigDocumentXML::contextMenu(QMenu& _menu)
+#else
 ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
+#endif
 {
+#ifdef LSB_Q3POPUPMENU
+  // The Add Sectio menu is a submenu of the menu passed as argument
+  menuAddSection_ = _menu.addMenu(tr("Add Section"));
+#else
   menuAddSection_ = new Q3PopupMenu(&_menu);
 
   _menu.insertItem("Add Section", menuAddSection_);
+#endif
 
   Miro::CFG::QStringVector childSections;
   Q3ListViewItem * item = listViewItem()->firstChild();
@@ -98,10 +112,23 @@ ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
     if (itemCount == 0)
       continue;
 
+#ifdef LSB_Q3POPUPMENU
+    const QString name = *first;
+    /// @todo Is this the correct parent for the QAction?
+    QWidget * const pActionParent = NULL;
+    QAction * const pAction = new QAction(name, pActionParent);
+    /// @todo Is this the right slot for the QAction?
+    connect(pAction, SIGNAL(triggered), this, SLOT(onAddSection(int)));
+    menuAddSection_->addAction(pAction);
+#else
     menuAddSection_->insertItem(*first);
+#endif
   }
+#ifdef LSB_Q3POPUPMENU
+#else
   connect(menuAddSection_, SIGNAL(activated(int)),
 	  this, SLOT(onAddSection(int)));
+#endif
 }
 
 //----------------------------------------------------------------------------  
