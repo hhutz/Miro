@@ -56,9 +56,11 @@ set( CPACK_RESOURCE_FILE_LICENSE       "${PROJECT_BINARY_DIR}/COPYING.txt" )
 set( CPACK_PACKAGE_VERSION_MAJOR       "${MIRO_SOVERSION_MAJOR}")
 set( CPACK_PACKAGE_VERSION_MINOR       "${MIRO_SOVERSION_MINOR}")
 set( CPACK_PACKAGE_VERSION_PATCH       "${MIRO_SOVERSION_PATCH}")
-set( CPACK_PACKAGE_VERSION             ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH} )
+set( CPACK_PACKAGE_VERSION_UPSTREAMVER "2014021201")
+set( CPACK_PACKAGE_VERSION             ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}+${CPACK_PACKAGE_VERSION_UPSTREAMVER} )
 set( CPACK_PACKAGE_INSTALL_DIRECTORY   "${PROJECT_NAME}")
-set( CPACK_PACKAGE_CONTACT             "Hans Utz <hans.utz@gmx.de>")
+set( CPACK_ORIG_PACKAGE_CONTACT        "Hans Utz <hans.utz@gmx.de>")
+set( CPACK_PACKAGE_CONTACT             "Michael Dille (IRG Debian Packaging) <mdille3+irgdebs@andrew.cmu.edu>")
 
 set( CPACK_PACKAGE_FILE_NAME           "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${ARCH_CPU}" )
 
@@ -97,14 +99,14 @@ find_program( DPKG_COMMAND dpkg )
 if( DPKG_COMMAND )
   exec_program( ${DPKG_COMMAND} ARGS --print-architecture OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE )
 endif( DPKG_COMMAND )
-set( CPACK_DEBIAN_PACKAGE_SECTION    "Development" )
+set( CPACK_DEBIAN_PACKAGE_SECTION    "libdevel" )
 set( CPACK_DEBIAN_PACKAGE_PRIORITY   "optional" )
 set( CPACK_DEBIAN_PACKAGE_RECOMMENDS "" )
 set( CPACK_DEBIAN_PACKAGE_SUGGESTS   "" )
 set( DEBIAN_PACKAGE_BUILDS_DEPENDS "debhelper, cmake, libqt4-dev, libace-dev")
 set( CPACK_DEBIAN_PACKAGE_DEPENDS    "libace-${ACE_VERSION}, libqt4-qt3support, libqt4-xml" )
 if( MIRO_BUILD_WITH_TAO )
-  set( DEBIAN_PACKAGE_BUILDS_DEPENDS  "${DEBIAN_PACKAGE_BUILDS_DEPENDS}, libtao-dev, libtao-orbsvcs-dev" )
+  set( DEBIAN_PACKAGE_BUILDS_DEPENDS  "${DEBIAN_PACKAGE_BUILDS_DEPENDS}, libtao-dev, libtao-orbsvcs-dev, tao-idl" )
   set( CPACK_DEBIAN_PACKAGE_DEPENDS   "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libtao-${TAO_VERSION}, libtao-orbsvcs-${TAO_VERSION}" )
 endif( MIRO_BUILD_WITH_TAO )
 if( MIRO_BUILD_WITH_JSON )
@@ -112,12 +114,24 @@ if( MIRO_BUILD_WITH_JSON )
   set( CPACK_DEBIAN_PACKAGE_DEPENDS   "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjsoncpp0" )
 endif( MIRO_BUILD_WITH_JSON )
 set( CPACK_DEBIAN_BUILD_DEPENDS ${DEBIAN_PACKAGE_BUILDS_DEPENDS} )
-set( CPACK_DEBIAN_CHANGELOG           "" )
+set( CPACK_DEBIAN_CHANGELOG           "  * Added tao-idl as build dep so TAO is properly detected\n\n" )
 set( CPACK_DEBIAN_PACKAGE_SOURCE_COPY rsync -a --exclude build --exclude .git )
 
 set( CPACK_DEBIAN_DISTRIBUTION_NAME   "ubuntu" )
-set( CPACK_DEBIAN_DISTRIBUTION_RELEASES precise )
 
 include(CPack)
-#include( DebSourcePPA)
+
+#Package dependencies differ between releases, so we can't build for multiple
+#releases at once
+set( CPACK_DEBIAN_DISTRIBUTION_RELEASES precise )
+#set( CPACK_DEBIAN_DISTRIBUTION_RELEASES trusty )
+
+#Incremented each time the otherwise same-version package is modified for
+#upload to PPA
+set( CPACK_DEBIAN_PPA_UPLOAD_REVISION "3" )
+
+#dput upload destination, currently the IRG roversw dependencies ubuntu PPA
+set( DPUT_HOST "ppa:irgroversw/deps" )
+
+include( DebSourcePPA)
 
