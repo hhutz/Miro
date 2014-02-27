@@ -19,7 +19,10 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
 #define LSB_Q3POPUPMENU
+
 #ifndef Item_h
 #define Item_h
 
@@ -40,14 +43,22 @@ class QMenu;
 #else
 class Q3PopupMenu;
 #endif
+#ifdef LSB_Q3LISTVIEW
+class QTreeWidget;
+#else
 class Q3ListView;
+#endif
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
+#else
 class Q3ListViewItem;
+#endif
 
-//! This class represents a QListViewItem descendand
+//! This class represents a QTreeWidgetItem descendant
 /** 
  * As we want a QObject as base class for signals and slots,
- * we need to tie the QListViewItem and the Item class together
- * by the use of a std::map. Sorry, for the inconvenience.
+ * we need to tie the QTreeWidgetItem and the Item class together
+ * by the use of a std::map. Sorry for the inconvenience.
  */
 class miroWidgets_Export Item : public QObject
 {
@@ -66,25 +77,46 @@ public:
   //----------------------------------------------------------------------------
 
   // Mapping QListViewItem instances to Item instances.
+#ifdef LSB_Q3LISTVIEWITEM
+  typedef std::map<QTreeWidgetItem *, Item *> ItemMap;
+#else
   typedef std::map<Q3ListViewItem *, Item *> ItemMap;
+#endif
 
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
   //! Initializing constructor, creating a QListView sibling item.
+#ifdef LSB_Q3LISTVIEWITEM
+  Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL, const char * _name = NULL);
+#else
   Item(Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
        QObject * _parent = NULL, const char * _name = NULL);
+#endif
   //! Initializing constructor, creating a QListView toplevel item.
+#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+  Item(QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL, const char * _name = NULL);
+#else
   Item(Q3ListView * _view, Q3ListViewItem * _pre = NULL,
        QObject * _parent = NULL, const char * _name = NULL);
+#endif
   //! Virtual destructor.
   virtual ~Item();
 
+#ifdef LSB_Q3LISTVIEWITEM
+  //! Accessor for the associated list view.
+  QTreeWidgetItem * treeWidgetItem();
+  //! Const accessor for the associated list view.
+  QTreeWidgetItem const * treeWidgetItem() const;
+#else
   //! Accessor for the associated list view.
   Q3ListViewItem * listViewItem();
   //! Const accessor for the associated list view.
   Q3ListViewItem const * listViewItem() const;
+#endif
 
   //! Move item up in list view.
   virtual void moveUp();
@@ -105,8 +137,12 @@ public:
 
   //! Accesor for the QListViewItem/Item map.
   static ItemMap const& itemMap();
-  //! Retriev the associated Item for a QListView.
+  //! Retrieve the associated Item for a QListView.
+#ifdef LSB_Q3LISTVIEWITEM
+  static Item * itemFromTreeWidgetItem(QTreeWidgetItem * _lvi);
+#else
   static Item * itemFromListViewItem(Q3ListViewItem * _lvi);
+#endif
 
 public slots:
   //----------------------------------------------------------------------------
@@ -140,8 +176,13 @@ private:
   // private members
   //----------------------------------------------------------------------------
 
+#ifdef LSB_Q3LISTVIEWITEM
+  //! Pointer to the corresponding QTreeWidgetItem.
+  QTreeWidgetItem * treeWidgetItem_;
+#else
   //! Pointer to the corresponding QListViewItem.
   Q3ListViewItem * listViewItem_;
+#endif
 
   //----------------------------------------------------------------------------
   // hidden methods
@@ -149,15 +190,30 @@ private:
   Item(Item const&);
 };
 
+#ifdef LSB_Q3LISTVIEWITEM
+inline
+QTreeWidgetItem *
+Item::treeWidgetItem() {
+  return treeWidgetItem_;
+}
+#else
 inline
 Q3ListViewItem *
 Item::listViewItem() {
   return listViewItem_;
 }
+#endif
+#ifdef LSB_Q3LISTVIEWITEM
+inline
+const QTreeWidgetItem *
+Item::treeWidgetItem() const {
+  return treeWidgetItem_;
+#else
 inline
 Q3ListViewItem const *
 Item::listViewItem() const {
   return listViewItem_;
+#endif
 }
 inline
 Item::ItemMap const&

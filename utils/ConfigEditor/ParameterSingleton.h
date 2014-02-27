@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEWITEM
+
 #ifndef ParameterSingleton_h
 #define ParameterSingleton_h
 
@@ -25,7 +28,11 @@
 
 // forward declarations
 class ConfigFile;
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
+#else
 class Q3ListViewItem;
+#endif
 
 class ParameterSingleton : public CompoundParameter
 {
@@ -36,7 +43,11 @@ public:
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
+#ifdef LSB_Q3LISTVIEWITEM
+  ParameterSingleton(QTreeWidgetItem * _listViewItem, QTreeWidgetItem * _pre,
+#else
   ParameterSingleton(Q3ListViewItem * _listViewItem, Q3ListViewItem * _pre,
+#endif
 		     QDomNode const& _node,
 		     QObject * _parent, const char * _name);
   //----------------------------------------------------------------------------

@@ -79,7 +79,7 @@ protected:
   //! Singleton instance of the config file.
   ConfigFile * config_;
 
-  //! Type description of the underling parameter.
+  //! Type description of the underlying parameter.
   Miro::CFG::Type parameterType_;
   //! Parameter type elements.
   Miro::CFG::ParameterVector params_;

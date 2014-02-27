@@ -53,7 +53,11 @@ namespace
 }
 
 DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f) :
+#ifdef LSB_Q3LISTVIEW
+  Super(_parent),
+#else
   Super(_parent, _name, _f),
+#endif
   titleBar_(NULL),
   statusBar_(NULL),
   document_(NULL),
@@ -61,20 +65,45 @@ DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f)
 {
   //----------------------------------------------------------------------------
   // init list view
-
+#ifdef LSB_Q3LISTVIEW
+  const int columnCount = 3;
+  setColumnCount(columnCount);
+  QStringList headerLabels;
+  headerLabels << "Item Name" << "Value" << "Type";
+  setHeaderLabels(headerLabels);
+#else
   addColumn("Item Name");
   addColumn("Value");
   addColumn("Type");
+#endif
   setRootIsDecorated(true);
+#ifdef LSB_Q3LISTVIEW
+  // Disable sorting
+  setSortingEnabled(false);
+#else
   setSorting(-1);
+#endif
+#ifdef LSB_Q3LISTVIEW
+  /// @todo How do we do this in Qt4?
+#else
   setResizeMode(Q3ListView::AllColumns);
+#endif
 
+#ifdef LSB_Q3LISTVIEWITEM
+  connect(this, 
+	  SIGNAL(contextMenuRequested(QTreeWidgetItem *, const QPoint&, int)),
+	  this,
+	  SLOT(slotContextMenu(QTreeWidgetItem *, const QPoint&, int)));
+  connect(this, SIGNAL(doubleClicked(QTreeWidgetItem *)),
+	  this, SLOT(slotDoubleClick(QTreeWidgetItem *)));
+#else
   connect(this, 
 	  SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint&, int)),
 	  this,
 	  SLOT(slotContextMenu(Q3ListViewItem *, const QPoint&, int)));
   connect(this, SIGNAL(doubleClicked(Q3ListViewItem *)),
 	  this, SLOT(slotDoubleClick(Q3ListViewItem *)));
+#endif
 }
 
 DocumentView::~DocumentView()
@@ -311,7 +340,11 @@ DocumentView::slotSaveAs()
 }
 
 void 
+#ifdef LSB_Q3LISTVIEWITEM
+DocumentView::slotContextMenu(QTreeWidgetItem * _item, const QPoint & _pos, int)
+#else
 DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
+#endif
 {
   if (_item == NULL)
     return;
@@ -321,7 +354,11 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
 
 #ifdef LSB_Q3POPUPMENU
   QMenu menu(NULL);
+#ifdef LSB_Q3LISTVIEWITEM
+  const std::pair<QTreeWidgetItem*, Item*>& p = *item;
+#else
   const std::pair<Q3ListViewItem*, Item*>& p = *item;
+#endif
   Item * const pItem = p.second;
   assert(pItem != 0);
   // Populate this context menu based on the Item
@@ -340,9 +377,17 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
 }
 
 void
+#ifdef LSB_Q3LISTVIEWITEM
+DocumentView::slotDoubleClick(QTreeWidgetItem * _item)
+#else
 DocumentView::slotDoubleClick(Q3ListViewItem * _item)
+#endif
 {
+#ifdef LSB_Q3LISTVIEW
+  if (_item->child(0) == NULL) {
+#else
   if (_item->firstChild() == NULL) {
+#endif
     ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
     assert(item != ItemXML::itemMap().end());
     

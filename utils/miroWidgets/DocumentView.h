@@ -18,6 +18,10 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
+
 #ifndef DocumentView_h
 #define DocumentView_h
 
@@ -25,20 +29,36 @@
 
 #include "miroWidgets_Export.h"
 
+#ifdef LSB_Q3LISTVIEW
+#include <QTreeWidget>
+#else
 #include <q3listview.h>
+#endif
 //Added by qt3to4:
 #include <QCloseEvent>
 
 // forward declarattions
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
+#else
+// handled by the header file for Q3ListView
+#endif
 class DocumentFile;
 class QWidget;
 class QStatusBar;
 
 //! Main class of the DocumentView application 
+#ifdef LSB_Q3LISTVIEW
+/**
+ * A specialized QTreeWidget that holds an XML document visualization.
+ */
+class miroWidgets_Export DocumentView : public QTreeWidget
+#else
 /**
  * A specialized QListView, that holds an XML document visualization.
  */
 class miroWidgets_Export DocumentView : public Q3ListView
+#endif
 {
   Q_OBJECT
 
@@ -47,7 +67,11 @@ class miroWidgets_Export DocumentView : public Q3ListView
   //----------------------------------------------------------------------------
 
   //! The super class.
+#ifdef LSB_Q3LISTVIEW
+  typedef QTreeWidget Super;
+#else
   typedef Q3ListView Super;
+#endif
 
 public:
   //----------------------------------------------------------------------------
@@ -96,10 +120,17 @@ protected slots:
   //! File Menu.
   void slotSaveAs();
 
+#ifdef LSB_Q3LISTVIEWITEM
+  //! Context Menu request.
+  void slotContextMenu(QTreeWidgetItem * _item, const QPoint & _pos, int);
+  //! Double Click event.
+  void slotDoubleClick(QTreeWidgetItem * _item);
+#else
   //! Context Menu request.
   void slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int);
   //! Double Click event.
   void slotDoubleClick(Q3ListViewItem * _item);
+#endif
 
 protected:
   //----------------------------------------------------------------------------

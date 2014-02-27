@@ -19,6 +19,8 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
 #define LSB_Q3POPUPMENU
 
 #ifndef Section_h
@@ -35,7 +37,11 @@ class QMenu;
 #endif
 
 // forward declarations
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
+#else
 class Q3ListViewItem;
+#endif
 
 class Section : public ItemXML
 {
@@ -44,7 +50,11 @@ class Section : public ItemXML
   typedef ItemXML Super;
 public:
   Section(QDomNode const& _node,
+#ifdef LSB_Q3LISTVIEWITEM
+	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
+#else
 	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
+#endif
 	  QObject * _parent, const char * _name);
 
   //----------------------------------------------------------------------------  

@@ -18,6 +18,10 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
+
 #include "DeferredParameterEdit.h"
 #include "ParameterDialog.h"
 #include "ParameterListDialog.h"
@@ -32,7 +36,12 @@
 
 #include <qpushbutton.h>
 #include <qstring.h>
+#ifdef LSB_Q3LISTVIEW
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#else
 #include <q3listview.h>
+#endif
 
 #include "qt_compatibility.h"
 
@@ -248,6 +257,31 @@ DeferredParameterEdit::setXML()
   //--------------------------------------
   // replace node by new content
 
+#ifdef LSB_Q3LISTVIEWITEM
+  // remember the predecessor, if there is one
+  QTreeWidgetItem * pre = NULL;
+  if (item_)
+  {
+    // Fetch the QTreeWidgetItem in the Item
+    QTreeWidgetItem * const pTreeWidgetItem = item_->treeWidgetItem();
+    assert(pTreeWidgetItem);
+    // Fetch the parent of the QTreeWidgetItem, if there is one
+    const QTreeWidgetItem * const pParent = pTreeWidgetItem->parent();
+    if (pParent)
+    {
+      // Fetch the child index of the QTreeWidgetItem wrt its parent
+      const int index = pParent->indexOfChild(pTreeWidgetItem);
+      // Fetch the QTreeWidgetItem's predecessor QTreeWidgetItem
+      if (index > 0)
+      {
+	pre = pParent->child(index - 1);
+      }
+    }
+    // We are going to replace this item, so delete it now
+    delete item_;
+    item_ = 0;
+  }
+#else
   // remember the predecessor
   Q3ListViewItem * pre = NULL;
   if (item_) {
@@ -263,6 +297,7 @@ DeferredParameterEdit::setXML()
     // delete the current content
     delete item_;
   }
+#endif
 
   // replace the xml subtree
   QDomNode node = tmpNode.cloneNode();
@@ -284,14 +319,22 @@ DeferredParameterEdit::setXML()
     
       item_ = new CompoundParameter(*parameterType,
 				    node,
+#ifdef LSB_Q3LISTVIEWITEM
+				    parentItem_->treeWidgetItem(), pre,
+#else
 				    parentItem_->listViewItem(), pre,
+#endif
 				    parentItem_, name());
     }
     else if (type_ == VECTOR ||
 	     type_ == SET) {
       item_ = new ParameterList(parameter_, 
 				node,
+#ifdef LSB_Q3LISTVIEWITEM
+				parentItem_->treeWidgetItem(), pre,
+#else
 				parentItem_->listViewItem(), pre,
+#endif
 				parentItem_, name());
     }
     if (item_ != NULL)

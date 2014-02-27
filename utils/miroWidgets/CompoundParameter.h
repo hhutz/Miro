@@ -18,6 +18,10 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
+
 #ifndef CompoundParameter_h
 #define CompoundParameter_h
 
@@ -25,6 +29,12 @@
 #include "params/Type.h"
 
 #include "miroWidgets_Export.h"
+
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
+#else
+class Q3ListViewItem;
+#endif
 
 //! Class representing compound parameter items.
 class miroWidgets_Export CompoundParameter : public ParameterXML
@@ -42,16 +52,40 @@ public:
   // public methods
   //----------------------------------------------------------------------------
 
+  /**
+   * @param[in] _type
+   * @param[in] _node
+   * @param[in,out] _treeWidgetItem
+   * @param[in] _pre
+   * @param[in] _parent
+   * @param[in] _name
+   */
   //! Initializing constructor.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
+#ifdef LSB_Q3LISTVIEWITEM
+		    QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
+#else
 		    Q3ListViewItem * _listViewItem, Q3ListViewItem * _pre,
+#endif
 		    QObject * _parent, const char * _name);
 
+  /**
+   * @param[in] _type
+   * @param[in] _node
+   * @param[in,out] _treeWidget
+   * @param[in] _pre
+   * @param[in] _parent
+   * @param[in] _name
+   */
   //! Initializing constructor. For toplevel QListViewItem.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
+#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+		    QTreeWidget * _list, QTreeWidgetItem * _pre,
+#else
 		    Q3ListView * _list, Q3ListViewItem * _pre,
+#endif
 		    QObject * _parent, const char * _name);
 
   //----------------------------------------------------------------------------

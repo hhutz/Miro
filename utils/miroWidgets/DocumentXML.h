@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+
 #ifndef DocumentXML_h
 #define DocumentXML_h
 
@@ -26,7 +29,11 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
+#ifdef LSB_Q3LISTVIEW
+class QTreeWidget;
+#else
 class Q3ListView;
+#endif
 
 
 //! Class representing an XML document.
@@ -52,7 +59,11 @@ public:
 
   //! Initializing constructor. Taking a XML document as first parameter.
   DocumentXML(QDomDocument const& _document,
+#ifdef LSB_Q3LISTVIEW
+	      QTreeWidget * _treeWidget,
+#else
 	      Q3ListView * _listView, 
+#endif
 	      QObject * _parent = NULL, const char * _name = NULL);
   //! Virtual destructor.
   virtual ~DocumentXML();

@@ -19,6 +19,8 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
 #define LSB_Q3POPUPMENU
 
 #ifndef ConfigDocumentXML_h
@@ -33,7 +35,11 @@ class QMenu;
 #endif
 
 // forward declarations
+#ifdef LSB_Q3LISTVIEW
+class QTreeWidget;
+#else
 class Q3ListView;
+#endif
 
 class ConfigDocumentXML : public DocumentXML
 {
@@ -51,7 +57,11 @@ public:
   //----------------------------------------------------------------------------  
 
   ConfigDocumentXML(QDomDocument const& _document,
-		    Q3ListView * _listView, 
+#ifdef LSB_Q3LISTVIEW
+		    QTreeWidget * _treeWidget,
+#else
+		    Q3ListView * _listView,
+#endif
 		    QObject * _parent = NULL, const char * _name = NULL);
   virtual ~ConfigDocumentXML();
 

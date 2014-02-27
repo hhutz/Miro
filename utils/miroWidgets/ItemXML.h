@@ -20,6 +20,8 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+#define LSB_Q3LISTVIEWITEM
 #define LSB_Q3POPUPMENU
 
 #ifndef ItemXML_h
@@ -33,6 +35,12 @@
 class QMenu;
 #else
 #include <Q3PopupMenu>
+#endif
+#ifdef LSB_Q3LISTVIEW
+class QTreeWidget;
+#endif
+#ifdef LSB_Q3LISTVIEWITEM
+class QTreeWidgetItem;
 #endif
 
 #include <vector>
@@ -67,7 +75,11 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
+#ifdef LSB_Q3LISTVIEWITEM
+	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
+#else
 	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
+#endif
 	  QObject * _parent = NULL, const char * _name = NULL);
   //! Initializing constructor.
   /**
@@ -75,7 +87,11 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
+#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+	  QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
+#else
 	  Q3ListView * _view, Q3ListViewItem * _pre = NULL,
+#endif
 	  QObject * _parent = NULL, const char * _name = NULL);
   //! Virtual destructor.
   virtual ~ItemXML();

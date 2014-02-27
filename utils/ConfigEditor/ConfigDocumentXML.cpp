@@ -28,7 +28,12 @@
 
 #include "params/Generator.h"
 
+#ifdef LSB_Q3LISTVIEW
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#else
 #include <q3listview.h>
+#endif
 #ifdef LSB_Q3POPUPMENU
 #include <QMenu>
 #else
@@ -48,10 +53,18 @@ const QString ConfigDocumentXML::XML_TAG("config");
 //------------------------------------------------------------------------------
 // public methods
 
-ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document, 
+ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document,
+#ifdef LSB_Q3LISTVIEW
+				     QTreeWidget * _treeWidget,
+#else 
 				     Q3ListView * _listView,
+#endif
 				     QObject * _parent, const char * _name) :
+#ifdef LSB_Q3LISTVIEW
+  Super(_document, _treeWidget, _parent, _name),
+#else
   Super(_document, _listView, _parent, _name),
+#endif
   menuAddSection_(NULL)
 {
 }
@@ -70,7 +83,7 @@ ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
 #endif
 {
 #ifdef LSB_Q3POPUPMENU
-  // The Add Sectio menu is a submenu of the menu passed as argument
+  // The Add Section menu is a submenu of the menu passed as argument
   menuAddSection_ = _menu.addMenu(tr("Add Section"));
 #else
   menuAddSection_ = new Q3PopupMenu(&_menu);
@@ -79,11 +92,26 @@ ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
 #endif
 
   Miro::CFG::QStringVector childSections;
+#ifdef LSB_Q3LISTVIEWITEM
+  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  assert(pTreeWidgetItem != NULL);
+  QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
+  assert(pParentTreeWidgetItem != NULL);
+  for (int i = 0; i < pParentTreeWidgetItem->childCount(); ++i)
+  {
+    const QTreeWidgetItem * const pChildTreeWidgetItem =
+      pParentTreeWidgetItem->child(i);
+    assert(pChildTreeWidgetItem != NULL);
+    const QString text = pChildTreeWidgetItem->text(0);
+    childSections.push_back(text);
+  }
+#else
   Q3ListViewItem * item = listViewItem()->firstChild();
   while (item != NULL) {
     childSections.push_back(item->text(0));
     item = item->nextSibling();
   }
+#endif
 
   // submenu: add all section names
   // not yet available in the document
@@ -151,7 +179,11 @@ ConfigDocumentXML::onAddSection(int _n)
 
   assert(!newChild.isNull());
   new Section(newChild, 
+#ifdef LSB_Q3LISTVIEWITEM
+	      treeWidgetItem(), NULL, 
+#else
 	      listViewItem(), NULL, 
+#endif
 	      this, menuAddSection_->text(_n));
   setModified();
 }
@@ -165,16 +197,28 @@ ConfigDocumentXML::parse()
   QDomNode n = document_.firstChild();
   if (!n.isNull()) {
     QDomNode n1 = n.firstChild();
+#ifdef LSB_Q3LISTVIEWITEM
+    QTreeWidgetItem * pre = NULL;
+#else
     Q3ListViewItem * pre = NULL;
+#endif
     while (!n1.isNull()) {
       QDomElement e = n1.toElement();
       if (!e.isNull() &&
 	  e.tagName() == Section::XML_TAG) {
 	Section * section =
 	  new Section(e, 
+#ifdef LSB_Q3LISTVIEWITEM
+		      treeWidgetItem(), pre,
+#else
 		      listViewItem(), pre, 
+#endif
 		      this, e.attribute("name"));
+#ifdef LSB_Q3LISTVIEWITEM
+	pre = section->treeWidgetItem();
+#else
 	pre = section->listViewItem();
+#endif
       }
       n1 = n1.nextSibling();
     }

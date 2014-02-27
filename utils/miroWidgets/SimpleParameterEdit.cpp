@@ -30,7 +30,11 @@
 #include <qlineedit.h>
 #include <qtextedit.h>
 #include <qtooltip.h>
+#ifdef LSB_Q3LISTVIEW
+#include <QTreeWidget>
+#else
 #include <q3listview.h>
+#endif
 #include <qcombobox.h>
 #ifdef LSB_Q3LISTBOX
 #include <QListWidget>
@@ -385,7 +389,11 @@ SimpleParameterEdit::setXML()
       ParameterXML * newParam =
 	new SimpleParameter(parameter_,
 			    node_,
+#ifdef LSB_Q3LISTVIEWITEM
+			    parentItem_->treeWidgetItem(), NULL,
+#else
 			    parentItem_->listViewItem(), NULL,
+#endif
 			    parentItem_, name());
       newParam->init();
       item_ = newParam;
@@ -401,7 +409,11 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
+#ifdef LSB_Q3LISTVIEWITEM
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#else
 	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#endif
     }
     else {
       lineEdit_->setEdited(false);
@@ -433,7 +445,11 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
+#ifdef LSB_Q3LISTVIEWITEM
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#else
 	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#endif
     }
     else {
       typeBoxModified_ = false;
@@ -486,7 +502,11 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
+#ifdef LSB_Q3LISTVIEWITEM
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#else
 	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+#endif
     }
     else {
       listBoxModified_ = false;

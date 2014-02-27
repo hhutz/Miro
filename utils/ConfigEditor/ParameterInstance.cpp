@@ -31,8 +31,13 @@
 QString const ParameterInstance::XML_TAG = "instance";
 QString const ParameterInstance::XML_ATTRIBUTE_TYPE = "type";
 
+#ifdef LSB_Q3LISTVIEWITEM
+ParameterInstance::ParameterInstance(QTreeWidgetItem * _listViewItem, 
+				     QTreeWidgetItem * _pre,
+#else
 ParameterInstance::ParameterInstance(Q3ListViewItem * _listViewItem, 
 				     Q3ListViewItem * _pre,
+#endif
 				     QDomNode const& _node,
 				     QObject * _parent, const char * _name) :
   Super(type(_node, XML_ATTRIBUTE_TYPE),
