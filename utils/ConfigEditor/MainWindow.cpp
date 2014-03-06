@@ -18,32 +18,26 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "MainWindow.h"
+// This application
 #include "ParameterInstance.h"
-
-#include "miroWidgets/DocumentView.h"
 #include "miroWidgets/ConfigFile.h"
+#include "miroWidgets/DocumentView.h"
 #include "miroWidgets/FileListDialog.h"
-
 #ifdef MIRO_IDL_INTERFACES
 #  include "idl/ConfigC.h"
 #  include "miro/Client.h"
 #endif
-
-
-#include <q3filedialog.h>
-#ifdef LSB_Q3POPUPMENU
-#include <QMenu>
-#else
-#include <q3popupmenu.h>
-#endif
-#include <qmenubar.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qinputdialog.h>
-//Added by qt3to4:
+// The Qt library
 #include <QCloseEvent>
-
+#include <QInputDialog>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+#include <QPushButton>
+// The C++ Standard Library
 #include <cassert>
 
 namespace 
@@ -69,102 +63,65 @@ MainWindow::MainWindow() :
   //-----------//
 
   // file menu
-#ifdef LSB_Q3POPUPMENU
   QAction * pAction = 0;
   QMenu * const pFileMenu = menuBar()->addMenu(tr("&File"));
   assert(pFileMenu != 0);
 
   pAction = new QAction(tr("New"), view_);
-  connect(pAction, SIGNAL(triggered), SLOT(slotNew()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotNew()));
   pFileMenu->addAction(pAction);
 
   pAction = new QAction(tr("Open ..."), view_);
-  connect(pAction, SIGNAL(triggered), SLOT(slotLoad()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotLoad()));
   pFileMenu->addAction(pAction);
 
   pAction = new QAction(tr("Save"), view_);
-  connect(pAction, SIGNAL(triggered), SLOT(slotSave()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotSave()));
   pFileMenu->addAction(pAction);
 
   pAction = new QAction(tr("Save As ..."), view_);
-   connect(pAction, SIGNAL(triggered), SLOT(slotSaveAs()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotSaveAs()));
   pFileMenu->addAction(pAction);
 
   pAction = new QAction(tr("Get from ..."), this);
-  connect(pAction, SIGNAL(triggered), SLOT(slotGetFrom()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotGetFrom()));
   pFileMenu->addAction(pAction);
 #ifndef MIRO_IDL_INTERFACES
   pAction->setEnabled(false);
 #endif // MIRO_IDL_INTERFACES
 
   pAction = new QAction(tr("Send to ..."), this);
-  connect(pAction, SIGNAL(triggered), SLOT(slotNew()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotNew()));
   pFileMenu->addAction(pAction);
 #ifndef MIRO_IDL_INTERFACES
   pAction->setEnabled(false);
 #endif // MIRO_IDL_INTERFACES
 
   pAction = new QAction(tr("Quit"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(slotClose()));
+  connect(pAction, SIGNAL(triggered()), SLOT(close()));
   pFileMenu->addAction(pAction);
-#else // LSB_Q3POPUPMENU
-  Q3PopupMenu * menuFile = new Q3PopupMenu();
-  menuBar()->insertItem("&File", menuFile);
-
-  menuFile->insertItem("New", view_, SLOT(slotNew()));
-  menuFile->insertItem("Open ...", view_, SLOT(slotLoad()));
-  menuFile->insertItem("Save", view_, SLOT(slotSave())); 
-  menuFile->insertItem("Save As ...", view_, SLOT(slotSaveAs()));
-  menuFile->insertSeparator();
-  int id1 = menuFile->insertItem("Get from ...", this, SLOT(slotGetFrom()));
-  int id2 = menuFile->insertItem("Send to ...", this, SLOT(slotSendTo()));
-  menuFile->insertSeparator();
-  menuFile->insertItem("Quit", this, SLOT(close()));
-#ifndef MIRO_IDL_INTERFACES
-  menuFile->setItemEnabled(id1, false);
-  menuFile->setItemEnabled(id2, false);
-#endif // MIRO_IDL_INTERFACES
-#endif // LSB_Q3POPUPMENU
 
   // options menu
-#ifdef LSB_Q3POPUPMENU
   QMenu * const pOptionsMenu = menuBar()->addMenu(tr("&Options"));
   assert(pOptionsMenu != 0);
   {
     pAction = new QAction(tr("&Parameter descriptions ..."), this);
-    connect(pAction, SIGNAL(triggered), SLOT(parameterDescriptions()));
+    connect(pAction, SIGNAL(triggered()), SLOT(paramsDescriptions()));
     pOptionsMenu->addAction(pAction);
   }
-#else
-  Q3PopupMenu* menuOptions = new Q3PopupMenu();
-  menuBar()->insertItem("&Options", menuOptions);
-
-  menuOptions->insertItem("&Parameter descriptions ...", 
-			  this, SLOT(paramsDescriptions()));
-#endif
 
   // help menu
-#ifdef LSB_Q3POPUPMENU
   menuBar()->addSeparator();
   QMenu * const pHelpMenu = menuBar()->addMenu(tr("&Help"));
   assert(pHelpMenu != 0);
 
   pAction = new QAction(tr("About ConfigEditor"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(slotAbout()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotAbout()));
   pHelpMenu->addAction(pAction);
 
   pAction = new QAction(tr("About Qt"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(slotAboutQt()));
+  connect(pAction, SIGNAL(triggered()), SLOT(slotAboutQt()));
   pHelpMenu->addAction(pAction);
-
-#else
-  Q3PopupMenu* menuHelp = new Q3PopupMenu();
-  menuBar()->insertSeparator();
-  menuBar()->insertItem("&Help", menuHelp);
-  
-  menuHelp->insertItem("About ConfigEditor", this, SLOT(slotAbout()));
-  menuHelp->insertItem("About Qt", this, SLOT(slotAboutQt()));
-#endif
 
   //-----------//
   // init view //
@@ -291,3 +248,8 @@ MainWindow::closeEvent(QCloseEvent *e)
 {
   view_->tryClose(e);
 }
+
+void MainWindow::slotNew()    { if (view_) { view_->slotNew();    } }
+void MainWindow::slotLoad()   { if (view_) { view_->slotLoad();   } }
+void MainWindow::slotSave()   { if (view_) { view_->slotSave();   } }
+void MainWindow::slotSaveAs() { if (view_) { view_->slotSaveAs(); } }

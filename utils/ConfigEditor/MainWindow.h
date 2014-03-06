@@ -18,22 +18,13 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-
-// Enable migration from Qt v3 to Qt v4
-#define LSB_Q3MAINWINDOW
-
 #ifndef MainWindow_h
 #define MainWindow_h
 
+// This application
 #include "ConfigDocumentXML.h"
-
-#ifdef LSB_Q3MAINWINDOW
+// The Qt library
 #include <QMainWindow>
-#else
-#include <q3mainwindow.h>
-#endif
-
-//Added by qt3to4:
 #include <QCloseEvent>
 
 // forward declarattions
@@ -42,12 +33,7 @@ class FileListDialog;
 class ConfigFile;
 
 //! Main class of the MainWindow application 
-class MainWindow : public
-#ifdef LSB_Q3MAINWINDOW
-QMainWindow
-#else
-Q3MainWindow
-#endif
+class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
@@ -56,11 +42,7 @@ Q3MainWindow
   //----------------------------------------------------------------------------
 
   //! The super class.
-#ifdef LSB_Q3MAINWINDOW
   typedef QMainWindow Super;
-#else
-  typedef Q3MainWindow Super;
-#endif
 
 public:
   //----------------------------------------------------------------------------
@@ -80,6 +62,10 @@ protected slots:
   //----------------------------------------------------------------------------
 
   // file menu
+  void slotNew();
+  void slotLoad();
+  void slotSave();
+  void slotSaveAs();
   void slotGetFrom();
   void slotSendTo();
 
