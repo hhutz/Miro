@@ -18,26 +18,11 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-#define LSB_Q3HBOX
-#define LSB_Q3HBOXLAYOUT
-#define LSB_Q3VBOXLAYOUT
-#define LSB_Q3VGROUPBOX
 
 #include "FileListDialog.h"
 
-#include <q3groupbox.h>
-#ifdef LSB_Q3VGROUPBOX
 #include <QGroupBox>
-#else
-#include <q3vgroupbox.h>
-#endif
-#include <q3hgroupbox.h>
-#ifdef LSB_Q3HBOX
 #include <QWidget>
-#else
-#include <q3hbox.h>
-#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
@@ -47,22 +32,9 @@
 #include <q3listbox.h>
 #endif
 #include <qstringlist.h>
-#ifdef LSB_Q3FILEDIALOG
 #include <QFileDialog>
-#else
-#include <q3filedialog.h>
-#endif
-//Added by qt3to4:
-#ifdef LSB_Q3HBOXLAYOUT
 #include <QHBoxLayout>
-#else
-#include <Q3HBoxLayout>
-#endif
-#ifdef LSB_Q3VBOXLAYOUT
 #include <QVBoxLayout>
-#else
-#include <Q3VBoxLayout>
-#endif
 #include <cassert>
 
 FileListDialog::FileListDialog(QWidget* parent,
@@ -78,161 +50,45 @@ FileListDialog::FileListDialog(QWidget* parent,
   resize(300, 200);
   setCaption(_dialogTitle);
 
-#ifdef LSB_Q3VBOXLAYOUT
-  QWidget * const pTopBoxParent = this;
-  QVBoxLayout * const topBox = new QVBoxLayout(pTopBoxParent);
-  assert(topBox != NULL);
-  const int margin = 0;
-  topBox->setContentsMargins(margin, margin, margin, margin);
-  const int spacing = -1;
-  topBox->setSpacing(spacing);
-#else
-  Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
-#endif
+  // Create and configure the layout for the FileListDialog
+  QVBoxLayout * const pFileListDialogLayout = createLayout();
 
-#ifdef LSB_Q3VGROUPBOX
-  // Create the Group Box
-  const QString groupBoxTitle("");
-  QWidget * const pGroupBoxParent = this;
-  QGroupBox * const fileBox = new QGroupBox(groupBoxTitle, pGroupBoxParent);
-  assert(fileBox != NULL);
+  // Create the upper pane, contining the ListBox of file pathnames and the
+  // "Add" and "Remove" buttons
+  const QString fileBoxTitle("");
+  QGroupBox * const pFileBox = new QGroupBox(fileBoxTitle);
+  assert(pFileBox != NULL);
 
-  // Create the Vertical Box Layout
-  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
-  assert(pGroupBoxLayout != NULL);
+  // The ListBox is above the pane that contains the buttons
+  QVBoxLayout * const pFileBoxLayout = new QVBoxLayout;
+  assert(pFileBoxLayout != NULL);
+  pFileBox->setLayout(pFileBoxLayout);
 
-  // Assign the Vertical Box Layout to the Group Box
-  fileBox->setLayout(pGroupBoxLayout);
-
-#else
-  Q3VGroupBox * fileBox = new Q3VGroupBox(this, "fileBox");
-#endif
-
-#if defined(LSB_Q3LISTBOX) && defined(LSB_Q3VGROUPBOX)
-  // Create the List Widget with no parent
-  QWidget * const pListWidgetParent = NULL;
+#if defined(LSB_Q3LISTBOX) 
+  // Create the widget that displays the list of file pathnames
+  QWidget * const pListWidgetParent = pFileBox;
   list_ = new QListWidget(pListWidgetParent);
   // Add the List Widget to the Group Box's Layout
   pGroupBoxLayout->addWidget(list_);
-#elif defined(LSB_Q3LISTBOX) && !defined(LSB_Q3VGROUPBOX)
-  // Create the List Widget with the Group Box as parent
-  QWidget * const pListWidgetParent = fileBox;
-  list_ = new QListWidget(pListWidgetParent);
-#elif !defined(LSB_Q3LISTBOX) && defined(LSB_Q3VGROUPBOX)
-  // Create the List Box with no parent
-  QWidget * const pListBoxParent = NULL;
-  const QString listBoxName("list");
-  list_ = new Q3ListBox(pListBoxParent, listBoxName);
-  // Add the List Box to the Group Box's Layout
-  pGroupBoxLayout->addWidget(list_);
 #else
   // Create the List Box with the Group Box as parent
-  list_ = new Q3ListBox(fileBox, "list");
+  list_ = new Q3ListBox(pFileBox, "list");
+  pFileBoxLayout->addWidget(list_);
 #endif
 
-#ifdef LSB_Q3HBOX
-  // Create the box to hold the buttons
-  QWidget * const pFileButtonsBoxParent = fileBox;
-  QWidget * const fileButtonsBox = new QWidget(pFileButtonsBoxParent);
-  assert(fileButtonsBox != NULL);
+  createFileButtonsBox(pFileBoxLayout);
 
-  // Create the button box's layout
-  QHBoxLayout * fileButtonsBoxLayout = new QHBoxLayout;
-  assert(fileButtonsBoxLayout != NULL);
-  fileButtonsBox->setLayout(fileButtonsBoxLayout);
+  // Create the dialog for soliciting the pathname
+  createDialogBox(_dialogTitle, _filters);
 
-  // Create the Add button and add it to the layout
-  const QString addButtonText("Add...");
-  QPushButton * const addButton = new QPushButton(addButtonText);
-  assert(addButton != NULL);
-  fileButtonsBoxLayout->addWidget(addButton);
+  pFileListDialogLayout->addSpacing(10);
+  // The ListBox goes on top
+  pFileListDialogLayout->addWidget(pFileBox);
+  // The title for the ListBox
+  pFileBox->setTitle(_listTitle);
 
-  // Create the Remove button and add it to the layout
-  const QString delButtonText("Remove");
-  delButton_ = new QPushButton(delButtonText);
-  assert(delButton_ != NULL);
-  fileButtonsBoxLayout->addWidget(delButton_);
-#else
-  Q3HBox * fileButtonsBox = new Q3HBox(fileBox, "fileButtons");
-  QPushButton * addButton = new QPushButton("Add...", fileButtonsBox);
-  delButton_ = new QPushButton("Remove", fileButtonsBox);
-#endif
-
-#ifdef LSB_Q3FILEDIALOG
-  QWidget * const fdParent = this;
-  const QString caption(_dialogTitle);
-  const QString directory;
-  QString filter;
-  if (_filters)
-  {
-    // A non-NULL filters argument was passed to the constructor
-    for (int i = 0; _filters[i] != NULL; ++i)
-    {
-      if (i != 0)
-      {
-	filter.append(";;");
-      }
-      filter.append(_filters[i]);
-    }
-  }
-  else
-  {
-    // A NULL filters aregument was passed to the constructor
-    filter = "all files (*)";
-  }
-  fileDialog_ = new QFileDialog(fdParent, caption, directory, filter);
-#else
-  fileDialog_ = new Q3FileDialog(this, "config file dialog", TRUE);
-#endif
-
-  topBox->addSpacing(10);
-  topBox->addWidget(fileBox);
-  fileBox->setTitle(_listTitle);
-
-  topBox->addSpacing(10);
-#ifdef LSB_Q3HBOXLAYOUT
-  // Create the Horizontal Box Layout
-#ifdef LSB_Q3VBOXLAYOUT
-  QVBoxLayout * const pDialogButtonsBoxParent = topBox;
-#else
-  Q3VBoxLayout * const pDialogButtonsBoxParent = topBox;
-#endif
-  QHBoxLayout * const dialogButtonsBox =
-    new QHBoxLayout(pDialogButtonsBoxParent);
-  assert(dialogButtonsBox != NULL);
-  {
-    const int spacing = -1;
-    dialogButtonsBox->setSpacing(spacing);
-  }
-#else
-  Q3HBoxLayout * dialogButtonsBox = new Q3HBoxLayout(topBox, -1, "hBoxLayout");
-#endif
-  QSpacerItem * dBSpace = new QSpacerItem(0, 0);
-  QPushButton * okButton = new QPushButton("OK", this);
-  QPushButton * cancelButton = new QPushButton("Cancel", this);
-  
-  topBox->addSpacing(5);
-  dialogButtonsBox->addItem(dBSpace);
-  dialogButtonsBox->addWidget(okButton);
-  dialogButtonsBox->addSpacing(5);
-  dialogButtonsBox->addWidget(cancelButton);
-  dialogButtonsBox->addSpacing(5);
-  
-  okButton->setDefault(true);
-
-#ifdef LSB_Q3FILEDIALOG
-#else
-  static const char * filters[3] = { "all files (*)", NULL };
-
-  fileDialog_->setCaption("File open dialog");
-  fileDialog_->setFilters((_filters == NULL)? filters : _filters);
-#endif
-
-  // connect the dialogs functionality  
-  connect(okButton,     SIGNAL(clicked()), SLOT(accept()));
-  connect(cancelButton, SIGNAL(clicked()), SLOT(reject()));
-  connect(addButton,    SIGNAL(clicked()), SLOT(add()));
-  connect(delButton_,   SIGNAL(clicked()), SLOT(del()));
+  pFileListDialogLayout->addSpacing(10);
+  createDialogButtonsBox(pFileListDialogLayout);
 
   selectListItem();
 }
@@ -390,4 +246,111 @@ FileListDialog::del() {
 #endif
  
   selectListItem();
+}
+
+void
+FileListDialog::createDialogBox(const QString& title, const char * filters[])
+{ 
+  QWidget * const fdParent = this;
+  const QString caption(title);
+  const QString directory;
+  QString filter;
+  if (filters)
+  {
+    // A non-NULL filters argument was passed to the constructor
+    for (int i = 0; filters[i] != NULL; ++i)
+    {
+      if (i != 0)
+      {
+	filter.append(";;");
+      }
+      filter.append(filters[i]);
+    }
+  }
+  else
+  {
+    // A NULL filters aregument was passed to the constructor
+    filter = "all files (*)";
+  }
+  fileDialog_ = new QFileDialog(fdParent, caption, directory, filter);
+}
+
+void
+FileListDialog::createFileButtonsBox(QVBoxLayout * const pFileBoxLayout)
+{
+  // Create the widget to hold the Add and Remove buttons, arrayed horizontally
+  QWidget * const pFileButtonsBox = new QWidget;
+  assert(pFileButtonsBox != NULL);
+
+  // Create and set its Layout
+  QHBoxLayout * const pFileButtonsBoxLayout = new QHBoxLayout;
+  assert(pFileButtonsBoxLayout != NULL);
+  pFileButtonsBox->setLayout(pFileButtonsBoxLayout);
+
+  // Create the Add button and add it to the layout
+  const QString addButtonText("Add...");
+  QPushButton * const addButton = new QPushButton(addButtonText);
+  assert(addButton != NULL);
+  pFileButtonsBoxLayout->addWidget(addButton);
+
+  // Create the Remove button and add it to the layout
+  const QString delButtonText("Remove");
+  delButton_ = new QPushButton(delButtonText);
+  assert(delButton_ != NULL);
+  pFileButtonsBoxLayout->addWidget(delButton_);
+
+  pFileBoxLayout->addWidget(pFileButtonsBox);
+
+  connect(addButton,    SIGNAL(clicked()), SLOT(add()));
+  connect(delButton_,   SIGNAL(clicked()), SLOT(del()));
+}
+
+void
+FileListDialog::createDialogButtonsBox(QVBoxLayout * const pFileListDialogLayout)
+{
+  // Create the Widget
+  QWidget * const pDialogButtonsBox = new QWidget();
+  assert(pDialogButtonsBox != NULL);
+
+  // Create the Layout
+  QHBoxLayout * const pDialogButtonsBoxLayout = new QHBoxLayout;
+  assert(pDialogButtonsBoxLayout != NULL);
+
+  pDialogButtonsBox->setLayout(pDialogButtonsBoxLayout);
+  // Use the value of the margin for the spacing
+  pDialogButtonsBoxLayout->setSpacing(-1);
+
+  QSpacerItem * dBSpace = new QSpacerItem(0, 0);
+  QPushButton * okButton = new QPushButton("OK", this);
+  QPushButton * cancelButton = new QPushButton("Cancel", this);
+  
+  pFileListDialogLayout->addSpacing(5);
+  pDialogButtonsBoxLayout->addItem(dBSpace);
+  pDialogButtonsBoxLayout->addWidget(okButton);
+  pDialogButtonsBoxLayout->addSpacing(5);
+  pDialogButtonsBoxLayout->addWidget(cancelButton);
+  pDialogButtonsBoxLayout->addSpacing(5);
+  okButton->setDefault(true);
+
+  // connect the dialogs functionality  
+  connect(okButton,     SIGNAL(clicked()), SLOT(accept()));
+  connect(cancelButton, SIGNAL(clicked()), SLOT(reject()));
+
+  // Add the Widget to its Layout
+  pFileListDialogLayout->addWidget(pDialogButtonsBox);
+}
+
+QVBoxLayout *
+FileListDialog::createLayout()
+{
+  QVBoxLayout * const pFileListDialogLayout = new QVBoxLayout;
+  assert(pFileListDialogLayout != NULL);
+  const int margin = 0;
+  pFileListDialogLayout->setContentsMargins(margin, margin, margin, margin);
+  // The spacing is the same as the margin
+  const int spacing = margin;
+  pFileListDialogLayout->setSpacing(spacing);
+  this->setLayout(pFileListDialogLayout);
+
+  return pFileListDialogLayout;
 }

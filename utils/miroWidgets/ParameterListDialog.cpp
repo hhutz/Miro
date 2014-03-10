@@ -19,10 +19,6 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3GROUPBOX
-#define LSB_Q3HBOX
-#define LSB_Q3HGROUPBOX
-#define LSB_Q3VGROUPBOX
 
 #include "ParameterListDialog.h"
 #include "SimpleParameter.h"
@@ -34,26 +30,8 @@
 #include "miro/Exception.h"
 #include "params/Generator.h"
 
-#ifdef LSB_Q3GROUPBOX
 #include <QGroupBox>
-#else
-#include <q3groupbox.h>
-#endif
-#ifdef LSB_Q3VGROUPBOX
-#include <QGroupBox>
-#else
-#include <q3vgroupbox.h>
-#endif
-#ifdef LSB_Q3HGROUPBOX
-#include <QGroupBox>
-#else
-#include <q3hgroupbox.h>
-#endif
-#ifdef LSB_Q3HBOX
 #include <QWidget>
-#else
-#include <q3hbox.h>
-#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
@@ -62,11 +40,7 @@
 #else
 #include <q3listview.h>
 #endif
-#ifdef LSB_Q3POPUPMENU
 #include <QMenu>
-#else
-#include <q3popupmenu.h>
-#endif
 
 #include <cassert>
 
@@ -111,7 +85,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   delete frame_;
 
 #ifdef LSB_Q3LISTVIEW
-  list_ = new QTreeWidget(groupBox_);
+  list_ = new QTreeWidget();
   assert(list_ != NULL);
   list_->setColumnCount(2);
   QStringList headerLabels;
@@ -128,11 +102,12 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   list_->setResizeMode(Q3ListView::AllColumns);
 #endif
   list_->setRootIsDecorated(true);
+  assert(groupBox_ != NULL);
+  assert(groupBox_->layout() != NULL);
+  groupBox_->layout()->addWidget(list_);
 
-#ifdef LSB_Q3HBOX
   // Create the box to hold the buttons
-  QWidget * const fileButtonsBoxParent = groupBox_;
-  QWidget * const fileButtonsBox = new QWidget(fileButtonsBoxParent);
+  QWidget * const fileButtonsBox = new QWidget;
   assert(fileButtonsBox != NULL);
 
   // Create the button box's layout
@@ -157,12 +132,10 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   editButton_ = new QPushButton(editButtonText);
   assert(editButton_ != NULL);
   fileButtonsBoxLayout->addWidget(editButton_);
-#else
-  Q3HBox * fileButtonsBox = new Q3HBox(groupBox_, "fileButtons");
-  QPushButton * addButton = new QPushButton("Add...", fileButtonsBox);
-  delButton_ = new QPushButton("Delete", fileButtonsBox);
-  editButton_ = new QPushButton("Edit", fileButtonsBox);
-#endif
+
+  assert(groupBox_ != NULL);
+  assert(groupBox_->layout() != NULL);
+  groupBox_->layout()->addWidget(fileButtonsBox);
 
   //----------------------------------------------------------------------------
   // add the list view items
@@ -593,7 +566,6 @@ ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
   Item::ItemMap::const_iterator i = Item::itemMap().find(_item);
   assert(i != Item::itemMap().end());
 
-#ifdef LSB_Q3POPUPMENU
   QMenu menu(NULL);
 #ifdef LSB_Q3LISTVIEWITEM
   const std::pair<QTreeWidgetItem*, Item*>& p = *i;
@@ -606,12 +578,6 @@ ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
   pItem->contextMenu(menu);
 
   menu.exec(pos);
-#else
-  Q3PopupMenu menu(NULL, "plistpopu");
-  i->second->contextMenu(menu);
-
-  menu.exec(pos);
-#endif
 }
 
 void

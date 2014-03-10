@@ -20,9 +20,8 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
-#define LSB_Q3POPUPMENU
+// #define LSB_Q3LISTVIEW
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef ItemXML_h
 #define ItemXML_h
@@ -31,11 +30,6 @@
 
 #include <qstring.h>
 #include <qdom.h>
-#ifdef LSB_Q3POPUPMENU
-class QMenu;
-#else
-#include <Q3PopupMenu>
-#endif
 #ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 #endif
@@ -127,11 +121,7 @@ public:
   //----------------------------------------------------------------------------
 
   //! Provide the context menu.
-#ifdef LSB_Q3POPUPMENU
   virtual void contextMenu(QMenu& _menu);
-#else
-  virtual void contextMenu(Q3PopupMenu& _menu);
-#endif
   //! Move item up in the list view and in the document.
   virtual void moveUp();
   //! Move item down  in the list view and in the document.

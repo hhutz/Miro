@@ -19,8 +19,8 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
+// #define LSB_Q3LISTVIEW
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef SimpleParameter_h
 #define SimpleParameter_h

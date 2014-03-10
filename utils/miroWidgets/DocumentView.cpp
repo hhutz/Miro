@@ -19,26 +19,14 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-// Enable migration from Qt v3 to Qt v4
-#define LSB_Q3FILEDIALOG
-
 #include "DocumentView.h"
 #include "ParameterXML.h"
 #include "ItemXML.h"
 
-#ifdef LSB_Q3FILEDIALOG
 #include <QFileDialog>
-#else
-#include <q3filedialog.h>
-#endif
 #include <qmessagebox.h>
 #include <qstatusbar.h>
-#ifdef LSB_Q3POPUPMENU
 #include <QMenu>
-#else
-#include <q3popupmenu.h>
-#endif
-//Added by qt3to4:
 #include <QCloseEvent>
 
 #include <cassert>
@@ -241,18 +229,15 @@ DocumentView::saveDocumentAs()
 
   while (!selected) {
     // show file dialog
-#ifdef LSB_Q3FILEDIALOG
     QWidget * const parent = this;
     const QString caption("Save File");
     const QString dir;
     const QString filter("Parameter Description (*.xml)");
     QString * const selectedFilter = 0;
+    const QFileDialog::Options options = 0;
     filename = QFileDialog::getSaveFileName(parent, caption, dir, filter,
-					    selectedFilter);
-#else
-    filename = Q3FileDialog::getSaveFileName(0, "*.xml", this);
-#endif
-	
+					    selectedFilter, options);
+
     if (filename.isEmpty()) {
       rc = false;
       break;
@@ -301,21 +286,15 @@ void
 DocumentView::slotLoad()
 {
   if (saveIfModified()) {
-#ifdef LSB_Q3FILEDIALOG
     QWidget * const parent = this;
     const QString caption("Open File");
     const QString dir;
-    const QString filter("Policies (*.xml);; All Data (*)");
+    const QString filter("Policies (*.xml);;All Data (*)");
     QString * const selectedFilter = 0;
+    const QFileDialog::Options options = 0;
     const QString filename =
       QFileDialog::getOpenFileName(parent, caption, dir, filter, 
-				   selectedFilter);
-#else
-    QString filename =
-      Q3FileDialog::getOpenFileName(0, 
-				   "Polycies *.xml\nAlle Dateien *", 
-				   this);
-#endif
+				   selectedFilter, options);
 
     if (filename.isNull())
       return;
@@ -352,7 +331,6 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
   ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
   assert(item != ItemXML::itemMap().end());
 
-#ifdef LSB_Q3POPUPMENU
   QMenu menu(NULL);
 #ifdef LSB_Q3LISTVIEWITEM
   const std::pair<QTreeWidgetItem*, Item*>& p = *item;
@@ -367,13 +345,6 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
   {
     menu.exec(_pos);
   }
-#else
-  Q3PopupMenu menu(NULL, "conext_menu");
-  item->second->contextMenu(menu);
-
-  if (menu.count() > 0)
-    menu.exec(_pos);
-#endif
 }
 
 void

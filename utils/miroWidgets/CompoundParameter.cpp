@@ -31,17 +31,6 @@
 #include "miro/Exception.h"
 #include <cassert>
 
-
-#if QT_VERSION >= 0x040000
-#ifdef LSB_Q3POPUPMENU
-// Not needed
-#else
-  #include <Q3PopupMenu>
-#endif
-#else 
-  #include <q3popupmenu.h>
-#endif 
-
 #ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #else

@@ -19,30 +19,19 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
-#define LSB_Q3POPUPMENU
+// #define LSB_Q3LISTVIEW
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef Item_h
 #define Item_h
 
 #include <qobject.h>
-#ifdef LSB_Q3POPUPMENU
-#else
-//Added by qt3to4:
-#include <Q3PopupMenu>
-#endif
-
 #include <map>
 
 #include "miroWidgets_Export.h"
 
 // forward declarations
-#ifdef LSB_Q3POPUPMENU
 class QMenu;
-#else
-class Q3PopupMenu;
-#endif
 #ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 #else
@@ -125,11 +114,7 @@ public:
   //! Update the item tree.
   virtual void update();
   //! Populate the provided context menu with entries for the item.
-#ifdef LSB_Q3POPUPMENU
   virtual void contextMenu(QMenu& _menu);
-#else
-  virtual void contextMenu(Q3PopupMenu& _menu);
-#endif
 
   //----------------------------------------------------------------------------
   // static public methods

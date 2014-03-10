@@ -19,10 +19,7 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3FRAME
-#define LSB_Q3GRIDLAYOUT
-#define LSB_Q3HGROUPBOX
-#define LSB_Q3SCROLLVIEW
+// #define LSB_Q3SCROLLVIEW
 
 #include "ParameterDialog.h"
 #include "SimpleParameter.h"
@@ -35,11 +32,7 @@
 #include "params/Generator.h"
 
 #include <qstring.h>
-#ifdef LSB_Q3HGROUPBOX
 #include <QGroupBox>
-#else
-#include <q3hgroupbox.h>
-#endif
 #include <qlayout.h>
 #include <qlabel.h>
 #include <qtooltip.h>
@@ -50,17 +43,8 @@
 #include <q3scrollview.h>
 #endif
 #include <qobject.h>
-#ifdef LSB_Q3GRIDLAYOUT
 #include <QGridLayout>
-#else
-//Added by qt3to4:
-#include <Q3GridLayout>
-#endif
-#ifdef LSB_Q3FRAME
 #include <QFrame>
-#else
-#include <Q3Frame>
-#endif
 
 #include <cassert>
 
@@ -92,12 +76,8 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
 #else
     Q3ScrollView * sv = new Q3ScrollView(groupBox_, "scrollview");
 #endif
-#ifdef LSB_Q3FRAME
-    QWidget * const parent = sv->viewport();
-    frame_ = new QFrame(parent);
-#else
-    frame_ = new Q3Frame(sv->viewport());
-#endif
+    QWidget * const pFrameParent = sv->viewport();
+    frame_ = new QFrame(pFrameParent);
 #ifdef LSB_Q3SCROLLVIEW
     sv->setWidget(frame_);
     /// @todo What is the counterpart of setting the resize policy?
@@ -133,16 +113,16 @@ ParameterDialog::initDialog()
 {
   editFelds_.clear();
 
-#ifdef LSB_Q3GRIDLAYOUT
+  // The GridLayout is a child of the ScrollView's viewport
   QWidget * const pGridLayoutParent = frame_;
   QGridLayout * const gridLayout = new QGridLayout(pGridLayoutParent);
   assert(gridLayout != 0);
+  // Specify the margin but not the number of rows (params_.size(),
+  // columns (3)
   const int margin = 5;
   gridLayout->setContentsMargins(margin, margin, margin, margin);
-#else
-  Q3GridLayout * gridLayout = 
-    new Q3GridLayout(frame_, params_.size(), 3, 2, 5, "gridLayout");
-#endif 
+  const int spacing = 5;
+  gridLayout->setSpacing(spacing);
 
   // add parameter structs:
   unsigned long i = 0;

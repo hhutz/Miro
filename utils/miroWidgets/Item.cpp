@@ -27,13 +27,6 @@
 #else
 #include <q3listview.h>
 #endif
-#ifdef LSB_Q3POPUPMENU
-#include <QMenu>
-#else
-//Added by qt3to4:
-#include <Q3PopupMenu>
-#endif
-
 #include <cassert>
 
 Item::ItemMap Item::itemMap_;
@@ -113,13 +106,10 @@ Item::update()
 {
 }
 
-void 
-#ifdef LSB_Q3POPUPMENU
+void
 Item::contextMenu(QMenu&)
-#else
-Item::contextMenu(Q3PopupMenu&)
-#endif
 {
+  // The context menu is empty.
 }
 
 //------------------------------------------------------------------------------

@@ -19,36 +19,17 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3HBOXLAYOUT
-#define LSB_Q3VBOXLAYOUT
+// #define LSB_Q3FRAME
 
 #include "OkCancelDialog.h"
 #include "ItemXML.h"
 
-#ifdef LSB_Q3VGROUPBOX
-#include <Q3GroupBox>
-#else
-#include <q3vgroupbox.h>
-#endif
-#include <q3hgroupbox.h>
-#ifdef LSB_Q3FRAME
+#include <QGroupBox>
 #include <QFrame>
-#else
-#include <q3frame.h>
-#endif
 #include <qlayout.h>
 #include <qpushbutton.h>
-//Added by qt3to4:
-#ifdef LSB_Q3VBOXLAYOUT
 #include <QVBoxLayout>
-#else
-#include <Q3VBoxLayout>
-#endif
-#ifdef LSB_Q3HBOXLAYOUT
 #include <QHBoxLayout>
-#else
-#include <Q3HBoxLayout>
-#endif
 
 #include <cassert>
 
@@ -58,100 +39,94 @@ OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _moda
   modified_(false),
   accept_(0)
 {
+  // Capitalize the _name member variable and use this as the caption
   QString n = _name;
   n[0] = n[0].upper();
   setCaption(n);
 
-#ifdef LSB_Q3VBOXLAYOUT
-  QWidget * const pTopBoxParent = this;
-  QVBoxLayout * const topBox = new QVBoxLayout(pTopBoxParent);
-  assert(topBox != NULL);
-  {
-    const int margin = 0;
-    topBox->setContentsMargins(margin, margin, margin, margin);
-    const int spacing = -1;
-    topBox->setSpacing(spacing);
-  }
-#else
-  Q3VBoxLayout * topBox = new Q3VBoxLayout(this, 0, -1, "boxLayout");
-#endif
+  QVBoxLayout * const pTopBoxLayout = createLayout();
+  createFrame();
+  createGroupBox();
 
-#ifdef LSB_Q3VGROUPBOX
-  // Create the Group Box
-  const QString groupBoxTitle("");
-  QWidget * const pGroupBoxParent = this;
-  groupBox_ = new QGroupBox(groupBoxTitle, pGroupBoxParent);
-  assert(groupBox_ != NULL);
-
-  // Create the Vertical Box Layout
-  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
-  assert(pGroupBoxLayout != NULL);
-
-  // Assign the Vertical Box Layout to the Group Box
-  groupBox_->setLayout(pGroupBoxLayout);
-#else
-  groupBox_ = new Q3VGroupBox(this, "groupbox");
-#endif
-
-#if defined(LSB_Q3FRAME) && defined(LSB_Q3VGROUPBOX)
-  // Create the Frame with no parent
-  QWidget * const pFrameParent = NULL;
-  frame_ = new QFrame(pFrameParent);
-  // Add the Frame to the Group Box's Layout
-  pGroupBoxLayout->addWidget(frame_);
-#elif defined(LSB_Q3FRAME) && !defined(LSB_Q3VGROUPBOX)
-  // Create the Frame with the Group Box as parent
-  QWidget * const parent = groupBox_;
-  frame_ = new QFrame(parent);
-#elif !defined(LSB_Q3FRAME) && defined(LSB_Q3VGROUPBOX)
-  // Create the Frame with no parent
-  QWidget * const pFrameParent = NULL;
-  const QString frameName("parameterframe");
-  frame_ = new Q3Frame(pFrameParent, frameName);
-  // Add the Frame to the Group Box's Layout
-  pGroupBoxLayout->addWidget(frame_);
-#else
-  // Create the Frame with the Group Box as parent
-  frame_ = new Q3Frame(groupBox_, "parameterframe");
-#endif
-
-#ifdef LSB_Q3HBOXLAYOUT
   // Create the Horizontal Box Layout
-  QWidget * const pDialogButtonsBoxParent = NULL;
-  QHBoxLayout * const dialogButtonsBox =
-    new QHBoxLayout(pDialogButtonsBoxParent);
-  assert(dialogButtonsBox != NULL);
+  QWidget * const pDialogButtonsBox = new QGroupBox;
+  QHBoxLayout * const pDialogButtonsBoxLayout = new QHBoxLayout;
+  assert(pDialogButtonsBoxLayout != NULL);
   {
     const int margin = 0;
-    dialogButtonsBox->setContentsMargins(margin, margin, margin, margin);
+    pDialogButtonsBoxLayout->setContentsMargins(margin, margin, margin, margin);
     const int spacing = -1;
-    dialogButtonsBox->setSpacing(spacing);
+    pDialogButtonsBoxLayout->setSpacing(spacing);
   }
-#else
-  Q3HBoxLayout * dialogButtonsBox = new Q3HBoxLayout(NULL, 0, -1, "hBoxLayout");
-#endif
-  QSpacerItem * dBSpace = new QSpacerItem(0, 0);
-  QPushButton * okButton = new QPushButton("OK", this);
-  QPushButton * cancelButton = new QPushButton("Cancel", this);
+  pDialogButtonsBox->setLayout(pDialogButtonsBoxLayout);
 
-  topBox->addSpacing(10);
-  topBox->addWidget(groupBox_);
-  topBox->addSpacing(10);
-  topBox->addLayout(dialogButtonsBox);
-  topBox->addSpacing(5);
+  pTopBoxLayout->addSpacing(10);
+  // Add the GroupBox to the OkCancelDialog's Layout
+  pTopBoxLayout->addWidget(groupBox_);
+  pTopBoxLayout->addSpacing(10);
 
-  dialogButtonsBox->addItem(dBSpace);
-  dialogButtonsBox->addWidget(okButton);
-  dialogButtonsBox->addSpacing(5);
-  dialogButtonsBox->addWidget(cancelButton);
-  dialogButtonsBox->addSpacing(5);
+  QSpacerItem * const dBSpace = new QSpacerItem(0, 0);
+  pDialogButtonsBoxLayout->addItem(dBSpace);
+  QPushButton * const okButton = new QPushButton("OK");
+  pDialogButtonsBoxLayout->addWidget(okButton);
+  pDialogButtonsBoxLayout->addSpacing(5);
+  QPushButton * const cancelButton = new QPushButton("Cancel");
+  pDialogButtonsBoxLayout->addWidget(cancelButton);
+  pDialogButtonsBoxLayout->addSpacing(5);
   
   okButton->setDefault(true);
+
+  pTopBoxLayout->addWidget(pDialogButtonsBox);
+  pTopBoxLayout->addSpacing(5);
 
   // connect the dialogs functionality  
   connect(this,         SIGNAL(okay(bool)), okButton, SLOT(setEnabled(bool)));
   connect(okButton,     SIGNAL(clicked()), SLOT(accept()));
   connect(cancelButton, SIGNAL(clicked()), SLOT(reject()));
+}
+
+// Create, configure and assign the Layout for the OkCancelDialog
+QVBoxLayout* OkCancelDialog::createLayout()
+{
+  QVBoxLayout * const pTopBoxLayout = new QVBoxLayout;
+  assert(pTopBoxLayout != NULL);
+  {
+    const int margin = 0;
+    pTopBoxLayout->setContentsMargins(margin, margin, margin, margin);
+    const int spacing = margin;
+    pTopBoxLayout->setSpacing(spacing);
+  }
+  this->setLayout(pTopBoxLayout);
+  return pTopBoxLayout;
+}
+
+void OkCancelDialog::createFrame()
+{
+  // Create the Frame with no parent
+  QWidget * const pFrameParent = NULL;
+#if defined(LSB_Q3FRAME)
+  frame_ = new QFrame(pFrameParent);
+  // Add the Frame to the Group Box's Layout
+#else
+  // Create the Frame with no parent
+  const QString frameName("parameterframe");
+  frame_ = new Q3Frame(pFrameParent, frameName);
+#endif
+}
+
+void OkCancelDialog::createGroupBox()
+{
+  // Create the Group Box to hold the main content of the dialog
+  groupBox_ = new QGroupBox;
+  assert(groupBox_ != NULL);
+
+  // Create, configure and assign the Layout for the groupBox_
+  QVBoxLayout * const pGroupBoxLayout = new QVBoxLayout;
+  assert(pGroupBoxLayout != NULL);
+  groupBox_->setLayout(pGroupBoxLayout);
+  // Add  the Frame to the Group Box's Layout
+  assert(frame_ != NULL);
+  pGroupBoxLayout->addWidget(frame_);
 }
 
 void

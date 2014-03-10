@@ -19,10 +19,6 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-// Enable migration from Qt v3 to Qt v4
-#define LSB_Q3FRAME
-#define LSB_Q3GROUPBOX
-
 #ifndef OkCancelDialog_h
 #define OkCancelDialog_h
 
@@ -30,7 +26,6 @@
 #include <qdom.h>
 #ifdef LSB_Q3FRAME
 #else
-//Added by qt3to4:
 #include <Q3Frame>
 #endif
 
@@ -39,16 +34,9 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
-#ifdef LSB_Q3FRAME
 class QFrame;
-#else
-class Q3Frame;
-#endif
-#ifdef LSB_Q3GROUPBOX
 class QGroupBox;
-#else
-class Q3GroupBox;
-#endif
+class QVBoxLayout;
 class ItemXML;
 
 //! Dialog base class, for editing XML nodes of the parameter framework.
@@ -112,17 +100,14 @@ protected:
   //----------------------------------------------------------------------------
 
   //! Layout element needed.
-#ifdef LSB_Q3GROUPBOX
   QGroupBox * groupBox_;
-#else
-  Q3GroupBox * groupBox_;
-#endif
   //! Layout element.
-#ifdef LSB_Q3FRAME
   QFrame * frame_;
-#else
-  Q3Frame * frame_;
-#endif
+
+private:
+  QVBoxLayout* createLayout();
+  void createFrame();
+  void createGroupBox();
 
 private:
   //----------------------------------------------------------------------------

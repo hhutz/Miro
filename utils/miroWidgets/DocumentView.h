@@ -19,8 +19,8 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
+// #define LSB_Q3LISTVIEW
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef DocumentView_h
 #define DocumentView_h
@@ -61,6 +61,8 @@ class miroWidgets_Export DocumentView : public Q3ListView
 #endif
 {
   Q_OBJECT
+
+  friend class MainWindow;
 
   //----------------------------------------------------------------------------
   // private types

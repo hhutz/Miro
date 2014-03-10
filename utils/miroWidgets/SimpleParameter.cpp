@@ -28,11 +28,6 @@
 
 #include "params/Generator.h"
 
-#ifdef LSB_Q3POPUPMENU
-// Not used
-#else
-#include <q3popupmenu.h>
-#endif
 #ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #else
