@@ -18,14 +18,12 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterInstance.h"
-
-#ifdef LSB_Q3POPUPMENU
+// The Qt library
 #include <QMenu>
-#else
-#include <q3popupmenu.h>
-#endif
-
+// The C++ Standard Library
 #include <cassert>
 
 QString const ParameterInstance::XML_TAG = "instance";
@@ -92,44 +90,33 @@ ParameterInstance::moveDown()
 }
 
 void
-#ifdef LSB_Q3POPUPMENU
 ParameterInstance::contextMenu(QMenu& _menu)
 {
+  // The context menu has 5 QActions: "Set Name", "Set Parameters", "Up",
+  // "Down" and "Delete"
   QAction * pAction = NULL;
 
   pAction = new QAction(tr("Set Name"), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(slotRename()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotRename()));
   _menu.addAction(pAction);
 
   pAction = new QAction(tr("Set Parameters"), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(slotSetParameters()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotSetParameters()));
   _menu.addAction(pAction);
 
   _menu.addSeparator();
 
   pAction = new QAction(tr("Up"), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(up()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(up()));
   _menu.addAction(pAction);
 
   pAction = new QAction(tr("Down"), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(down()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(down()));
   _menu.addAction(pAction);
 
   _menu.addSeparator();
  
   pAction = new QAction(tr("Delete"), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(slotDelete()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotDelete()));
   _menu.addAction(pAction);
-#else
-ParameterInstance::contextMenu(Q3PopupMenu& _menu)
-{
-  _menu.insertItem("Set Name", this, SLOT(slotRename()));
-  _menu.insertItem("Set Parameters", this, SLOT(slotSetParameters()));
-  _menu.insertSeparator();
-  _menu.insertItem("Up", this, SLOT(up()));
-  _menu.insertItem("Down", this, SLOT(down()));
-  _menu.insertSeparator();
-  _menu.insertItem("Delete", this, SLOT(slotDelete()));
-#endif
 }
-

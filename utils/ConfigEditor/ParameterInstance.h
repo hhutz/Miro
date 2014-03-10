@@ -19,23 +19,16 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEWITEM
-#define LSB_Q3POPUPMENU
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef ParameterInstance_h
 #define ParameterInstance_h
 
+// This application
 #include "miroWidgets/CompoundParameter.h"
-#ifdef LSB_Q3POPUPMENU
-class QMenu;
-#else
-//Added by qt3to4:
-#include <Q3PopupMenu>
-#endif
 
 // forward declarations
 class ConfigFile;
-
 #ifdef LSB_Q3LISTVIEWITEM
 class QTreeWidgetItem;
 #else
@@ -68,11 +61,7 @@ public:
   //! Inherited method.
   virtual void moveDown();
   //! Inherited method.
-#ifdef LSB_Q3POPUPMENU
   virtual void contextMenu(QMenu& _menu);
-#else
-  virtual void contextMenu(Q3PopupMenu& _menu);
-#endif
 
   //----------------------------------------------------------------------------
   // public constants

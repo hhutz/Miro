@@ -34,16 +34,12 @@
 #else
 #include <q3listview.h>
 #endif
-#ifdef LSB_Q3POPUPMENU
 #include <QMenu>
-#else
-#include <q3popupmenu.h>
-#endif
 #include <qstring.h>
 
 #include <algorithm>
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
 
 const QString ConfigDocumentXML::XML_DOCTYPE("MiroConfigDocument");
@@ -76,20 +72,12 @@ ConfigDocumentXML::~ConfigDocumentXML()
 // inherited public methods
 
 void
-#ifdef LSB_Q3POPUPMENU
 ConfigDocumentXML::contextMenu(QMenu& _menu)
-#else
-ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
-#endif
 {
-#ifdef LSB_Q3POPUPMENU
-  // The Add Section menu is a submenu of the menu passed as argument
+  // The context menu has one QAction, "Add Section"
+  // The "Add Section" menu is a submenu of the menu passed as argument.
+  // Its signal is invoked when it is activated, not triggered.
   menuAddSection_ = _menu.addMenu(tr("Add Section"));
-#else
-  menuAddSection_ = new Q3PopupMenu(&_menu);
-
-  _menu.insertItem("Add Section", menuAddSection_);
-#endif
 
   Miro::CFG::QStringVector childSections;
 #ifdef LSB_Q3LISTVIEWITEM
@@ -140,23 +128,19 @@ ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
     if (itemCount == 0)
       continue;
 
-#ifdef LSB_Q3POPUPMENU
+    // The name of the Action
     const QString name = *first;
-    /// @todo Is this the correct parent for the QAction?
+    // From "http://qt-project.org/doc/qt4-8/qaction.html":
+    // "We recommend that actions are created as children of the window they
+    // are used in. In most cases, actions will be children of the application's
+    // main window."
+    // This class doesn't have a handle to any window.
     QWidget * const pActionParent = NULL;
     QAction * const pAction = new QAction(name, pActionParent);
-    /// @todo Is this the right slot for the QAction?
-    connect(pAction, SIGNAL(triggered), this, SLOT(onAddSection(int)));
+    connect(pAction, SIGNAL(activated(int)), this, SLOT(onAddSection(int)));
+    // Add the Action to the Menu
     menuAddSection_->addAction(pAction);
-#else
-    menuAddSection_->insertItem(*first);
-#endif
   }
-#ifdef LSB_Q3POPUPMENU
-#else
-  connect(menuAddSection_, SIGNAL(activated(int)),
-	  this, SLOT(onAddSection(int)));
-#endif
 }
 
 //----------------------------------------------------------------------------  

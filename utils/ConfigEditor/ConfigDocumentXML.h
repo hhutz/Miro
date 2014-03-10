@@ -19,20 +19,13 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
-#define LSB_Q3POPUPMENU
+// #define LSB_Q3LISTVIEW
+// #define LSB_Q3LISTVIEWITEM
 
 #ifndef ConfigDocumentXML_h
 #define ConfigDocumentXML_h
 
 #include "miroWidgets/DocumentXML.h"
-#ifdef LSB_Q3POPUPMENU
-class QMenu;
-#else
-//Added by qt3to4:
-#include <Q3PopupMenu>
-#endif
 
 // forward declarations
 #ifdef LSB_Q3LISTVIEW
@@ -70,11 +63,7 @@ public:
   //----------------------------------------------------------------------------  
 
   virtual void parse();
-#ifdef LSB_Q3POPUPMENU
   virtual void contextMenu(QMenu& _menu);
-#else
-  virtual void contextMenu(Q3PopupMenu& _menu);
-#endif
 
   //----------------------------------------------------------------------------  
   // public constants
@@ -96,11 +85,7 @@ protected:
   //----------------------------------------------------------------------------  
 
   //! The section menu.
-#ifdef LSB_Q3POPUPMENU
   QMenu * menuAddSection_;
-#else
-  Q3PopupMenu * menuAddSection_;
-#endif
 
   //----------------------------------------------------------------------------  
   // hidden methods
