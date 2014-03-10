@@ -18,8 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3SCROLLVIEW
 
 #include "ParameterDialog.h"
 #include "SimpleParameter.h"
@@ -37,11 +35,7 @@
 #include <qlabel.h>
 #include <qtooltip.h>
 #include <qmessagebox.h>
-#ifdef LSB_Q3SCROLLVIEW
 #include <QScrollArea>
-#else
-#include <q3scrollview.h>
-#endif
 #include <qobject.h>
 #include <QGridLayout>
 #include <QFrame>
@@ -68,24 +62,27 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
   if (s.width() > 800 || 
       s.height() > 600) {
 
+    // Replace the Frame with one in a ScrollArea
     delete frame_;
-#ifdef LSB_Q3SCROLLVIEW
-    QWidget * const pScrollAreaParent = groupBox_;
-    QScrollArea * const sv = new QScrollArea(pScrollAreaParent);
+    // Create the ScrollArea as a child of the GroupBox
+    QScrollArea * const sv = new QScrollArea;
     assert(sv != NULL);
-#else
-    Q3ScrollView * sv = new Q3ScrollView(groupBox_, "scrollview");
-#endif
+
+    // Create the Frame as a child of the ScrollArea's viewport
     QWidget * const pFrameParent = sv->viewport();
     frame_ = new QFrame(pFrameParent);
-#ifdef LSB_Q3SCROLLVIEW
     sv->setWidget(frame_);
-    /// @todo What is the counterpart of setting the resize policy?
-#else
-    sv->addChild(frame_);
-    sv->setResizePolicy(Q3ScrollView::AutoOneFit);
-#endif
+
+    // Set the resize policy
+    /// @todo What is the counterpart of
+    /// Q3ScrollView::setResizePolicy(Q3ScrollView::AutoOneFit)?
+    sv->setWidgetResizable(true);
     
+    // Add the ScrollArea to the GroupBox's layout
+    assert(groupBox_ != NULL);
+    assert(groupBox_->layout() != NULL);
+    groupBox_->layout()->addWidget(sv);
+
     initDialog();
 
     frame_->sizeHint();
