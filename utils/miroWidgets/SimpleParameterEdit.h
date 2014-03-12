@@ -22,7 +22,6 @@
 // Enable migration from Qt v3 to Qt v4
 // #define LSB_Q3LISTBOX
 // #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef SimpleParameterEdit_h
 #define SimpleParameterEdit_h

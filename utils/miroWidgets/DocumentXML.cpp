@@ -69,14 +69,14 @@ DocumentXML::init(QString const& _rootTag)
   QDomNode n = document_.appendChild( root );
   assert(!n.isNull());
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   treeWidgetItem()->setText(0, _rootTag);
   treeWidgetItem()->setText(2, document_.doctype().name());
   treeWidgetItem()->setExpanded(true);
 #else
-  listViewItem()->setText(0, _rootTag);
-  listViewItem()->setText(2, document_.doctype().name());
-  listViewItem()->setOpen(true);
+  treeWidgetItem()->setText(0, _rootTag);
+  treeWidgetItem()->setText(2, document_.doctype().name());
+  treeWidgetItem()->setOpen(true);
 #endif
 
   setModified(false, true);

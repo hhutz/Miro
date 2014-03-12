@@ -65,7 +65,7 @@ ParameterList::typeFromName(QString const& _type)
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 			     QTreeWidgetItem * _parentItem,
 			     QTreeWidgetItem * _pre,
 #else
@@ -79,14 +79,14 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
 #else
-  if (listViewItem()->listView()->columns() == 2)
-    listViewItem()->setText(2, param_.type_);
+  if (treeWidgetItem()->listView()->columns() == 2)
+    treeWidgetItem()->setText(2, param_.type_);
 #endif
 
 
@@ -102,7 +102,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 			     QTreeWidget * _list,
 			     QTreeWidgetItem * _pre,
 #else
@@ -116,14 +116,14 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
 #else
-  if (listViewItem()->listView()->columns() == 2)
-    listViewItem()->setText(2, param_.type_);
+  if (treeWidgetItem()->listView()->columns() == 2)
+    treeWidgetItem()->setText(2, param_.type_);
 #endif
 
 
@@ -159,7 +159,7 @@ ParameterList::init()
   
   unsigned int index = 0;
   QDomNode n = node().firstChild();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
 #else
   Q3ListViewItem * pre = NULL;
@@ -191,31 +191,17 @@ ParameterList::init()
 
 	
 	QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
-#ifdef LSB_Q3LISTVIEWITEM
 	newParam = new SimpleParameter(nestedParameter, n, treeWidgetItem(),
 				       pre, this, indexName);
-#else
-	newParam = new SimpleParameter(nestedParameter, n, listViewItem(), pre,
-				       this, indexName);
-#endif
       }
       else {
-#ifdef LSB_Q3LISTVIEWITEM
 	newParam = new CompoundParameter(*nestedType, n, treeWidgetItem(), pre,
 					 this, indexName);
-#else
-	newParam = new CompoundParameter(*nestedType, n, listViewItem(), pre,
-					 this, indexName);
-#endif
       }
 
       if (newParam != NULL) {
 	newParam->init();
-#ifdef LSB_Q3LISTVIEWITEM
 	pre = newParam->treeWidgetItem();
-#else
-	pre = newParam->listViewItem();
-#endif
 	++index;
       }
     }
@@ -236,10 +222,10 @@ ParameterList::setParameters()
   nestedParameter.description_ = param_.description_;
 
   ItemXML * parentItem = NULL;
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const p = treeWidgetItem()->parent();
 #else
-  Q3ListViewItem * p = listViewItem()->parent();
+  Q3ListViewItem * p = treeWidgetItem()->parent();
 #endif
   Item::ItemMap::const_iterator i = Item::itemMap().find(p);
   if (i != Item::itemMap().end())

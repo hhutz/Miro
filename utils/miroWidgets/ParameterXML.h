@@ -18,9 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef ParameterXML_h
 #define ParameterXML_h
@@ -35,7 +32,7 @@
 
 // forward declarations
 class ConfigFile;
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 class QTreeWidgetItem;
 #else
@@ -62,7 +59,7 @@ public:
 
   //! Initializing constructor.
   ParameterXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 	       QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 #else
 	       Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
@@ -71,7 +68,7 @@ public:
 
   //! Initializing constructor.
   ParameterXML(QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 	       QTreeWidget * _view, QTreeWidgetItem * _pre,
 #else
 	       Q3ListView * _view, Q3ListViewItem * _pre,

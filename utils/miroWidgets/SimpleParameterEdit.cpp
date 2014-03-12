@@ -96,7 +96,17 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
   } else if (parameter_.type_ == "Miro::EnumerationMultiple" || 
 	     parameter_.type_ == "EnumerationMultiple") {
 #ifdef LSB_Q3LISTBOX
-    listBox_ = new QListWidget(_parent);
+    if (_parent->layout() != NULL)
+      {
+	// Create the ListWidget without parent and add to the _parent's layout
+	listBox_ = new QListWidget;
+	_parent->layout()->addWidget(listBox_);
+      }
+    else
+      {
+	// Create the ListWidget as a child of _parent
+	listBox_ = new QListWidget(_parent);
+      }
 #else
     listBox_ = new Q3ListBox(_parent, "list_box");
 #endif
@@ -247,6 +257,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 
     case SimpleParameter::ENUMERATIONMULTIPLE:
       // init list box
+      // For each selected element of 
 #ifdef LSB_Q3LISTBOX
       // Precondition
       assert(listBox_ != NULL);
@@ -389,11 +400,7 @@ SimpleParameterEdit::setXML()
       ParameterXML * newParam =
 	new SimpleParameter(parameter_,
 			    node_,
-#ifdef LSB_Q3LISTVIEWITEM
 			    parentItem_->treeWidgetItem(), NULL,
-#else
-			    parentItem_->listViewItem(), NULL,
-#endif
 			    parentItem_, name());
       newParam->init();
       item_ = newParam;
@@ -409,11 +416,7 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-#ifdef LSB_Q3LISTVIEWITEM
 	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#else
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#endif
     }
     else {
       lineEdit_->setEdited(false);
@@ -445,11 +448,7 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-#ifdef LSB_Q3LISTVIEWITEM
 	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#else
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#endif
     }
     else {
       typeBoxModified_ = false;
@@ -502,11 +501,7 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-#ifdef LSB_Q3LISTVIEWITEM
 	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#else
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-#endif
     }
     else {
       listBoxModified_ = false;

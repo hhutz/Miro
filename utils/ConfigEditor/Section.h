@@ -18,9 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef Section_h
 #define Section_h
@@ -30,7 +27,7 @@
 #include <qstring.h>
 
 // forward declarations
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
 #else
 class Q3ListViewItem;
@@ -43,7 +40,7 @@ class Section : public ItemXML
   typedef ItemXML Super;
 public:
   Section(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 #else
 	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,

@@ -20,7 +20,6 @@
 //
 // Enable migration from Qt v3 to Qt v4
 // #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef ParameterListDialog_h
 #define ParameterListDialog_h
@@ -35,12 +34,9 @@
 // forward declarations
 #ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
-#else
-class Q3ListView;
-#endif
-#ifdef LSB_Q3LISTVIEWITEM
 class QTreeWidgetItem;
 #else
+class Q3ListView;
 class Q3ListViewItem;
 #endif
 class QPushButton;
@@ -87,7 +83,7 @@ protected slots:
   void del();
   void edit();
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   void slotDoubleClick(QTreeWidgetItem *);
   void contextMenu(QTreeWidgetItem*, const QPoint&,int);
 #else

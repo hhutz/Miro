@@ -80,7 +80,7 @@ ConfigDocumentXML::contextMenu(QMenu& _menu)
   menuAddSection_ = _menu.addMenu(tr("Add Section"));
 
   Miro::CFG::QStringVector childSections;
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
@@ -94,7 +94,7 @@ ConfigDocumentXML::contextMenu(QMenu& _menu)
     childSections.push_back(text);
   }
 #else
-  Q3ListViewItem * item = listViewItem()->firstChild();
+  Q3ListViewItem * item = treeWidgetItem()->firstChild();
   while (item != NULL) {
     childSections.push_back(item->text(0));
     item = item->nextSibling();
@@ -163,11 +163,7 @@ ConfigDocumentXML::onAddSection(int _n)
 
   assert(!newChild.isNull());
   new Section(newChild, 
-#ifdef LSB_Q3LISTVIEWITEM
 	      treeWidgetItem(), NULL, 
-#else
-	      listViewItem(), NULL, 
-#endif
 	      this, menuAddSection_->text(_n));
   setModified();
 }
@@ -181,7 +177,7 @@ ConfigDocumentXML::parse()
   QDomNode n = document_.firstChild();
   if (!n.isNull()) {
     QDomNode n1 = n.firstChild();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
     QTreeWidgetItem * pre = NULL;
 #else
     Q3ListViewItem * pre = NULL;
@@ -192,17 +188,9 @@ ConfigDocumentXML::parse()
 	  e.tagName() == Section::XML_TAG) {
 	Section * section =
 	  new Section(e, 
-#ifdef LSB_Q3LISTVIEWITEM
 		      treeWidgetItem(), pre,
-#else
-		      listViewItem(), pre, 
-#endif
 		      this, e.attribute("name"));
-#ifdef LSB_Q3LISTVIEWITEM
 	pre = section->treeWidgetItem();
-#else
-	pre = section->listViewItem();
-#endif
       }
       n1 = n1.nextSibling();
     }

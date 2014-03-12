@@ -22,18 +22,18 @@
 
 #include <cassert>
 
-#ifdef LSB_Q3LISTVIEWITEM
-ParameterSingleton::ParameterSingleton(QTreeWidgetItem * _listViewItem, 
+#ifdef LSB_Q3LISTVIEW
+ParameterSingleton::ParameterSingleton(QTreeWidgetItem * _treeWidgetItem, 
 				       QTreeWidgetItem * _pre,
 #else
-ParameterSingleton::ParameterSingleton(Q3ListViewItem * _listViewItem, 
+ParameterSingleton::ParameterSingleton(Q3ListViewItem * _treeWidgetItem, 
 				       Q3ListViewItem * _pre,
 #endif
 				       QDomNode const& _node,
 				       QObject * _parent, const char * _name) :
   Super(type(_node, XML_ATTRIBUTE_KEY),
 	_node, 
-	_listViewItem, _pre, _parent, _name)
+	_treeWidgetItem, _pre, _parent, _name)
 {
 }
 

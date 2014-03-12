@@ -77,7 +77,7 @@ DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f)
   setResizeMode(Q3ListView::AllColumns);
 #endif
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   connect(this, 
 	  SIGNAL(contextMenuRequested(QTreeWidgetItem *, const QPoint&, int)),
 	  this,
@@ -319,7 +319,7 @@ DocumentView::slotSaveAs()
 }
 
 void 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 DocumentView::slotContextMenu(QTreeWidgetItem * _item, const QPoint & _pos, int)
 #else
 DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
@@ -332,7 +332,7 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
   assert(item != ItemXML::itemMap().end());
 
   QMenu menu(NULL);
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   const std::pair<QTreeWidgetItem*, Item*>& p = *item;
 #else
   const std::pair<Q3ListViewItem*, Item*>& p = *item;
@@ -348,7 +348,7 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
 }
 
 void
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 DocumentView::slotDoubleClick(QTreeWidgetItem * _item)
 #else
 DocumentView::slotDoubleClick(Q3ListViewItem * _item)

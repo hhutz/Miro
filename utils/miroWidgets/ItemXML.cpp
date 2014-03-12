@@ -36,7 +36,7 @@
 QString const ItemXML::XML_ATTRIBUTE_KEY = "name";
 
 ItemXML::ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 #else
 		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
@@ -51,7 +51,7 @@ ItemXML::ItemXML(QDomNode const& _node,
 }
 
 ItemXML::ItemXML(QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 		 QTreeWidget * _view, QTreeWidgetItem * _pre,
 #else
 		 Q3ListView * _view, Q3ListViewItem * _pre,
@@ -237,11 +237,7 @@ ItemXML::rename(QString const& _name)
     // rename element
     element.setAttribute(XML_ATTRIBUTE_KEY, _name);
     setName(_name.latin1());
-#ifdef LSB_Q3LISTVIEWITEM
     treeWidgetItem()->setText(0, _name);
-#else
-    listViewItem()->setText(0, _name);
-#endif
     setModified();
   }
 

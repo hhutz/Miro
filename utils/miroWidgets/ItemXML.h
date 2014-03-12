@@ -19,10 +19,6 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
-
 #ifndef ItemXML_h
 #define ItemXML_h
 
@@ -32,8 +28,6 @@
 #include <qdom.h>
 #ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
-#endif
-#ifdef LSB_Q3LISTVIEWITEM
 class QTreeWidgetItem;
 #endif
 
@@ -69,7 +63,7 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
 #else
 	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
@@ -81,7 +75,7 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 	  QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
 #else
 	  Q3ListView * _view, Q3ListViewItem * _pre = NULL,

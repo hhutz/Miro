@@ -18,9 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef CompoundParameter_h
 #define CompoundParameter_h
@@ -30,7 +27,7 @@
 
 #include "miroWidgets_Export.h"
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
 #else
 class Q3ListViewItem;
@@ -63,10 +60,10 @@ public:
   //! Initializing constructor.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 		    QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
 #else
-		    Q3ListViewItem * _listViewItem, Q3ListViewItem * _pre,
+		    Q3ListViewItem * _treeWidgetItem, Q3ListViewItem * _pre,
 #endif
 		    QObject * _parent, const char * _name);
 
@@ -81,7 +78,7 @@ public:
   //! Initializing constructor. For toplevel QListViewItem.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 		    QTreeWidget * _list, QTreeWidgetItem * _pre,
 #else
 		    Q3ListView * _list, Q3ListViewItem * _pre,

@@ -157,7 +157,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   
   // iterate over all members
   QDomNode n = tmpNode_.firstChild();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
 #else
   Q3ListViewItem * pre = NULL;
@@ -193,11 +193,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
       }
 
       newParam->init();
-#ifdef LSB_Q3LISTVIEWITEM
       pre = newParam->treeWidgetItem();
-#else
-      pre = newParam->listViewItem();
-#endif
       ++index_;
     }
     n = n.nextSibling();
@@ -209,7 +205,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 
   // enable/disable buttons
   selectListItem();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   connect(list_, 
 	  SIGNAL(contextMenuRequested(QTreeWidgetItem *, const QPoint&, int)),
 	  this,
@@ -269,7 +265,7 @@ ParameterListDialog::setXML()
   //--------------------------------------
   // replace node by new content
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // Fetch the QTreeWidgetItem corresponding to item_
   QTreeWidgetItem * const pThisTreeWidgetItem = item_->treeWidgetItem();
   // Fetch the parent of pThisTreeWidgetItem
@@ -291,11 +287,11 @@ ParameterListDialog::setXML()
   // remember the predecessor
   Q3ListViewItem * pre = NULL;
   if (item_) {
-    Q3ListViewItem * parent = item_->listViewItem()->parent();
+    Q3ListViewItem * parent = item_->treeWidgetItem()->parent();
     if (parent != NULL) {
       pre = parent->firstChild();
       while (pre != NULL) {
-	if (pre->nextSibling() == item_->listViewItem())
+	if (pre->nextSibling() == item_->treeWidgetItem())
 	  break;
 	pre = pre->nextSibling();
       }
@@ -336,11 +332,7 @@ ParameterListDialog::setXML()
     QString p = node.toElement().attribute(ParameterXML::XML_ATTRIBUTE_KEY);
     item_ = new ParameterList(parameter,
 			      node,
-#ifdef LSB_Q3LISTVIEWITEM
 			      parentItem_->treeWidgetItem(), pre,
-#else
-			      parentItem_->listViewItem(), pre,
-#endif
 			      parentItem_, p);
     dynamic_cast<ParameterXML *>(item_)->init();
   }
@@ -349,7 +341,7 @@ ParameterListDialog::setXML()
 void
 ParameterListDialog::selectListItem()
 {
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // Precondition
   assert(list_ != NULL);
   // If list_ has no children
@@ -378,7 +370,7 @@ void
 ParameterListDialog::add()
 {
   ParameterXML * newParam = NULL;
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // Precondition
   assert(list_ != NULL);
 
@@ -476,13 +468,13 @@ ParameterListDialog::add()
   ++index_;
 
   setModified(true);
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   assert(newParam != NULL);
   QTreeWidgetItem * const pTreeWidgetItem = newParam->treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   pTreeWidgetItem->setSelected(true);
 #else
-  list_->setSelected(newParam->listViewItem(), true);
+  list_->setSelected(newParam->treeWidgetItem(), true);
 #endif
   selectListItem();
   renumberEntries();
@@ -491,7 +483,7 @@ ParameterListDialog::add()
 void 
 ParameterListDialog::del()
 {
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * item; 
 #else
   Q3ListViewItem * item; 
@@ -512,7 +504,7 @@ ParameterListDialog::del()
 void
 ParameterListDialog::edit()
 {
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * item = list_->currentItem();
 #else
   Q3ListViewItem * item = list_->currentItem();
@@ -541,7 +533,7 @@ ParameterListDialog::down()
 
 
 void
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 ParameterListDialog::slotDoubleClick(QTreeWidgetItem * _item)
 #else
 ParameterListDialog::slotDoubleClick(Q3ListViewItem * _item)
@@ -557,7 +549,7 @@ ParameterListDialog::slotDoubleClick(Q3ListViewItem * _item)
 }
 
 void
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 ParameterListDialog::contextMenu(QTreeWidgetItem * _item, const QPoint& pos, int)
 #else
 ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
@@ -567,7 +559,7 @@ ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
   assert(i != Item::itemMap().end());
 
   QMenu menu(NULL);
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   const std::pair<QTreeWidgetItem*, Item*>& p = *i;
 #else
   const std::pair<Q3ListViewItem*, Item*>& p = *i;
@@ -583,7 +575,7 @@ ParameterListDialog::contextMenu(Q3ListViewItem * _item, const QPoint& pos, int)
 void
 ParameterListDialog::renumberEntries() 
 {
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // Precondition
   assert(list_ != NULL);
 

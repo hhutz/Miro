@@ -24,10 +24,6 @@
 
 #include <qdialog.h>
 #include <qdom.h>
-#ifdef LSB_Q3FRAME
-#else
-#include <Q3Frame>
-#endif
 
 #include <iostream>
 

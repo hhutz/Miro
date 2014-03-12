@@ -104,14 +104,7 @@ void OkCancelDialog::createFrame()
 {
   // Create the Frame with no parent
   QWidget * const pFrameParent = NULL;
-#if defined(LSB_Q3FRAME)
   frame_ = new QFrame(pFrameParent);
-  // Add the Frame to the Group Box's Layout
-#else
-  // Create the Frame with no parent
-  const QString frameName("parameterframe");
-  frame_ = new Q3Frame(pFrameParent, frameName);
-#endif
 }
 
 void OkCancelDialog::createGroupBox()

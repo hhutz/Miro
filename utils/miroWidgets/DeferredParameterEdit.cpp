@@ -20,7 +20,6 @@
 //
 // Enable migration from Qt v3 to Qt v4
 // #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #include "DeferredParameterEdit.h"
 #include "ParameterDialog.h"
@@ -257,7 +256,7 @@ DeferredParameterEdit::setXML()
   //--------------------------------------
   // replace node by new content
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // remember the predecessor, if there is one
   QTreeWidgetItem * pre = NULL;
   if (item_)
@@ -285,11 +284,11 @@ DeferredParameterEdit::setXML()
   // remember the predecessor
   Q3ListViewItem * pre = NULL;
   if (item_) {
-    Q3ListViewItem * parent = item_->listViewItem()->parent();
+    Q3ListViewItem * parent = item_->treeWidgetItem()->parent();
     if (parent != NULL) {
       pre = parent->firstChild();
       while (pre != NULL) {
-	if (pre->nextSibling() == item_->listViewItem())
+	if (pre->nextSibling() == item_->treeWidgetItem())
 	  break;
 	pre = pre->nextSibling();
       }
@@ -319,22 +318,14 @@ DeferredParameterEdit::setXML()
     
       item_ = new CompoundParameter(*parameterType,
 				    node,
-#ifdef LSB_Q3LISTVIEWITEM
 				    parentItem_->treeWidgetItem(), pre,
-#else
-				    parentItem_->listViewItem(), pre,
-#endif
 				    parentItem_, name());
     }
     else if (type_ == VECTOR ||
 	     type_ == SET) {
       item_ = new ParameterList(parameter_, 
 				node,
-#ifdef LSB_Q3LISTVIEWITEM
 				parentItem_->treeWidgetItem(), pre,
-#else
-				parentItem_->listViewItem(), pre,
-#endif
 				parentItem_, name());
     }
     if (item_ != NULL)

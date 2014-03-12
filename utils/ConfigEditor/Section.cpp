@@ -46,7 +46,7 @@
 const QString Section::XML_TAG("section");
 
 Section::Section(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 #else
 		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
@@ -56,11 +56,7 @@ Section::Section(QDomNode const& _node,
   menuAddParameter_(NULL),
   menuAddInstance_(NULL)
 {
-#ifdef LSB_Q3LISTVIEWITEM
   treeWidgetItem()->setText(2, className());
-#else
-  listViewItem()->setText(2, className());
-#endif
 
   assert(!node_.isNull());
 
@@ -73,7 +69,7 @@ Section::contextMenu(QMenu& _menu)
   // The number of QActions in the context menu varies with what is loaded.
   // get all current parameters
   Miro::CFG::QStringVector childParameters;
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
@@ -99,7 +95,7 @@ Section::contextMenu(QMenu& _menu)
     }    
   }
 #else
-  Q3ListViewItem * item = listViewItem()->firstChild();
+  Q3ListViewItem * item = treeWidgetItem()->firstChild();
   while (item != NULL) {
     ItemXML * itemXML =
       dynamic_cast<ItemXML *>(Item::itemMap().find(item)->second);
@@ -120,11 +116,7 @@ Section::contextMenu(QMenu& _menu)
   QStringVector paramsList;
   QStringVector instanceList;
 
-#ifdef LSB_Q3LISTVIEWITEM
   const QString section = treeWidgetItem()->text(0);
-#else
-  QString section = listViewItem()->text(0);
-#endif
 
   Miro::CFG::GroupMap::const_iterator first, last;
   ConfigFile::instance()->description().getGroupedTypes(section, first, last);
@@ -206,11 +198,7 @@ Section::onAddInstance(int _n)
     
     assert(!newChild.isNull());
     try {
-#ifdef LSB_Q3LISTVIEWITEM
       new ParameterInstance(treeWidgetItem(), NULL, newChild, 
-#else
-      new ParameterInstance(listViewItem(), NULL, newChild, 
-#endif
 			    this, name);
     }
     catch (QString const& e) {
@@ -234,11 +222,7 @@ Section::onAddParameter(int _n)
     
   assert(!newChild.isNull());
   try {
-#ifdef LSB_Q3LISTVIEWITEM
     new ParameterSingleton(treeWidgetItem(), NULL, newChild,
-#else
-    new ParameterSingleton(listViewItem(), NULL, newChild, 
-#endif
 			   this,  menuAddParameter_->text(_n));
   }
   catch (QString const& e) {
@@ -253,7 +237,7 @@ void
 Section::buildSubtree()
 {
   QDomNode n = node_.firstChild();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
 #else
   Q3ListViewItem * pre = NULL;
@@ -266,31 +250,19 @@ Section::buildSubtree()
 	if (e.tagName() == ParameterInstance::XML_TAG &&
 	    e.hasAttribute(XML_ATTRIBUTE_KEY)) {
 	  param =
-#ifdef LSB_Q3LISTVIEWITEM
 	    new ParameterInstance(treeWidgetItem(), pre,
-#else
-	    new ParameterInstance(listViewItem(), pre,
-#endif
 				  e, this, e.attribute(XML_ATTRIBUTE_KEY));
 	}
 	if (e.tagName() == ParameterXML::XML_TAG &&
 	    e.hasAttribute(XML_ATTRIBUTE_KEY)) {
 	  param =
-#ifdef LSB_Q3LISTVIEWITEM
 	    new ParameterSingleton(treeWidgetItem(), pre,
-#else
-	    new ParameterSingleton(listViewItem(), pre,
-#endif
 				   e, this, 
 				   e.attribute(XML_ATTRIBUTE_KEY));
 	}
 	if (param != NULL) {
 	  param->init();
-#ifdef LSB_Q3LISTVIEWITEM
 	  pre = param->treeWidgetItem();
-#else
-	  pre = param->listViewItem();
-#endif
 	}
       }
       catch (QString const& e) {

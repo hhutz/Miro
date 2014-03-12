@@ -83,7 +83,7 @@ SimpleParameter::typeFromName(QString const& _type)
 
 SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 				 QTreeWidgetItem * _parentItem,
 				 QTreeWidgetItem * _pre,
 #else
@@ -95,7 +95,7 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
   param_(_param)
 {
   QDomElement e = node().toElement();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
@@ -111,16 +111,16 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
     }
   }
 #else
-  if (listViewItem()->listView()->columns() >= 2)
-    listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, param_.type_);
+  if (treeWidgetItem()->listView()->columns() >= 2)
+    treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+  if (treeWidgetItem()->listView()->columns() >= 3)
+    treeWidgetItem()->setText(2, param_.type_);
 #endif
 }
 
 SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
-#if defined(LSB_Q3LISTVIEWITEM) && defined(LSB_Q3LISTVIEW)
+#ifdef LSB_Q3LISTVIEW
 				 QTreeWidget * _list,
 				 QTreeWidgetItem * _pre,
 #else
@@ -132,7 +132,7 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
   param_(_param)
 {
   QDomElement e = node().toElement();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
@@ -148,10 +148,10 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
     }
   }
 #else
-  if (listViewItem()->listView()->columns() >= 2)
-    listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, param_.type_);
+  if (treeWidgetItem()->listView()->columns() >= 2)
+    treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+  if (treeWidgetItem()->listView()->columns() >= 3)
+    treeWidgetItem()->setText(2, param_.type_);
 #endif
 }
 

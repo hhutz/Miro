@@ -20,7 +20,6 @@
 //
 // Enable migration from Qt v3 to Qt v4
 // #define LSB_Q3LISTVIEW
-// #define LSB_Q3LISTVIEWITEM
 
 #ifndef DocumentView_h
 #define DocumentView_h
@@ -38,7 +37,7 @@
 #include <QCloseEvent>
 
 // forward declarattions
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
 #else
 // handled by the header file for Q3ListView
@@ -122,7 +121,7 @@ protected slots:
   //! File Menu.
   void slotSaveAs();
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   //! Context Menu request.
   void slotContextMenu(QTreeWidgetItem * _item, const QPoint & _pos, int);
   //! Double Click event.
