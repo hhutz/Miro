@@ -26,11 +26,7 @@
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <qmessagebox.h>
-#ifdef LSB_Q3LISTBOX
 #include <QListWidget>
-#else
-#include <q3listbox.h>
-#endif
 #include <qstringlist.h>
 #include <QFileDialog>
 #include <QHBoxLayout>
@@ -52,6 +48,7 @@ FileListDialog::FileListDialog(QWidget* parent,
 
   // Create and configure the layout for the FileListDialog
   QVBoxLayout * const pFileListDialogLayout = createLayout();
+  assert(pFileListDialogLayout != NULL);
 
   // Create the upper pane, contining the ListBox of file pathnames and the
   // "Add" and "Remove" buttons
@@ -64,17 +61,10 @@ FileListDialog::FileListDialog(QWidget* parent,
   assert(pFileBoxLayout != NULL);
   pFileBox->setLayout(pFileBoxLayout);
 
-#if defined(LSB_Q3LISTBOX) 
-  // Create the widget that displays the list of file pathnames
-  QWidget * const pListWidgetParent = pFileBox;
-  list_ = new QListWidget(pListWidgetParent);
+  // Create the QListWidget that contains the file pathnames
+  list_ = new QListWidget;
   // Add the List Widget to the Group Box's Layout
-  pGroupBoxLayout->addWidget(list_);
-#else
-  // Create the List Box with the Group Box as parent
-  list_ = new Q3ListBox(pFileBox, "list");
   pFileBoxLayout->addWidget(list_);
-#endif
 
   createFileButtonsBox(pFileBoxLayout);
 
@@ -102,76 +92,61 @@ FileListDialog::init(const QStringList& _list)
 {
   // fill list with current parameters
   modified_ = false;
-#ifdef LSB_Q3LISTBOX
+  // Remove any existing items
   list_->clear();
+  // Insert at the beginning
   const int row = 0;
+  // Create a ListBoxItem for each Parameter Description File pathname in _list
   list_->insertItems(row, _list);
-#else
-  list_->clear();
-  list_->insertStringList(_list);
-#endif
- 
+  // Select the first item, if any
   selectListItem();
 }
 
 void
 FileListDialog::selectListItem()
 {
-#ifdef LSB_Q3LISTBOX
   // Precondition
   assert(list_ != NULL);
   if (list_->count() != 0)
   {
     // Select the current item, or item 0 if there is no current item
-    QListWidgetItem * pItem = list_->currentItem();
-    if (pItem == NULL)
+    QListWidgetItem * const pCurrentItem = list_->currentItem();
+    if (pCurrentItem)
     {
-      // There is no current item; use item 0
-      pItem = list_->item(0);
+      // There is a current item; select it
+      pCurrentItem->setSelected(true);
     }
-    assert(pItem != NULL);
-    // This also selects
-    pItem->setSelected(true);
-    // Postcondition
-    assert(pItem->isSelected());
-    assert(list_->selectedItems().size() > 0);
+    else
+    {
+      // There is no current item; make item 0 current and select it
+      list_->setCurrentRow(0);
+      assert(list_->currentItem() != NULL);
+      list_->currentItem()->setSelected(true);
+    }
   }
-#else
-  if (list_->count() != 0) {
-    int item = list_->currentItem();
-    if (item == -1)
-      item = 0;
-    list_->setSelected(list_->item(item), true);
-  }
-
-  delButton_->setEnabled(list_->currentItem() != -1);
-#endif
+  // If the list is not empty, enable the Delete button
+  delButton_->setEnabled(list_->count() > 0);
 }
 
+/**
+ * Return a QStringList of the Parameter Description File pathnames in list_.
+ */
 QStringList
 FileListDialog::result() 
 {
-  QStringList list;
-#ifdef LSB_Q3LISTBOX
   // Precondition
   assert(list_ != NULL);
 
-  // Cache the size to avoid repeated accesses
-  const int count = list_->count();
-  for (int row = 0; row < count; ++row)
+  // The return value
+  QStringList list;
+  for (int i = 0; i < list_->count(); ++i)
   {
-    const QListWidgetItem * const pItem = list_->item(row);
+    // Append the QListWidgetItem's label to list
+    const QListWidgetItem * const pItem = list_->item(i);
     assert(pItem != NULL);
     const QString& s = pItem->text();
     list.append(s);
   }
-
-  // Postcondition
-  assert(list.size() == list_->count());
-#else
-  for (unsigned int i = 0; i < list_->count(); ++i)
-    list.append(list_->text(i));
-#endif
 
   return list;
 }
@@ -179,20 +154,17 @@ FileListDialog::result()
 void 
 FileListDialog::add()
 {
+  // Precondition
+  assert(fileDialog_ != NULL);
+  assert(list_ != NULL);
+
   if (fileDialog_->exec() == QDialog::Accepted ) {
-
-#ifdef LSB_Q3LISTBOX
-    // Precondition
-    assert(fileDialog_ != NULL);
-    assert(list_ != NULL);
-
-    // The collection of all selected file names
     const QStringList selectedFileNames = fileDialog_->selectedFiles();
-    // The number of selected file names
     const int count = selectedFileNames.size();
     assert(count > 0); // If accepted, there must be one
     // Use the first
     const QString& selectedFileName = selectedFileNames.at(0);
+
     // Search for the file name among the QListWidget items
     // This is case insensitive. Use Qt::MatchCaseSensitive or Qt::MatchExactly?
     Qt::MatchFlags flags = Qt::MatchFixedString; 
@@ -200,20 +172,13 @@ FileListDialog::add()
       list_->findItems(selectedFileName, flags);
     if (found.empty())
     {
-      // The selected file name was not an item in the QListWidget; insert it
-      // Insert at the end
-      const int row = list_->count();
-      list_->insertItem(row, selectedFileName);
-      // Notify that the QListWidget has been modified
+      // The selected file name was not already in the QListWidget; insert it at
+      // the end
+      const int endRow = list_->count();
+      list_->insertItem(endRow, selectedFileName);
+      // Record that the QListWidget has been modified
       modified_ = true;
-    }
-#else
-    if (list_->findItem(fileDialog_->selectedFile()) != NULL) {
-      list_->insertItem(fileDialog_->selectedFile());
-      modified_ = true;
-    }
-#endif
-    else {
+    } else {
       QMessageBox::warning(this, "Duplicated file", "Selected file is already part of the file list.");
     }
   }
@@ -223,28 +188,20 @@ FileListDialog::add()
 
 void 
 FileListDialog::del() {
-#ifdef LSB_Q3LISTBOX
   // Precondition
   assert(list_ != 0);
-  
+
   QListWidgetItem * const pCurrentItem = list_->currentItem();
   if (pCurrentItem != NULL)
   {
-    // There is a current item; remove it from the QListWidget
-    /// @todo Does this delete the item?
-    /// @todo Should we use QListWidget::take() and delete it ourselves?
-    list_->removeItemWidget(pCurrentItem);
+    const int row = list_->row(pCurrentItem);
+    const QListWidgetItem * const pItem = list_->takeItem(row);
+    // Items removed from a list widget will not be managed by Qt, and will
+    // need to be deleted manually.
+    delete pItem;
     modified_ = true;
   }
 
-#else
-  int item; 
-  if ((item = list_->currentItem()) != -1) {
-    list_->removeItem(item);
-    modified_ = true;
-  }
-#endif
- 
   selectListItem();
 }
 

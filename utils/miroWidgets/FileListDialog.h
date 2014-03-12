@@ -20,7 +20,6 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTBOX
 
 #ifndef FileListDialog_h
 #define FileListDialog_h
@@ -30,11 +29,7 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
-#ifdef LSB_Q3LISTBOX
 class QListWidget;
-#else
-class Q3ListBox;
-#endif
 class QFileDialog;
 class QPushButton;
 class QString;
@@ -67,11 +62,7 @@ public slots:
 protected:
   void selectListItem();
 
-#ifdef LSB_Q3LISTBOX
   QListWidget * list_;
-#else
-  Q3ListBox * list_;
-#endif
   QPushButton * delButton_;  
   QFileDialog * fileDialog_;
 
