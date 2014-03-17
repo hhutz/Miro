@@ -27,11 +27,7 @@
 
 // forward declarations
 class ConfigFile;
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
-#else
-class Q3ListViewItem;
-#endif
 
 class ParameterInstance : public CompoundParameter
 {
@@ -42,11 +38,7 @@ public:
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
-#ifdef LSB_Q3LISTVIEW
   ParameterInstance(QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
-#else
-  ParameterInstance(Q3ListViewItem * _treeWidgetItem, Q3ListViewItem * _pre,
-#endif
 		    QDomNode const& _node,
 		    QObject * _parent, const char * _name);
 

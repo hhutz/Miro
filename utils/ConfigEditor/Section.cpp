@@ -29,12 +29,8 @@
 #include "params/Type.h"
 
 #include <QMenu>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 #include <qinputdialog.h>
 #include <qmessagebox.h>
 
@@ -46,11 +42,7 @@
 const QString Section::XML_TAG("section");
 
 Section::Section(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-#else
-		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-#endif
 		 QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   menuAddParameter_(NULL),
@@ -69,7 +61,6 @@ Section::contextMenu(QMenu& _menu)
   // The number of QActions in the context menu varies with what is loaded.
   // get all current parameters
   Miro::CFG::QStringVector childParameters;
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
@@ -94,22 +85,6 @@ Section::contextMenu(QMenu& _menu)
       childParameters.push_back(pChildTreeWidgetItem->text(0));
     }    
   }
-#else
-  Q3ListViewItem * item = treeWidgetItem()->firstChild();
-  while (item != NULL) {
-    ItemXML * itemXML =
-      dynamic_cast<ItemXML *>(Item::itemMap().find(item)->second);
-    assert(itemXML != NULL);
-
-    QDomElement e = itemXML->node().toElement();
-    assert(!e.isNull());
-
-    if (e.tagName() == ParameterXML::XML_TAG) {
-      childParameters.push_back(item->text(0));
-    }
-    item = item->nextSibling();
-  }
-#endif
 
   typedef std::vector<QString> QStringVector;
 
@@ -237,11 +212,7 @@ void
 Section::buildSubtree()
 {
   QDomNode n = node_.firstChild();
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
-#else
-  Q3ListViewItem * pre = NULL;
-#endif
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull()) {

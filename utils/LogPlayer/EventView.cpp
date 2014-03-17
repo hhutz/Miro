@@ -102,6 +102,7 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
 #ifdef LSB_Q3LISTVIEW
   list_ = new QTreeWidget(eventBox, "list");
   assert(list_ != NULL);
+  list_->setContextMenuPolicy(Qt::CustomContextMenu);
   const int columnCount = 4;
   list_->setColumnCount(columnCount);
   QStringList headerLabels;
@@ -136,7 +137,7 @@ EventView::EventView(FileSet * _fileSet, unsigned int _history, char const * _na
             this, SLOT(insertEvent(const QString&,const QString&,const QString&,const QString&)));
   }
 
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   connect(list_, SIGNAL(selectionChanged(QTreeWidgetItem *)),
           this, SLOT(selectionChanged(QTreeWidgetItem *)));
 #else
@@ -474,7 +475,7 @@ EventView::pruneHistory()
 }
 
 void
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 EventView::selectionChanged(QTreeWidgetItem * _item)
 #else
 EventView::selectionChanged(Q3ListViewItem * _item)
@@ -489,7 +490,7 @@ EventView::selectionChanged(Q3ListViewItem * _item)
 void
 EventView::excludeEvent(const QString& _domainName, const QString& _typeName)
 {
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   // Precondition
   assert(list_ != NULL);
 
@@ -575,7 +576,7 @@ EventView::includeEvent(const QString&, const QString&)
 }
 
 ACE_Time_Value
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
 EventView::eventTime(QTreeWidgetItem * _item)
 #else
 EventView::eventTime(Q3ListViewItem * _item)

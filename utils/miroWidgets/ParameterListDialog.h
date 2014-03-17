@@ -18,8 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
 
 #ifndef ParameterListDialog_h
 #define ParameterListDialog_h
@@ -32,13 +30,8 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 class QTreeWidgetItem;
-#else
-class Q3ListView;
-class Q3ListViewItem;
-#endif
 class QPushButton;
 class QString;
 class QStringList;
@@ -83,13 +76,8 @@ protected slots:
   void del();
   void edit();
 
-#ifdef LSB_Q3LISTVIEW
   void slotDoubleClick(QTreeWidgetItem *);
-  void contextMenu(QTreeWidgetItem*, const QPoint&,int);
-#else
-  void slotDoubleClick(Q3ListViewItem *);
-  void contextMenu(Q3ListViewItem*,const QPoint&,int);
-#endif
+  void contextMenu(const QPoint&);
 
 protected:
   //----------------------------------------------------------------------------
@@ -114,11 +102,7 @@ protected:
   unsigned int index_;
 
   //! The list view.
-#ifdef LSB_Q3LISTVIEW
   QTreeWidget * list_;
-#else
-  Q3ListView * list_;
-#endif
   //! The delete button.
   QPushButton * delButton_;
   //! The edit button.

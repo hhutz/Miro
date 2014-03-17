@@ -30,11 +30,7 @@
 #include <qlineedit.h>
 #include <qtextedit.h>
 #include <qtooltip.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
-#else
-#include <q3listview.h>
-#endif
 #include <qcombobox.h>
 #ifdef LSB_Q3LISTBOX
 #include <QListWidget>

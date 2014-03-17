@@ -31,13 +31,8 @@
 
 // forward declarations
 class ConfigFile;
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 class QTreeWidgetItem;
-#else
-class Q3ListView;
-class Q3ListViewItem;
-#endif
 
 //! Class representing vector and set items.
 class miroWidgets_Export ParameterList : public ParameterXML
@@ -66,21 +61,13 @@ public:
   //! Initializing constructor.
   ParameterList(Miro::CFG::Parameter const& _param,
 		QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-#else
-		Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-#endif
 		QObject * _parent, const char * _name);
 
   //! Initializing constructor.
   ParameterList(Miro::CFG::Parameter const& _param,
 		QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		QTreeWidget * _list, QTreeWidgetItem * _pre,
-#else
-		Q3ListView * _list, Q3ListViewItem * _pre,
-#endif
 		QObject * _parent, const char * _name);
 
   //----------------------------------------------------------------------------

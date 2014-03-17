@@ -20,10 +20,10 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3GRIDLAYOUT
-#define LSB_Q3HBOXLAYOUT
-#define LSB_Q3PROGRESSDIALOG
-#define LSB_Q3VBOXLAYOUT
+// #define LSB_Q3GRIDLAYOUT
+// #define LSB_Q3HBOXLAYOUT
+// #define LSB_Q3PROGRESSDIALOG
+// #define LSB_Q3VBOXLAYOUT
 
 #include "MainForm.h"
 #include "LogFile.h"
@@ -149,17 +149,17 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
   QAction * pAction = NULL;
   
   pAction = new QAction(tr("Open/Close..."), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(files()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(files()));
   fileMenu->addAction(pAction);
 
   pAction = new QAction(tr("Save &as..."), this);
-  connect(pAction, SIGNAL(triggered), this, SLOT(saveAs()));
+  connect(pAction, SIGNAL(triggered()), this, SLOT(saveAs()));
   fileMenu->addAction(pAction);
 
   fileMenu->addSeparator();
 
   pAction = new QAction(tr("&Quit"), qApp);
-  connect(pAction, SIGNAL(triggered), SLOT(quit));
+  connect(pAction, SIGNAL(triggered()), SLOT(quit));
   fileMenu->addAction(pAction);
 #else
   Q3PopupMenu *fileMenu = new Q3PopupMenu( this );
@@ -173,15 +173,15 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
   QMenu * const editMenu = menuBar()->addMenu(tr("&Edit"));
 
   pAction = new QAction(tr("Cut Front"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(cutFront()));
+  connect(pAction, SIGNAL(triggered()), SLOT(cutFront()));
   editMenu->addAction(pAction);
 
   pAction = new QAction(tr("Cut Back"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(cutBack()));
+  connect(pAction, SIGNAL(triggered()), SLOT(cutBack()));
   editMenu->addAction(pAction);
 
   pAction = new QAction(tr("Undo all"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(cutUndo()));
+  connect(pAction, SIGNAL(triggered()), SLOT(cutUndo()));
   editMenu->addAction(pAction);
 #else
   Q3PopupMenu * editMenu = new Q3PopupMenu(this);
@@ -196,7 +196,7 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
   /// Q3PopupMenu::insertItem()?
   pAction = new QAction(tr("&Event View"), this);
   pAction->setCheckable(true);
-  connect(pAction, SIGNAL(triggered), SLOT(toggleEventView()));
+  connect(pAction, SIGNAL(triggered()), SLOT(toggleEventView()));
   toolsMenu->addAction(pAction);
   // Store the Action for later toggling
   m_pToggleEventViewAction = pAction;
@@ -210,7 +210,7 @@ MainForm::MainForm(QApplication& _app, FileSet& _fileSet,
   QMenu * const settingsMenu = menuBar()->addMenu("&Settings");
 
   pAction = new QAction(tr("&History"), this);
-  connect(pAction, SIGNAL(triggered), SLOT(setHistory()));
+  connect(pAction, SIGNAL(triggered()), SLOT(setHistory()));
   settingsMenu->addAction(pAction);
 
   pAction = new QAction(tr("&Loop Playback"), this);

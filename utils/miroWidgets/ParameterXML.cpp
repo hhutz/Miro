@@ -22,23 +22,15 @@
 #include "ConfigFile.h"
 
 #include <QMenu>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 
 #include <cassert>
 
 QString const ParameterXML::XML_TAG = "parameter";
 
 ParameterXML::ParameterXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 			   QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-#else
-			   Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-#endif
 			   QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   config_(ConfigFile::instance())
@@ -47,11 +39,7 @@ ParameterXML::ParameterXML(QDomNode const& _node,
 }
 
 ParameterXML::ParameterXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 			   QTreeWidget * _view, QTreeWidgetItem * _pre,
-#else
-			   Q3ListView * _view, Q3ListViewItem * _pre,
-#endif
 			   QObject * _parent, const char * _name) :
   Super(_node, _view, _pre, _parent, _name),
   config_(ConfigFile::instance())

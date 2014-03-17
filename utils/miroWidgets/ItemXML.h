@@ -26,14 +26,14 @@
 
 #include <qstring.h>
 #include <qdom.h>
-#ifdef LSB_Q3LISTVIEW
-class QTreeWidget;
-class QTreeWidgetItem;
-#endif
 
 #include <vector>
 
 #include "miroWidgets_Export.h"
+
+// Forward declarations
+class QTreeWidget;
+class QTreeWidgetItem;
 
 typedef std::vector<QString> QStringVector;
 
@@ -63,11 +63,7 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
-#else
-	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
-#endif
 	  QObject * _parent = NULL, const char * _name = NULL);
   //! Initializing constructor.
   /**
@@ -75,11 +71,7 @@ public:
    * representing the item.
    */
   ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 	  QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
-#else
-	  Q3ListView * _view, Q3ListViewItem * _pre = NULL,
-#endif
 	  QObject * _parent = NULL, const char * _name = NULL);
   //! Virtual destructor.
   virtual ~ItemXML();

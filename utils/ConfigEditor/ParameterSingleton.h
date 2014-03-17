@@ -26,11 +26,7 @@
 
 // forward declarations
 class ConfigFile;
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
-#else
-class Q3ListViewItem;
-#endif
 
 class ParameterSingleton : public CompoundParameter
 {
@@ -41,11 +37,7 @@ public:
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
-#ifdef LSB_Q3LISTVIEW
   ParameterSingleton(QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
-#else
-  ParameterSingleton(Q3ListViewItem * _treeWidgetItem, Q3ListViewItem * _pre,
-#endif
 		     QDomNode const& _node,
 		     QObject * _parent, const char * _name);
   //----------------------------------------------------------------------------

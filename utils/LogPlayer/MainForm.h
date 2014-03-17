@@ -20,8 +20,8 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
-#define LSB_Q3MAINWINDOW
-#define LSB_Q3POPUPMENU
+// #define LSB_Q3MAINWINDOW
+// #define LSB_Q3POPUPMENU
 
 #ifndef Mainform_h
 #define MainForm_h

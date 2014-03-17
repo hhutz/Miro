@@ -27,12 +27,7 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
-#else
-class Q3ListView;
-#endif
-
 
 //! Class representing an XML document.
 /** 
@@ -57,11 +52,7 @@ public:
 
   //! Initializing constructor. Taking a XML document as first parameter.
   DocumentXML(QDomDocument const& _document,
-#ifdef LSB_Q3LISTVIEW
 	      QTreeWidget * _treeWidget,
-#else
-	      Q3ListView * _listView, 
-#endif
 	      QObject * _parent = NULL, const char * _name = NULL);
   //! Virtual destructor.
   virtual ~DocumentXML();

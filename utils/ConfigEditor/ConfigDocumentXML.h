@@ -25,11 +25,7 @@
 #include "miroWidgets/DocumentXML.h"
 
 // forward declarations
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
-#else
-class Q3ListView;
-#endif
 
 class ConfigDocumentXML : public DocumentXML
 {
@@ -47,11 +43,7 @@ public:
   //----------------------------------------------------------------------------  
 
   ConfigDocumentXML(QDomDocument const& _document,
-#ifdef LSB_Q3LISTVIEW
 		    QTreeWidget * _treeWidget,
-#else
-		    Q3ListView * _listView,
-#endif
 		    QObject * _parent = NULL, const char * _name = NULL);
   virtual ~ConfigDocumentXML();
 

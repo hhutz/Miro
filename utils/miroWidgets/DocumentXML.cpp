@@ -26,12 +26,7 @@
 
 #include <qfile.h>
 #include <qobject.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
-#else
-#include <q3listview.h>
-#endif
-
 #include <QTextStream>
 
 #include <cassert>
@@ -41,17 +36,9 @@
 //------------------------------------------------------------------------------
 
 DocumentXML::DocumentXML(QDomDocument const& _document,
-#ifdef LSB_Q3LISTVIEW
 			 QTreeWidget * _treeWidget, 
-#else
-			 Q3ListView * _listView, 
-#endif
 			 QObject * _parent, const char * _name) :
-#ifdef LSB_Q3LISTVIEW
   Super(_document, _treeWidget, NULL, _parent, ""),
-#else
-  Super(_document, _listView, NULL, _parent, ""),
-#endif
   document_(_document)
 {}
 
@@ -69,15 +56,9 @@ DocumentXML::init(QString const& _rootTag)
   QDomNode n = document_.appendChild( root );
   assert(!n.isNull());
 
-#ifdef LSB_Q3LISTVIEW
   treeWidgetItem()->setText(0, _rootTag);
   treeWidgetItem()->setText(2, document_.doctype().name());
   treeWidgetItem()->setExpanded(true);
-#else
-  treeWidgetItem()->setText(0, _rootTag);
-  treeWidgetItem()->setText(2, document_.doctype().name());
-  treeWidgetItem()->setOpen(true);
-#endif
 
   setModified(false, true);
 }

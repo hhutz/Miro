@@ -22,11 +22,7 @@
 
 #include <qstring.h>
 #include <qobject.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
-#else
-#include <q3listview.h>
-#endif
 #include <cassert>
 
 Item::ItemMap Item::itemMap_;
@@ -35,7 +31,6 @@ Item::ItemMap Item::itemMap_;
 // public methods
 //----------------------------------------------------------------------------
 
-#ifdef LSB_Q3LISTVIEW
 Item::Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 	   QObject * _parent, const char * _name) :
   Super(_parent, _name),
@@ -44,19 +39,7 @@ Item::Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
   treeWidgetItem()->setText(0, name());
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
-#else
-Item::Item(Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-	   QObject * _parent, const char * _name) :
-  Super(_parent, _name),
-  treeWidgetItem_(new Q3ListViewItem(_parentItem, _pre))
-{
-  treeWidgetItem()->setText(0, name());
-  itemMap_.insert(std::make_pair(treeWidgetItem_, this));
-}
-#endif
 
-
-#ifdef LSB_Q3LISTVIEW
 Item::Item(QTreeWidget * _view, QTreeWidgetItem * _pre,
 	   QObject * _parent, const char * _name) :
   Super(_parent, _name),
@@ -65,17 +48,6 @@ Item::Item(QTreeWidget * _view, QTreeWidgetItem * _pre,
   treeWidgetItem()->setText(0, name());
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
-#else
-Item::Item(Q3ListView * _view, Q3ListViewItem * _pre,
-	   QObject * _parent, const char * _name) :
-  Super(_parent, _name),
-  treeWidgetItem_(new Q3ListViewItem(_view, _pre))
-{
-  treeWidgetItem()->setText(0, name());
-  itemMap_.insert(std::make_pair(treeWidgetItem_, this));
-}
-#endif
-
 
 Item::~Item()
 {
@@ -126,7 +98,6 @@ Item::down()
 void
 Item::moveUp()
 {
-#ifdef LSB_Q3LISTVIEW
   // Map this Item onto its QTreeWidgetItem
   QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
   assert(pThisTreeWidgetItem != NULL);
@@ -160,41 +131,11 @@ Item::moveUp()
     pParentTreeWidgetItem->removeChild(pPredecessorTreeWidgetItem);
     pParentTreeWidgetItem->insertChild(0, pPredecessorTreeWidgetItem);
   }
-#else
-  // find the pre predecessor of the item
-  Q3ListViewItem * prePre = NULL;
-  Q3ListViewItem * pre = NULL;
-  Q3ListViewItem * self = NULL;
-
-  // get the parents' first child
-  self = (treeWidgetItem()->parent() == NULL)?
-    treeWidgetItem()->listView()->firstChild() :
-    treeWidgetItem()->parent()->firstChild();
-
-  // find ourselves
-  while (self != treeWidgetItem()) {
-    assert(self != NULL);
-
-    prePre = pre;
-    pre = self;
-    self = self->nextSibling();
-  }
-
-  if (pre != NULL) {
-    if (prePre != NULL) {
-      treeWidgetItem()->moveItem(prePre);
-    }
-    else {
-      pre->moveItem(treeWidgetItem());
-    }
-  }
-#endif
 }
 
 void
 Item::moveDown()
 {
-#ifdef LSB_Q3LISTVIEW
   // Map this Item onto its QTreeWidgetItem
   QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
   assert(pThisTreeWidgetItem != NULL);
@@ -220,12 +161,6 @@ Item::moveDown()
     pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
     pParentTreeWidgetItem->insertChild(thisIndex, pThisTreeWidgetItem);
   }
-#else
-  Q3ListViewItem * succ = treeWidgetItem()->nextSibling();
-  if (succ != NULL) {
-    treeWidgetItem()->moveItem(succ);
-  }
-#endif
 }
 
 /**
@@ -236,7 +171,6 @@ Item::moveDown()
 Item *
 Item::predecessor()
 {
-#ifdef LSB_Q3LISTVIEW
   // Map this Item onto its QTreeWidgetItem
   QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
   assert(pThisTreeWidgetItem != NULL);
@@ -264,32 +198,11 @@ Item::predecessor()
   return result;
 
   // Fetch the index of this
-#else
-  // find the pre predecessor of the item
-  Q3ListViewItem * pre = NULL;
-  Q3ListViewItem * self = NULL;
-
-  // get the parents first child
-  self = (treeWidgetItem()->parent() == NULL)?
-    treeWidgetItem()->listView()->firstChild() :
-    treeWidgetItem()->parent()->firstChild();
-
-  // find ourselves
-  while (self != treeWidgetItem()) {
-    assert(self != NULL);
-
-    pre = self;
-    self = self->nextSibling();
-  }
-
-  return itemFromListViewItem(pre);
-#endif
 }
 
 Item *
 Item::successor()
 {
-#ifdef LSB_Q3LISTVIEW
   // Map this Item onto its QTreeWidgetItem
   QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
   assert(pThisTreeWidgetItem != NULL);
@@ -317,17 +230,10 @@ Item::successor()
   // Map the succcessor QTreeWidgetItem onto its Item
   Item * const result = itemFromTreeWidgetItem(pSuccessorTreeWidgetItem);
   return result;
-#else
-  return itemFromListViewItem(treeWidgetItem_->nextSibling());
-#endif
 }
 
 Item *
-#ifdef LSB_Q3LISTVIEW
 Item::itemFromTreeWidgetItem(QTreeWidgetItem * _lvi)
-#else
-Item::itemFromListViewItem(Q3ListViewItem * _lvi)
-#endif
 {
   if (_lvi == NULL)
     return NULL;

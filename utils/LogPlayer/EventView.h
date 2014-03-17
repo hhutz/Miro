@@ -20,7 +20,6 @@
 //
 // Enable migration from Qt v3 to Qt v4
 #define LSB_Q3LISTVIEW
-#define LSB_Q3LISTVIEWITEM
 
 #ifndef EventView_h
 #define EventView_h
@@ -34,14 +33,12 @@
 // forward declarations
 #ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
-#else
-class Q3ListView;
-#endif
-#ifdef LSB_Q3LISTVIEWITEM
 class QTreeWidgetItem;
 #else
+class Q3ListView;
 class Q3ListViewItem;
 #endif
+
 class FileSet;
 namespace CosNotification
 {
@@ -66,7 +63,7 @@ public slots:
                    const QString& _domain, const QString& _type, const QString& _event);
 
 protected slots:
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   void selectionChanged(QTreeWidgetItem * _item);
 #else
   void selectionChanged(Q3ListViewItem * _item);
@@ -78,7 +75,7 @@ protected:
   virtual void hideEvent(QHideEvent * _event);
 
   void pruneHistory();
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   static ACE_Time_Value eventTime(QTreeWidgetItem * _item);
 #else
   static ACE_Time_Value eventTime(Q3ListViewItem * _item);
@@ -90,7 +87,7 @@ protected:
 #else
   Q3ListView * list_;
 #endif
-#ifdef LSB_Q3LISTVIEWITEM
+#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * last_;
 #else
   Q3ListViewItem * last_;

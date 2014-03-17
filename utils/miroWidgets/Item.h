@@ -18,9 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
-
 #ifndef Item_h
 #define Item_h
 
@@ -31,13 +28,8 @@
 
 // forward declarations
 class QMenu;
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidget;
 class QTreeWidgetItem;
-#else
-class Q3ListView;
-class Q3ListViewItem;
-#endif
 
 //! This class represents a QTreeWidgetItem descendant
 /** 
@@ -62,46 +54,27 @@ public:
   //----------------------------------------------------------------------------
 
   // Mapping QListViewItem instances to Item instances.
-#ifdef LSB_Q3LISTVIEW
   typedef std::map<QTreeWidgetItem *, Item *> ItemMap;
-#else
-  typedef std::map<Q3ListViewItem *, Item *> ItemMap;
-#endif
 
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
   //! Initializing constructor, creating a QListView sibling item.
-#ifdef LSB_Q3LISTVIEW
   Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
        QObject * _parent = NULL, const char * _name = NULL);
-#else
-  Item(Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
-#endif
+
   //! Initializing constructor, creating a QListView toplevel item.
-#ifdef LSB_Q3LISTVIEW
   Item(QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
        QObject * _parent = NULL, const char * _name = NULL);
-#else
-  Item(Q3ListView * _view, Q3ListViewItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
-#endif
+
   //! Virtual destructor.
   virtual ~Item();
 
-#ifdef LSB_Q3LISTVIEW
   //! Accessor for the associated list view.
   QTreeWidgetItem * treeWidgetItem();
   //! Const accessor for the associated list view.
   QTreeWidgetItem const * treeWidgetItem() const;
-#else
-  //! Accessor for the associated list view.
-  Q3ListViewItem * treeWidgetItem();
-  //! Const accessor for the associated list view.
-  Q3ListViewItem const * treeWidgetItem() const;
-#endif
 
   //! Move item up in list view.
   virtual void moveUp();
@@ -119,11 +92,7 @@ public:
   //! Accesor for the QListViewItem/Item map.
   static ItemMap const& itemMap();
   //! Retrieve the associated Item for a QListView.
-#ifdef LSB_Q3LISTVIEW
   static Item * itemFromTreeWidgetItem(QTreeWidgetItem * _lvi);
-#else
-  static Item * itemFromListViewItem(Q3ListViewItem * _lvi);
-#endif
 
 public slots:
   //----------------------------------------------------------------------------
@@ -157,13 +126,8 @@ private:
   // private members
   //----------------------------------------------------------------------------
 
-#ifdef LSB_Q3LISTVIEW
   //! Pointer to the corresponding QTreeWidgetItem.
   QTreeWidgetItem * treeWidgetItem_;
-#else
-  //! Pointer to the corresponding QListViewItem.
-  Q3ListViewItem * treeWidgetItem_;
-#endif
 
   //----------------------------------------------------------------------------
   // hidden methods
@@ -171,30 +135,16 @@ private:
   Item(Item const&);
 };
 
-#ifdef LSB_Q3LISTVIEW
 inline
 QTreeWidgetItem *
 Item::treeWidgetItem() {
   return treeWidgetItem_;
 }
-#else
-inline
-Q3ListViewItem *
-Item::treeWidgetItem() {
-  return treeWidgetItem_;
-}
-#endif
-#ifdef LSB_Q3LISTVIEW
+
 inline
 const QTreeWidgetItem *
 Item::treeWidgetItem() const {
   return treeWidgetItem_;
-#else
-inline
-Q3ListViewItem const *
-Item::treeWidgetItem() const {
-  return treeWidgetItem_;
-#endif
 }
 inline
 Item::ItemMap const&

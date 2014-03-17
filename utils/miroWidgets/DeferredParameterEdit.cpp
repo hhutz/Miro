@@ -18,8 +18,6 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3LISTVIEW
 
 #include "DeferredParameterEdit.h"
 #include "ParameterDialog.h"
@@ -35,12 +33,8 @@
 
 #include <qpushbutton.h>
 #include <qstring.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 
 #include "qt_compatibility.h"
 
@@ -256,7 +250,6 @@ DeferredParameterEdit::setXML()
   //--------------------------------------
   // replace node by new content
 
-#ifdef LSB_Q3LISTVIEW
   // remember the predecessor, if there is one
   QTreeWidgetItem * pre = NULL;
   if (item_)
@@ -280,23 +273,6 @@ DeferredParameterEdit::setXML()
     delete item_;
     item_ = 0;
   }
-#else
-  // remember the predecessor
-  Q3ListViewItem * pre = NULL;
-  if (item_) {
-    Q3ListViewItem * parent = item_->treeWidgetItem()->parent();
-    if (parent != NULL) {
-      pre = parent->firstChild();
-      while (pre != NULL) {
-	if (pre->nextSibling() == item_->treeWidgetItem())
-	  break;
-	pre = pre->nextSibling();
-      }
-    }
-    // delete the current content
-    delete item_;
-  }
-#endif
 
   // replace the xml subtree
   QDomNode node = tmpNode.cloneNode();

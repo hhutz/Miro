@@ -30,12 +30,8 @@
 #include "miro/Exception.h"
 
 #include <q3popupmenu.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 
 #include <cassert>
 
@@ -65,13 +61,8 @@ ParameterList::typeFromName(QString const& _type)
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 			     QTreeWidgetItem * _parentItem,
 			     QTreeWidgetItem * _pre,
-#else
-			     Q3ListViewItem * _parentItem,
-			     Q3ListViewItem * _pre,
-#endif
 			     QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param),
@@ -79,16 +70,10 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
-#else
-  if (treeWidgetItem()->listView()->columns() == 2)
-    treeWidgetItem()->setText(2, param_.type_);
-#endif
-
 
   // get the nested parameter type
   int len = param_.type_.length();
@@ -102,13 +87,8 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 			     QTreeWidget * _list,
 			     QTreeWidgetItem * _pre,
-#else
-			     Q3ListView * _list,
-			     Q3ListViewItem * _pre,
-#endif
 			     QObject * _parent, const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   param_(_param),
@@ -116,16 +96,10 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
-#else
-  if (treeWidgetItem()->listView()->columns() == 2)
-    treeWidgetItem()->setText(2, param_.type_);
-#endif
-
 
   // get the nested parameter type
   int len = param_.type_.length();
@@ -159,11 +133,7 @@ ParameterList::init()
   
   unsigned int index = 0;
   QDomNode n = node().firstChild();
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
-#else
-  Q3ListViewItem * pre = NULL;
-#endif
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull() &&
@@ -222,11 +192,7 @@ ParameterList::setParameters()
   nestedParameter.description_ = param_.description_;
 
   ItemXML * parentItem = NULL;
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const p = treeWidgetItem()->parent();
-#else
-  Q3ListViewItem * p = treeWidgetItem()->parent();
-#endif
   Item::ItemMap::const_iterator i = Item::itemMap().find(p);
   if (i != Item::itemMap().end())
     parentItem = dynamic_cast<ItemXML *>(i->second);

@@ -27,11 +27,7 @@
 #include <qstring.h>
 
 // forward declarations
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
-#else
-class Q3ListViewItem;
-#endif
 
 class Section : public ItemXML
 {
@@ -40,11 +36,7 @@ class Section : public ItemXML
   typedef ItemXML Super;
 public:
   Section(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 	  QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-#else
-	  Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-#endif
 	  QObject * _parent, const char * _name);
 
   //----------------------------------------------------------------------------  

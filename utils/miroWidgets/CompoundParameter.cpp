@@ -31,58 +31,34 @@
 #include "miro/Exception.h"
 #include <cassert>
 
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
-#else
-#include <q3listview.h>
-#endif
 
 CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 				     QTreeWidgetItem * _parentItem,
 				     QTreeWidgetItem * _pre,
-#else
-				     Q3ListViewItem * _parentItem,
-				     Q3ListViewItem * _pre,
-#endif
 				     QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   type_(_type)
 {
-#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() >= 3)
   {
     treeWidgetItem()->setText(2, type_.fullName());
   }
-#else
-  if (treeWidgetItem()->listView()->columns() >= 3)
-    treeWidgetItem()->setText(2, type_.fullName());
-#endif
 }
 
 CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 				     QTreeWidget * _list,
 				     QTreeWidgetItem * _pre,
-#else
-				     Q3ListView * _list,
-				     Q3ListViewItem * _pre,
-#endif
 				     QObject * _parent, const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   type_(_type)
 {
-#ifdef LSB_Q3LISTVIEW
   if (treeWidgetItem()->treeWidget()->columnCount() >= 3)
   {
     treeWidgetItem()->setText(2, type_.fullName());
   }
-#else
-  if (treeWidgetItem()->listView()->columns() >= 3)
-    treeWidgetItem()->setText(2, type_.fullName());
-#endif
 }
 
 void
@@ -92,11 +68,7 @@ CompoundParameter::init()
   Miro::CFG::ParameterVector params = config_->description().getFullParameterSet(type_);
 
   QDomNode n = node().firstChild();
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * pre = NULL;
-#else
-  Q3ListViewItem * pre = NULL;
-#endif
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull() &&
@@ -123,38 +95,24 @@ CompoundParameter::init()
 
       if (SimpleParameter::typeFromName(i->type_) != 
 	  SimpleParameter::NONE) {
-#ifdef LSB_Q3LISTVIEW
 	QTreeWidgetItem * const  pTreeWidgetItem = treeWidgetItem();
 	assert(pTreeWidgetItem != NULL);
 	newParam = new SimpleParameter(*i, n, pTreeWidgetItem, pre, this, p);
-#else
-	newParam = new SimpleParameter(*i, n, treeWidgetItem(), pre, this, p);
-#endif
       }
       else if (ParameterList::typeFromName(i->type_) !=
 	       ParameterList::NONE) {
-#ifdef LSB_Q3LISTVIEW
 	QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
 	assert(pTreeWidgetItem != NULL);
 	newParam = new ParameterList(*i, n, pTreeWidgetItem, pre, this, p);
-#else
-	newParam = new ParameterList(*i, n, treeWidgetItem(), pre, this, p);
-#endif
       }
       else {
 	Miro::CFG::Type const * const t = 
 	  config_->description().getType(i->type_);
 	if (t != NULL) {
-#ifdef LSB_Q3LISTVIEW
 	  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   	  assert(pTreeWidgetItem != NULL);
 	  newParam =
 	    new CompoundParameter(*t, n, pTreeWidgetItem, pre, this, p);
-#else
-	  newParam = new CompoundParameter(*t, 
-					   n, treeWidgetItem(), pre,
-					   this, p);
-#endif
 	}
 	else
 	  throw Miro::Exception(QString("Type " + i->type_ + " of parameter " + p +

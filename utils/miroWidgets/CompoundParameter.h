@@ -27,11 +27,7 @@
 
 #include "miroWidgets_Export.h"
 
-#ifdef LSB_Q3LISTVIEW
 class QTreeWidgetItem;
-#else
-class Q3ListViewItem;
-#endif
 
 //! Class representing compound parameter items.
 class miroWidgets_Export CompoundParameter : public ParameterXML
@@ -60,11 +56,7 @@ public:
   //! Initializing constructor.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		    QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
-#else
-		    Q3ListViewItem * _treeWidgetItem, Q3ListViewItem * _pre,
-#endif
 		    QObject * _parent, const char * _name);
 
   /**
@@ -78,11 +70,7 @@ public:
   //! Initializing constructor. For toplevel QListViewItem.
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		    QTreeWidget * _list, QTreeWidgetItem * _pre,
-#else
-		    Q3ListView * _list, Q3ListViewItem * _pre,
-#endif
 		    QObject * _parent, const char * _name);
 
   //----------------------------------------------------------------------------

@@ -24,23 +24,15 @@
 #include <qobject.h>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 
 #include <cassert>
 
 QString const ItemXML::XML_ATTRIBUTE_KEY = "name";
 
 ItemXML::ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-#else
-		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-#endif
 		 QObject * _parent, const char * _name) :
   Super(_parentItem, _pre, _parent, _name),
   node_(_node),
@@ -51,11 +43,7 @@ ItemXML::ItemXML(QDomNode const& _node,
 }
 
 ItemXML::ItemXML(QDomNode const& _node,
-#ifdef LSB_Q3LISTVIEW
 		 QTreeWidget * _view, QTreeWidgetItem * _pre,
-#else
-		 Q3ListView * _view, Q3ListViewItem * _pre,
-#endif
 		 QObject * _parent, const char * _name) :
   Super(_view, _pre, _parent, _name),
   node_(_node),

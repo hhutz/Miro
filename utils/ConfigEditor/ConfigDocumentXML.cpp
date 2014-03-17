@@ -28,12 +28,8 @@
 
 #include "params/Generator.h"
 
-#ifdef LSB_Q3LISTVIEW
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#else
-#include <q3listview.h>
-#endif
 #include <QMenu>
 #include <qstring.h>
 
@@ -50,17 +46,9 @@ const QString ConfigDocumentXML::XML_TAG("config");
 // public methods
 
 ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document,
-#ifdef LSB_Q3LISTVIEW
 				     QTreeWidget * _treeWidget,
-#else 
-				     Q3ListView * _listView,
-#endif
 				     QObject * _parent, const char * _name) :
-#ifdef LSB_Q3LISTVIEW
   Super(_document, _treeWidget, _parent, _name),
-#else
-  Super(_document, _listView, _parent, _name),
-#endif
   menuAddSection_(NULL)
 {
 }
@@ -80,26 +68,21 @@ ConfigDocumentXML::contextMenu(QMenu& _menu)
   menuAddSection_ = _menu.addMenu(tr("Add Section"));
 
   Miro::CFG::QStringVector childSections;
-#ifdef LSB_Q3LISTVIEW
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
   QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
-  assert(pParentTreeWidgetItem != NULL);
-  for (int i = 0; i < pParentTreeWidgetItem->childCount(); ++i)
+  if (pParentTreeWidgetItem != NULL)
   {
-    const QTreeWidgetItem * const pChildTreeWidgetItem =
-      pParentTreeWidgetItem->child(i);
-    assert(pChildTreeWidgetItem != NULL);
-    const QString text = pChildTreeWidgetItem->text(0);
-    childSections.push_back(text);
+    // It is not the root, so it may have siblings
+    for (int i = 0; i < pParentTreeWidgetItem->childCount(); ++i)
+    {
+      const QTreeWidgetItem * const pChildTreeWidgetItem =
+	pParentTreeWidgetItem->child(i);
+      assert(pChildTreeWidgetItem != NULL);
+      const QString text = pChildTreeWidgetItem->text(0);
+      childSections.push_back(text);
+    }
   }
-#else
-  Q3ListViewItem * item = treeWidgetItem()->firstChild();
-  while (item != NULL) {
-    childSections.push_back(item->text(0));
-    item = item->nextSibling();
-  }
-#endif
 
   // submenu: add all section names
   // not yet available in the document
@@ -177,11 +160,7 @@ ConfigDocumentXML::parse()
   QDomNode n = document_.firstChild();
   if (!n.isNull()) {
     QDomNode n1 = n.firstChild();
-#ifdef LSB_Q3LISTVIEW
     QTreeWidgetItem * pre = NULL;
-#else
-    Q3ListViewItem * pre = NULL;
-#endif
     while (!n1.isNull()) {
       QDomElement e = n1.toElement();
       if (!e.isNull() &&

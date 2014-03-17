@@ -41,11 +41,7 @@ namespace
 }
 
 DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f) :
-#ifdef LSB_Q3LISTVIEW
   Super(_parent),
-#else
-  Super(_parent, _name, _f),
-#endif
   titleBar_(NULL),
   statusBar_(NULL),
   document_(NULL),
@@ -53,45 +49,28 @@ DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f)
 {
   //----------------------------------------------------------------------------
   // init list view
-#ifdef LSB_Q3LISTVIEW
   const int columnCount = 3;
   setColumnCount(columnCount);
   QStringList headerLabels;
   headerLabels << "Item Name" << "Value" << "Type";
   setHeaderLabels(headerLabels);
-#else
-  addColumn("Item Name");
-  addColumn("Value");
-  addColumn("Type");
-#endif
+  setContextMenuPolicy(Qt::CustomContextMenu);
   setRootIsDecorated(true);
-#ifdef LSB_Q3LISTVIEW
   // Disable sorting
   setSortingEnabled(false);
-#else
-  setSorting(-1);
-#endif
-#ifdef LSB_Q3LISTVIEW
   /// @todo How do we do this in Qt4?
-#else
-  setResizeMode(Q3ListView::AllColumns);
-#endif
+  // setResizeMode(Q3ListView::AllColumns);
 
-#ifdef LSB_Q3LISTVIEW
+  // When the user right licks, present the context menu
   connect(this, 
-	  SIGNAL(contextMenuRequested(QTreeWidgetItem *, const QPoint&, int)),
+	  SIGNAL(customContextMenuRequested(const QPoint&)),
 	  this,
-	  SLOT(slotContextMenu(QTreeWidgetItem *, const QPoint&, int)));
-  connect(this, SIGNAL(doubleClicked(QTreeWidgetItem *)),
-	  this, SLOT(slotDoubleClick(QTreeWidgetItem *)));
-#else
-  connect(this, 
-	  SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint&, int)),
+	  SLOT(slotContextMenu(const QPoint&)));
+  // When the user double clicks, display an item editor
+  connect(this,
+	  SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
 	  this,
-	  SLOT(slotContextMenu(Q3ListViewItem *, const QPoint&, int)));
-  connect(this, SIGNAL(doubleClicked(Q3ListViewItem *)),
-	  this, SLOT(slotDoubleClick(Q3ListViewItem *)));
-#endif
+	  SLOT(slotDoubleClick(QTreeWidgetItem *, int)));
 }
 
 DocumentView::~DocumentView()
@@ -319,12 +298,11 @@ DocumentView::slotSaveAs()
 }
 
 void 
-#ifdef LSB_Q3LISTVIEW
-DocumentView::slotContextMenu(QTreeWidgetItem * _item, const QPoint & _pos, int)
-#else
-DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
-#endif
+DocumentView::slotContextMenu(const QPoint & _pos)
 {
+  // Find the QTreeWidgetItem at the position passed in from the Signal
+  QTreeWidgetItem * const _item = itemAt(_pos);
+
   if (_item == NULL)
     return;
 
@@ -332,33 +310,25 @@ DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
   assert(item != ItemXML::itemMap().end());
 
   QMenu menu(NULL);
-#ifdef LSB_Q3LISTVIEW
   const std::pair<QTreeWidgetItem*, Item*>& p = *item;
-#else
-  const std::pair<Q3ListViewItem*, Item*>& p = *item;
-#endif
   Item * const pItem = p.second;
   assert(pItem != 0);
   // Populate this context menu based on the Item
   pItem->contextMenu(menu);
   if (!menu.isEmpty())
   {
-    menu.exec(_pos);
+    // _pos is in viewport coordinates. Convert to Widget coordinates.
+    // The offset of 90 works when the window is resized and scrolled.
+    // It is best to calculate this, but that shouldn't hold up other testing.
+    const int yOffset = 90;
+    menu.exec(QPoint(_pos.x(), _pos.y() + yOffset));
   }
 }
 
 void
-#ifdef LSB_Q3LISTVIEW
-DocumentView::slotDoubleClick(QTreeWidgetItem * _item)
-#else
-DocumentView::slotDoubleClick(Q3ListViewItem * _item)
-#endif
+DocumentView::slotDoubleClick(QTreeWidgetItem * _item, int column)
 {
-#ifdef LSB_Q3LISTVIEW
   if (_item->child(0) == NULL) {
-#else
-  if (_item->firstChild() == NULL) {
-#endif
     ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
     assert(item != ItemXML::itemMap().end());
     
