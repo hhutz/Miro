@@ -163,6 +163,7 @@ FileListDialog::add()
     const int count = selectedFileNames.size();
     assert(count > 0); // If accepted, there must be one
 
+    QStringList duplicates;
     for (int i = 0; i < count; i++)
     {
       const QString& selectedFileName = selectedFileNames.at(i);
@@ -181,10 +182,19 @@ FileListDialog::add()
 	// Record that the QListWidget has been modified
 	modified_ = true;
       } else {
-	QMessageBox::warning(this,
-			     "Duplicated file",
-			     "Selected file is already part of the file list.");
+	duplicates.append(selectedFileName);
       }
+    }
+    if (!duplicates.isEmpty())
+    {
+      const QString title("Duplicated file(s)");
+      QString text("The following selected files are already part of the file list:");
+      for (int i = 0; i < duplicates.size(); ++i)
+      {
+	text.append("\n");
+	text.append(duplicates.at(i));	    
+      }
+      QMessageBox::warning(this, title, text);
     }
   }
 
