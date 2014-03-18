@@ -162,24 +162,29 @@ FileListDialog::add()
     const QStringList selectedFileNames = fileDialog_->selectedFiles();
     const int count = selectedFileNames.size();
     assert(count > 0); // If accepted, there must be one
-    // Use the first
-    const QString& selectedFileName = selectedFileNames.at(0);
 
-    // Search for the file name among the QListWidget items
-    // This is case insensitive. Use Qt::MatchCaseSensitive or Qt::MatchExactly?
-    Qt::MatchFlags flags = Qt::MatchFixedString; 
-    const QList<QListWidgetItem*> found =
-      list_->findItems(selectedFileName, flags);
-    if (found.empty())
+    for (int i = 0; i < count; i++)
     {
-      // The selected file name was not already in the QListWidget; insert it at
-      // the end
-      const int endRow = list_->count();
-      list_->insertItem(endRow, selectedFileName);
-      // Record that the QListWidget has been modified
-      modified_ = true;
-    } else {
-      QMessageBox::warning(this, "Duplicated file", "Selected file is already part of the file list.");
+      const QString& selectedFileName = selectedFileNames.at(i);
+
+      // Search for the file name among the QListWidget items
+      // This is case insensitive. Use Qt::MatchCaseSensitive or Qt::MatchExactly?
+      Qt::MatchFlags flags = Qt::MatchFixedString; 
+      const QList<QListWidgetItem*> found =
+	list_->findItems(selectedFileName, flags);
+      if (found.empty())
+      {
+	// The selected file name was not already in the QListWidget; insert it
+	// at the end
+	const int endRow = list_->count();
+	list_->insertItem(endRow, selectedFileName);
+	// Record that the QListWidget has been modified
+	modified_ = true;
+      } else {
+	QMessageBox::warning(this,
+			     "Duplicated file",
+			     "Selected file is already part of the file list.");
+      }
     }
   }
 
@@ -230,6 +235,9 @@ FileListDialog::createDialogBox(const QString& title, const char * filters[])
     filter = "all files (*)";
   }
   fileDialog_ = new QFileDialog(fdParent, caption, directory, filter);
+  assert(fileDialog_ != NULL);
+  // The names of zero or more existing files
+  fileDialog_->setFileMode(QFileDialog::ExistingFiles);
 }
 
 void
