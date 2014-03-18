@@ -76,7 +76,7 @@ protected slots:
   void del();
   void edit();
 
-  void slotDoubleClick(QTreeWidgetItem *);
+  void slotDoubleClick(QTreeWidgetItem *, int);
   void contextMenu(const QPoint&);
 
 protected:

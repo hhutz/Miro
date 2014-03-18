@@ -194,9 +194,9 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 	  this,
 	  SLOT(contextMenu(const QPoint&)));
   connect(list_,
-	  SIGNAL(doubleClicked(QTreeWidgetItem *)),
+	  SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
 	  this,
-	  SLOT(slotDoubleClick(QTreeWidgettem *)));
+	  SLOT(slotDoubleClick(QTreeWidgetItem *, int)));
   connect(addButton, SIGNAL(clicked()), SLOT(add()));
   connect(delButton_, SIGNAL(clicked()), SLOT(del()));
   connect(editButton_, SIGNAL(clicked()), SLOT(edit()));
@@ -467,7 +467,7 @@ ParameterListDialog::down()
 
 
 void
-ParameterListDialog::slotDoubleClick(QTreeWidgetItem * _item)
+ParameterListDialog::slotDoubleClick(QTreeWidgetItem * _item, int)
 {
   Item::ItemMap::const_iterator i = Item::itemMap().find(_item);
   assert(i != Item::itemMap().end());
