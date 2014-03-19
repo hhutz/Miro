@@ -317,11 +317,10 @@ DocumentView::slotContextMenu(const QPoint & _pos)
   pItem->contextMenu(menu);
   if (!menu.isEmpty())
   {
-    // _pos is in viewport coordinates. Convert to Widget coordinates.
-    // The offset of 90 works when the window is resized and scrolled.
-    // It is best to calculate this, but that shouldn't hold up other testing.
-    const int yOffset = 90;
-    menu.exec(QPoint(_pos.x(), _pos.y() + yOffset));
+    const QTreeWidget * const pTreeWidget = _item->treeWidget();
+    assert(pTreeWidget != NULL);
+    const QPoint pos = pTreeWidget->mapToGlobal(_pos);
+    menu.exec(pos);
   }
 }
 
