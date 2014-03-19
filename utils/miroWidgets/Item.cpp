@@ -24,6 +24,7 @@
 #include <qobject.h>
 #include <QTreeWidget>
 #include <cassert>
+#include <iostream>
 
 Item::ItemMap Item::itemMap_;
 
@@ -115,21 +116,13 @@ Item::moveUp()
     pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
   assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
 
-  if (thisIndex > 1)
+  if (thisIndex != 0)
   {
-    // This item can be inserted after thisIndex - 2
+    // This item has a predecessor, so it can be moved up
+    const int newIndex = thisIndex - 1;
+    std::cout << "newIndex = " << newIndex << std::endl;
     pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
-    pParentTreeWidgetItem->insertChild(thisIndex - 2, pThisTreeWidgetItem);
-  }
-  else if (thisIndex == 1)
-  {
-    // Fetch the predecessor, which is at index thisIndex - 1 == 0
-    QTreeWidgetItem * const pPredecessorTreeWidgetItem =
-      pParentTreeWidgetItem->child(0);
-    // The predecessor can be inserted after this item, which will have index
-    // 0 after removing the predecessor
-    pParentTreeWidgetItem->removeChild(pPredecessorTreeWidgetItem);
-    pParentTreeWidgetItem->insertChild(0, pPredecessorTreeWidgetItem);
+    pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
 }
 
@@ -148,18 +141,18 @@ Item::moveDown()
     pThisTreeWidgetItem->treeWidget()->invisibleRootItem();
   assert(pParentTreeWidgetItem != NULL);
 
-  // Fetch this QTreeWidgetItem's index
+  // Fetch the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
   const int thisIndex =
     pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+  assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
 
-  if (thisIndex < pParentTreeWidgetItem->childCount() - 1)
+  if (thisIndex != pParentTreeWidgetItem->childCount() - 1)
   {
-    // It has a successor
-    // 
-    // This QTreeWidgetItem can be inserted after its successor, which will
-    // have index thisIndex after removing this QTreeWidgetItem
+    // This item has a successor, so it can be moved up
+    const int newIndex = thisIndex + 1;
+    std::cout << "newIndex = " << newIndex << std::endl;
     pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
-    pParentTreeWidgetItem->insertChild(thisIndex, pThisTreeWidgetItem);
+    pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
 }
 
