@@ -35,8 +35,6 @@
 #include <qmessagebox.h>
 
 #include <algorithm>
-#include <iostream>
-
 #include <cassert>
 
 const QString Section::XML_TAG("section");
@@ -63,13 +61,11 @@ Section::contextMenu(QMenu& _menu)
   Miro::CFG::QStringVector childParameters;
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
-  QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
-  assert(pParentTreeWidgetItem != NULL);
-  const int childCount = pParentTreeWidgetItem->childCount();
+
+  const int childCount = pTreeWidgetItem->childCount();
   for (int i = 0; i < childCount; ++i)
   {
-    QTreeWidgetItem * const pChildTreeWidgetItem =
-      pParentTreeWidgetItem->child(i);
+    QTreeWidgetItem * const pChildTreeWidgetItem =  pTreeWidgetItem->child(i);
     const ItemMap::const_iterator it =
       Item::itemMap().find(pChildTreeWidgetItem);
     assert(it != Item::itemMap().end());
@@ -88,6 +84,7 @@ Section::contextMenu(QMenu& _menu)
 
   typedef std::vector<QString> QStringVector;
 
+  // A list of the names of all parameters that can be added
   QStringVector paramsList;
   QStringVector instanceList;
 
