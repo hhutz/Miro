@@ -35,8 +35,6 @@
 
 #include <algorithm>
 #include <cassert>
-#include <iostream>
-
 
 const QString ConfigDocumentXML::XML_DOCTYPE("MiroConfigDocument");
 const QString ConfigDocumentXML::XML_TAG("config");
@@ -67,27 +65,32 @@ ConfigDocumentXML::contextMenu(QMenu& _menu)
   // Its signal is invoked when it is activated, not triggered.
   menuAddSection_ = _menu.addMenu(tr("Add Section"));
 
+  // Construct a list of all siblings of the QTreeWidgetItem
   Miro::CFG::QStringVector childSections;
+  // Fetch the QTreeWidgetItem
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
-  QTreeWidgetItem * const pParentTreeWidgetItem = pTreeWidgetItem->parent();
-  if (pParentTreeWidgetItem != NULL)
+  // For each child of the QTreeWidgetItem
+  for (int i = 0; i < pTreeWidgetItem->childCount(); ++i)
   {
-    // It is not the root, so it may have siblings
-    for (int i = 0; i < pParentTreeWidgetItem->childCount(); ++i)
-    {
+      // Fetch the ith sibling
       const QTreeWidgetItem * const pChildTreeWidgetItem =
-	pParentTreeWidgetItem->child(i);
+	pTreeWidgetItem->child(i);
       assert(pChildTreeWidgetItem != NULL);
+      // Fetch the sibling's label text
       const QString text = pChildTreeWidgetItem->text(0);
+      // Append the label text to the QStringVector
       childSections.push_back(text);
-    }
   }
+  // The QStringVector should have as many elements as the parent has children
+  assert(static_cast<size_t>(pTreeWidgetItem->childCount()) == 
+	 static_cast<size_t>(childSections.size()));
 
-  // submenu: add all section names
-  // not yet available in the document
+
+  // submenu: add all section names not yet available in the document
   Miro::CFG::QStringVector sections =
     ConfigFile::instance()->description().groups();
+
   Miro::CFG::QStringVector::const_iterator first, last = sections.end();
   for (first = sections.begin(); first != last; ++first) {
 
