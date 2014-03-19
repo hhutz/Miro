@@ -24,7 +24,6 @@
 #include <qobject.h>
 #include <QTreeWidget>
 #include <cassert>
-#include <iostream>
 
 Item::ItemMap Item::itemMap_;
 
@@ -120,7 +119,6 @@ Item::moveUp()
   {
     // This item has a predecessor, so it can be moved up
     const int newIndex = thisIndex - 1;
-    std::cout << "newIndex = " << newIndex << std::endl;
     pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
     pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
@@ -150,7 +148,6 @@ Item::moveDown()
   {
     // This item has a successor, so it can be moved up
     const int newIndex = thisIndex + 1;
-    std::cout << "newIndex = " << newIndex << std::endl;
     pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
     pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
