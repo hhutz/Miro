@@ -33,6 +33,7 @@
 #include <QTreeWidget>
 #include <qcombobox.h>
 #ifdef LSB_Q3LISTBOX
+#include <QLayout>
 #include <QListWidget>
 #else
 #include <q3listbox.h>
