@@ -21,24 +21,25 @@
 
 #define QT_ALTERNATE_QTSMANIP
 
+// This module
 #include "ConfigDocumentXML.h"
+// This application
 #include "Section.h"
 
 #include "miroWidgets/ConfigFile.h"
 
 #include "params/Generator.h"
-
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
+// The Qt library
 #include <QMenu>
 #include <qstring.h>
-
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+// The C++ Standard Library
 #include <algorithm>
 #include <cassert>
 
 const QString ConfigDocumentXML::XML_DOCTYPE("MiroConfigDocument");
 const QString ConfigDocumentXML::XML_TAG("config");
-
 
 //------------------------------------------------------------------------------
 // public methods
@@ -148,9 +149,12 @@ ConfigDocumentXML::onAddSection(int _n)
     newChild = config.insertBefore(e, n);
 
   assert(!newChild.isNull());
+  // The constructor registers the constructed element
   new Section(newChild, 
-	      treeWidgetItem(), NULL, 
-	      this, menuAddSection_->text(_n));
+	      treeWidgetItem(), // QTreeWidget for the ConfigDocumentXML
+	      NULL, 
+	      this, // parent QObject
+	      menuAddSection_->text(_n));
   setModified();
 }
 
@@ -160,20 +164,29 @@ ConfigDocumentXML::onAddSection(int _n)
 void
 ConfigDocumentXML::parse()
 {
+  // The root element
   QDomNode n = document_.firstChild();
   if (!n.isNull()) {
+    // The DOM tree is not empty.
+    // Iterate over the children of the root element, which are Sections
     QDomNode n1 = n.firstChild();
+    // The QTreeWidgetItem for the predecessor Section
     QTreeWidgetItem * pre = NULL;
     while (!n1.isNull()) {
       QDomElement e = n1.toElement();
       if (!e.isNull() &&
-	  e.tagName() == Section::XML_TAG) {
+	  (e.tagName() == Section::XML_TAG)) {
+	// The XML element is for a Section; create a Section object
 	Section * section =
 	  new Section(e, 
-		      treeWidgetItem(), pre,
-		      this, e.attribute("name"));
+		      treeWidgetItem(), // parent QTreeWidgetItem
+		      pre,
+		      this, // parent QObject
+		      e.attribute("name"));
+	// The QTreeWidgetItem for the section
 	pre = section->treeWidgetItem();
       }
+      // Advance to the next child of the root element
       n1 = n1.nextSibling();
     }
   }

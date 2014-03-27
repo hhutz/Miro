@@ -27,6 +27,7 @@
 // forward declarations
 class QTreeWidget;
 
+/** The document Item for a ConfigEditor document. */
 class ConfigDocumentXML : public DocumentXML
 {
   Q_OBJECT
@@ -34,52 +35,75 @@ class ConfigDocumentXML : public DocumentXML
   //----------------------------------------------------------------------------  
   // private types
   //----------------------------------------------------------------------------  
-  
+  /** The immediate base class. */
   typedef DocumentXML Super;
 
 public:
   //----------------------------------------------------------------------------  
   // public methods
   //----------------------------------------------------------------------------  
-
+  /**   
+   * @param[in,out] _document the DOM tree for the document being edited
+   * @param[in,out] _treeWidget the QTreeWidget for viewing the document
+   * @param[in,out] _parent ?
+   * @param[in] _name passed on to the immediate base class constructor
+   */
   ConfigDocumentXML(QDomDocument const& _document,
 		    QTreeWidget * _treeWidget,
-		    QObject * _parent = NULL, const char * _name = NULL);
+		    QObject * _parent = NULL,
+		    const char * _name = NULL);
+
+  /** The destructor has nothing to do. */
   virtual ~ConfigDocumentXML();
 
   //----------------------------------------------------------------------------  
   // inherited public methods
   //----------------------------------------------------------------------------  
-
+  /** Create the Confguration Editor ocument's Sections. */
   virtual void parse();
+
+  /**
+   * Create the context menu for the root element.
+   * There is one menu item, "Add Section".
+   * The "Add Section" menu has a sub-menu of all Sections in the document
+   * that have not already been chosen.
+   * @param[in,out] _menu the parent menu of the context menu
+   */
   virtual void contextMenu(QMenu& _menu);
 
   //----------------------------------------------------------------------------  
   // public constants
   //----------------------------------------------------------------------------  
-
+  /** The string that goes in column 2, for the root QTreeWidget's type. */
   static const QString XML_DOCTYPE;
+  /** The string that goes in column 0, for the root QTreeWidget's name. */
   static const QString XML_TAG;
 
 public slots:
   //----------------------------------------------------------------------------  
   // public slots
   //----------------------------------------------------------------------------  
-
+  /**
+   * The slot to invoke when the user has chosen a Section from the context
+   * menu.
+   * Create the Section and insert it before the clicked Section, if any.
+   */
   void onAddSection(int);
 
 protected:
   //----------------------------------------------------------------------------  
   // protected members
   //----------------------------------------------------------------------------  
-
-  //! The section menu.
+  /**
+   * The section menu.
+   * The context menu for adding a new Section.
+   */
   QMenu * menuAddSection_;
 
   //----------------------------------------------------------------------------  
   // hidden methods
   //----------------------------------------------------------------------------  
-
+  /** Disable the copy constructor. */
   ConfigDocumentXML(ConfigDocumentXML const&);
 };
 
