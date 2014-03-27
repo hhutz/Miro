@@ -51,7 +51,8 @@ CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
 				     QTreeWidget * _list,
 				     QTreeWidgetItem * _pre,
-				     QObject * _parent, const char * _name) :
+				     QObject * _parent,
+				     const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   type_(_type)
 {
@@ -65,7 +66,8 @@ void
 CompoundParameter::init()
 {
   // get complete parameter set including super classes
-  Miro::CFG::ParameterVector params = config_->description().getFullParameterSet(type_);
+  Miro::CFG::ParameterVector params =
+    config_->description().getFullParameterSet(type_);
 
   QDomNode n = node().firstChild();
   QTreeWidgetItem * pre = NULL;
@@ -143,12 +145,15 @@ CompoundParameter::setParameters()
 }
 
 Miro::CFG::Type const&
-CompoundParameter::type(QDomNode const& _node, QString const& _attribute)
+CompoundParameter::type(QDomNode const& _node,
+			QString const& _attribute)
 {
+  // Fetch the value of the given attribute from the given QDomNode
   QDomNode n = _node;
   QDomElement e = n.toElement();
   QString typeName = e.attribute(_attribute);
 
+  // Map the attribute's value onto a Miro::CFG::Type
   Miro::CFG::Type const * const parameterType =
     ConfigFile::instance()->description().getType(typeName);
   
