@@ -63,7 +63,7 @@ public:
   /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
    * a QTreeWidgetItem.
-   * @param[in] _node Reference to the node in the xml document
+   * @param[in] _node Reference to the node in the DOM tree
    * @param[in] _parentItem pointer to the QTreeWidgetItem for the parent of
    * this item
    * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this

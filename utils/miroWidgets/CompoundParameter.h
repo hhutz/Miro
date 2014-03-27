@@ -109,7 +109,7 @@ public:
 
   /**
    * Inherited method.
-   * Show a dialog to get the value for each field of the compound parameter.
+   * Show a dialog to get the value for each field of the CompoundParameter.
    * If successful, copy the changes to the DOM tree and notify that the
    * CompoundParameter has been modified.
    * Overrides ParameterXML::setParameters().

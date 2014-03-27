@@ -18,21 +18,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterList.h"
+// This application
 #include "SimpleParameter.h"
 #include "CompoundParameter.h"
-
 #include "ConfigFile.h"
 #include "ParameterListDialog.h"
-
 #include "params/Generator.h"
-
 #include "miro/Exception.h"
-
-#include <q3popupmenu.h>
+// The Qt library
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-
+// The C++ Standard Library
 #include <cassert>
 
 namespace 
@@ -63,13 +62,15 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
 			     QTreeWidgetItem * _parentItem,
 			     QTreeWidgetItem * _pre,
-			     QObject * _parent, const char * _name) :
+			     QObject * _parent,
+			     const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param),
   type_(typeFromName(_param.type_))
 {
   assert(type_ != NONE);
 
+  /// @todo If column count is 2, there is no column 2
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
@@ -96,6 +97,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
+  /// @todo If column count is 2, there is no column 2
   if (treeWidgetItem()->treeWidget()->columnCount() == 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
