@@ -29,10 +29,11 @@
 // forward declarations
 class QTreeWidget;
 
-//! Class representing an XML document.
 /** 
- * It has also an associated QListViewItem, that represents the node
- * in a QListView.
+ * Class representing an XML document.
+ * This is the root node.
+ * It has also an associated QTreeWidgetItem that represents the node
+ * in a QTreeWidget.
  */
 class miroWidgets_Export DocumentXML : public ItemXML
 {
@@ -50,30 +51,78 @@ public:
   // public methods
   //----------------------------------------------------------------------------
 
-  //! Initializing constructor. Taking a XML document as first parameter.
+  /**
+   * Initializing constructor. Taking a XML document as first parameter.
+   * @param[in,out] _document the DOM tree for the document being edited
+   * @param[in,out] _treeWidget the QTreeWidget for viewing the document
+   * @param[in,out] _parent ?
+   * @param[in] _name ignored
+   */
   DocumentXML(QDomDocument const& _document,
 	      QTreeWidget * _treeWidget,
-	      QObject * _parent = NULL, const char * _name = NULL);
-  //! Virtual destructor.
+	      QObject * _parent = NULL,
+	      const char * _name = NULL);
+
+  /**
+   * Virtual destructor.
+   * The destructor has nothing to do.
+   */
   virtual ~DocumentXML();
 
-  //! Reset policy document.
+  /**
+   * Reset the policy document.
+   * Clear the document, set its name to the empty string, create the root
+   * element, set the name and type of the root element, and notify that the
+   * document is not modified.
+   * @param[in] _rootTag the label gien to the root QTreeWidget
+   */
   virtual void init(QString const& _rootTag);
-  //! Set policy document.
+
+  /**
+   * Set policy document.
+   * Set the content of the DOM tree for the document from the XML document
+   * with the given file pathname.
+   * @param[in] _xml the file pathname of the XML document from which to
+   * populate the DOM tree.
+   * @throw Miro::Exception on failure to set the DOM tree's contents from the
+   * given file pathname
+   */
   virtual void initXML(QString const& _xml);
   //! Parse document and build list view tree
   virtual void parse() = 0;
   //! Clean up document.
   virtual void clear();
   
-  //! Set the name of the document.
+  /**
+   * Set the name of the document. If the name has changed, notify that the
+   * document has been modified.
+   * @param[in] _name the new name for the document; may be empty
+   */
   void setName(const QString& _name);
-  //! Load a new document from a given XML file.
+
+  /**
+   * Load a new document from a given XML file, clearning any previous contents.
+   * Notify that the document has not been modified.
+   * @param[in] _name the file pathname of the XML file for the document; this
+   * becomes the name of the item
+   * @throw Miro::Exception on failure to open the file for reading
+   * @throw Miro::Exception on failure to parse the document
+   */
   void loadXML(const QString& _name);
-  //! Save the document to a given XML file.
+
+  /**
+   * Save the document to a given XML file.
+   * The file pathname is that from which the DOM tree was populated.
+   * Notify that the document has not been modified.
+   * @throw Miro::Exception of failure to open the file
+   */
   void saveXML();
 
-  //! Accessor method to the xml document.
+  /**
+   * Accessor method to the xml document.
+   * Return a const reference to the DOM tree.
+   * @return a const reference to the DOM tree
+   */
   QDomDocument const& domDocument() const;
 
 protected:
@@ -81,13 +130,18 @@ protected:
   // protected data
   //----------------------------------------------------------------------------
 
-  //! The main document structure.
+  /**
+   * The main document structure.
+   * This is a DOM tree populated by parsing an XML file.
+   */
   QDomDocument document_;
 
 private:
   //----------------------------------------------------------------------------
   // hidden methods
   //----------------------------------------------------------------------------
+  
+  /** Disable the copy constructor. */
   DocumentXML(DocumentXML const&);
 };
 
