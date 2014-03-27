@@ -88,9 +88,17 @@ public:
    * given file pathname
    */
   virtual void initXML(QString const& _xml);
-  //! Parse document and build list view tree
+
+  /**
+   * Parse document and build QTreeWidget tree.
+   * This is a pure virtual member function.
+   */
   virtual void parse() = 0;
-  //! Clean up document.
+
+  /**
+   * Clean up document.
+   * Remove the root element and all its children.
+   */
   virtual void clear();
   
   /**

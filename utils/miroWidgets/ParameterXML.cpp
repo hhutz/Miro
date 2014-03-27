@@ -18,20 +18,25 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-#include "ParameterXML.h"
-#include "ConfigFile.h"
 
+// This module
+#include "ParameterXML.h"
+// This application
+#include "ConfigFile.h"
+// The Qt library
 #include <QMenu>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-
+// The C++ Standard Library
 #include <cassert>
 
 QString const ParameterXML::XML_TAG = "parameter";
 
 ParameterXML::ParameterXML(QDomNode const& _node,
-			   QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-			   QObject * _parent, const char * _name) :
+			   QTreeWidgetItem * _parentItem,
+			   QTreeWidgetItem * _pre,
+			   QObject * _parent,
+			   const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   config_(ConfigFile::instance())
 {
@@ -39,8 +44,10 @@ ParameterXML::ParameterXML(QDomNode const& _node,
 }
 
 ParameterXML::ParameterXML(QDomNode const& _node,
-			   QTreeWidget * _view, QTreeWidgetItem * _pre,
-			   QObject * _parent, const char * _name) :
+			   QTreeWidget * _view,
+			   QTreeWidgetItem * _pre,
+			   QObject * _parent,
+			   const char * _name) :
   Super(_node, _view, _pre, _parent, _name),
   config_(ConfigFile::instance())
 {
@@ -55,7 +62,7 @@ ParameterXML::init()
 void
 ParameterXML::contextMenu(QMenu& _menu)
 {
-  // The context menu contains 4 QActions: "Set Parameters", "Up", "Down" and
+  // Add 4 QActions to the context menu: "Set Parameters", "Up", "Down" and
   // "Delete"
   QAction * pAction = NULL;
 
