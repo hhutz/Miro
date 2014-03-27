@@ -65,14 +65,13 @@ public:
   /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
    * a QTreeWidgetItem.
-   * @param[in] _node Reference to the node in the xml document
+   * @param[in] _node reference to the node in the DOM tree
    * @param[in] _parentItem pointer to the QTreeWidgetItem for the parent of
    * this item
    * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
    * item
    * @param[in] _parent the QObject that is the parent of this ItemXML
    * @param[in] _name the name of this ItemXML; may be NULl or empty
-   * representing the item.
    */
   ItemXML(QDomNode const& _node,
 	  QTreeWidgetItem * _parentItem,
@@ -83,7 +82,7 @@ public:
   /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
    * a QTreeWidget.
-   * @param _node Reference to the node in the xml document
+   * @param _node reference to the node in the DOM tree
    * @param _view the QTreeWidget which contains the QTreeWidgetItem for this
    * ItemXML
    * representing the item.
@@ -91,7 +90,6 @@ public:
    * item
    * @param[in] _parent the QObject that is the parent of this ItemXML
    * @param[in] _name the name of this ItemXML; may be NULl or empty
-   * representing the item.
    */
   ItemXML(QDomNode const& _node,
 	  QTreeWidget * _view,

@@ -18,22 +18,23 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "Section.h"
+// This application
 #include "ParameterInstance.h"
 #include "ParameterSingleton.h"
 #include "ConfigDocumentXML.h"
-
 #include "miroWidgets/ConfigFile.h"
-
 #include "params/Generator.h"
 #include "params/Type.h"
-
+// The Qt library
 #include <QMenu>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
-
+// The C++ Standard Library
 #include <algorithm>
 #include <cassert>
 
@@ -163,7 +164,8 @@ Section::onAddInstance(int _n)
     QDomDocument document = node_.ownerDocument();
     QDomElement e = document.createElement(ParameterInstance::XML_TAG);
     e.setAttribute(ParameterInstance::XML_ATTRIBUTE_KEY, name);
-    e.setAttribute(ParameterInstance::XML_ATTRIBUTE_TYPE, menuAddInstance_->text(_n));
+    e.setAttribute(ParameterInstance::XML_ATTRIBUTE_TYPE,
+		   menuAddInstance_->text(_n));
     
     QDomNode n = node_.firstChild();
     QDomNode newChild = node_.insertBefore(e, n);
