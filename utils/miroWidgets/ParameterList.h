@@ -83,7 +83,7 @@ public:
    * column 2.
    * Extract and save the name of the element type.
    * @param[in] _param ?
-   * @param[in] _node Reference to the node in the DOM tree
+   * @param[in] _node reference to the node in the DOM tree
    * @param[in] _parentItem pointer to the QTreeWidgetItem for the parent of
    * this item
    * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
@@ -106,7 +106,7 @@ public:
    * column 2.
    * Extract and save the name of the element type.
    * @param[in] _param ?
-   * @param[in] _node Reference to the node in the DOM tree
+   * @param[in] _node reference to the node in the DOM tree
    * @param[in] _list pointer to the QTreeWidget for the parent of this item
    * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
    * item

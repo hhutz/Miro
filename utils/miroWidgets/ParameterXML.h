@@ -54,6 +54,7 @@ class miroWidgets_Export ParameterXML : public ItemXML
    * The immediate base class.
    */
   typedef ItemXML Super;
+
 public:
 
   //----------------------------------------------------------------------------

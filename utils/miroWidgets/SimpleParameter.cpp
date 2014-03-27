@@ -18,17 +18,19 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-#include "SimpleParameter.h"
 
+// This module
+#include "SimpleParameter.h"
+// This application
 #include "ConfigFile.h"
 #include "SimpleParameterEdit.h"
 #include "ParameterDialog.h"
 #include "ParameterListDialog.h"
 #include "SingleParameterDialog.h"
-
 #include "params/Generator.h"
-
+// The Qt library
 #include <QTreeWidget>
+// The C++ Standard Library
 #include <cassert>
 
 namespace 
