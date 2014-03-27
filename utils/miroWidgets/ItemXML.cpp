@@ -18,22 +18,26 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-#include "ItemXML.h"
 
-#include <QMenu>
-#include <qobject.h>
+// This module
+#include "ItemXML.h"
+// The Qt library
 #include <qinputdialog.h>
+#include <QMenu>
 #include <qmessagebox.h>
+#include <qobject.h>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-
+// The C++ Standard Library
 #include <cassert>
 
 QString const ItemXML::XML_ATTRIBUTE_KEY = "name";
 
 ItemXML::ItemXML(QDomNode const& _node,
-		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-		 QObject * _parent, const char * _name) :
+		 QTreeWidgetItem * _parentItem,
+		 QTreeWidgetItem * _pre,
+		 QObject * _parent,
+		 const char * _name) :
   Super(_parentItem, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
@@ -43,8 +47,10 @@ ItemXML::ItemXML(QDomNode const& _node,
 }
 
 ItemXML::ItemXML(QDomNode const& _node,
-		 QTreeWidget * _view, QTreeWidgetItem * _pre,
-		 QObject * _parent, const char * _name) :
+		 QTreeWidget * _view,
+		 QTreeWidgetItem * _pre,
+		 QObject * _parent,
+		 const char * _name) :
   Super(_view, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
