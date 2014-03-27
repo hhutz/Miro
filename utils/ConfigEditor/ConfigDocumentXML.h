@@ -67,7 +67,7 @@ public:
    * There is one menu item, "Add Section".
    * The "Add Section" menu has a sub-menu of all Sections in the document
    * that have not already been chosen.
-   * @param[in,out] _menu the parent menu of the context menu
+   * @param[in,out] _menu the context menu
    */
   virtual void contextMenu(QMenu& _menu);
 

@@ -18,26 +18,29 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "CompoundParameter.h"
+// This application
 #include "SimpleParameter.h"
 #include "ParameterList.h"
-
 #include "ParameterDialog.h"
 #include "ConfigFile.h"
-
 #include "params/Type.h"
 #include "params/Generator.h"
-
 #include "miro/Exception.h"
+// The Qt library
+#include <QTreeWidget>
+// The C++ Standard Library
 #include <cassert>
 
-#include <QTreeWidget>
 
 CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
 				     QTreeWidgetItem * _parentItem,
 				     QTreeWidgetItem * _pre,
-				     QObject * _parent, const char * _name) :
+				     QObject * _parent,
+				     const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   type_(_type)
 {

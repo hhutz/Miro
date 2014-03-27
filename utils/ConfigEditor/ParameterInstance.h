@@ -25,38 +25,79 @@
 // This application
 #include "miroWidgets/CompoundParameter.h"
 
-// forward declarations
+// Forward declarations
 class ConfigFile;
 class QTreeWidgetItem;
 
+/**
+ * The ItemXML that represents a named instance of a parameter.
+ * A ParameterInstance is a CompoundParameter.
+ */
 class ParameterInstance : public CompoundParameter
 {
   Q_OBJECT
   
+  /** The immediate base class. */
   typedef CompoundParameter Super;
+
 public:
+
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
-  ParameterInstance(QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
+  
+ /**
+   * Initializing constructor used when the parent of the QTreeWidgetItem is
+   * a QTreeWidgetItem.
+   * If the QTreeWidget has at least 3 columns, write the type name in column 2.
+   * @param[in] _treeWidgetItem pointer to the QTreeWidgetItem for this item
+   * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
+   * item
+   * @param[in] _node Reference to the node in the xml document
+   * @param[in] _parent the QObject that is the parent of this ItemXML
+   * @param[in] _name the name of this ItemXML; may be NULl or empty
+   * representing the item.
+   */
+  ParameterInstance(QTreeWidgetItem * _treeWidgetItem,
+		    QTreeWidgetItem * _pre,
 		    QDomNode const& _node,
-		    QObject * _parent, const char * _name);
+		    QObject * _parent,
+		    const char * _name);
 
   //----------------------------------------------------------------------------
   // public inherited methods
   //----------------------------------------------------------------------------
 
-  //! Inherited method.
+  /**
+   * Inherited method.
+   * Move item up in the QTreeWidget and in the document DOM tree.
+   * Overrides ItemXML::moveUp()
+   */
   virtual void moveUp();
-  //! Inherited method.
+
+  /**
+   * Inherited method.
+   * Move item down in the QTreeWidget and in the document DOM tree.
+   * Overrides ItemXML::moveDown()
+   */
   virtual void moveDown();
-  //! Inherited method.
+
+  /**
+   * Inherited method.
+   * Overrides ParameterXML::contextMenu() to add 5 menu items to the context
+   * menu: "Set Name", "Set Parameters", "Up", "Down" and "Delete"
+   * @param[in,out] _menu the context menu
+   */
   virtual void contextMenu(QMenu& _menu);
 
   //----------------------------------------------------------------------------
   // public constants
   //----------------------------------------------------------------------------
+  
+  /** The name of the XML element for a ParameterInstance. */
   static QString const XML_TAG;
+
+  /** The name of the XML attribute for a ParameterInstance's type. */
   static QString const XML_ATTRIBUTE_TYPE;
 };
 

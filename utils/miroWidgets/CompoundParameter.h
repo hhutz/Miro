@@ -22,6 +22,7 @@
 #ifndef CompoundParameter_h
 #define CompoundParameter_h
 
+// This application
 #include "ParameterXML.h"
 #include "params/Type.h"
 

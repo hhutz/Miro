@@ -186,7 +186,7 @@ public:
    * Partially populate the context menu for the ItemXML.
    * There is one menu item, "Set Name".
    * The slot is to invoke slotRename().
-   * @param[in,out] _menu the parent menu of the context menu
+   * @param[in,out] _menu the context menu
    */
   virtual void contextMenu(QMenu& _menu);
 

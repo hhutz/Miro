@@ -111,6 +111,7 @@ public:
    * Inherited method.
    * Overrides DocumentXML::contextMenu() to add 4 menu items to the context
    * menu: "Set Parameters", "Up", "Down" and "Delete".
+   * @param[in,out] _menu the context menu
    */
   virtual void contextMenu(QMenu& _menu);
 
