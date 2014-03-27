@@ -22,31 +22,62 @@
 #ifndef ParameterSingleton_h
 #define ParameterSingleton_h
 
+// This application
 #include "miroWidgets/CompoundParameter.h"
 
-// forward declarations
+// Forward declarations
 class ConfigFile;
 class QTreeWidgetItem;
 
+/**
+ * The ItemXML that represents an anonymous singleton instance of a parameter.
+ * A ParameterSingleton is a CompoundParameter.
+ */
 class ParameterSingleton : public CompoundParameter
 {
   Q_OBJECT
-  
+   
+  /** The immediate base class. */
   typedef CompoundParameter Super;
+
 public:
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
-  ParameterSingleton(QTreeWidgetItem * _treeWidgetItem, QTreeWidgetItem * _pre,
+ 
+ /**
+   * Initializing constructor used when the parent of the QTreeWidgetItem is
+   * a QTreeWidgetItem.
+   * If the QTreeWidget has at least 3 columns, write the type name in column 2.
+   * @param[in] _treeWidgetItem pointer to the QTreeWidgetItem for this item
+   * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
+   * item
+   * @param[in] _node reference to the node in the DOM tree
+   * @param[in] _parent the QObject that is the parent of this ItemXML
+   * @param[in] _name the name of this ItemXML; may be NULl or empty
+   */
+  ParameterSingleton(QTreeWidgetItem * _treeWidgetItem,
+		     QTreeWidgetItem * _pre,
 		     QDomNode const& _node,
-		     QObject * _parent, const char * _name);
+		     QObject * _parent,
+		     const char * _name);
+
   //----------------------------------------------------------------------------
   // public inherited methods
   //----------------------------------------------------------------------------
 
-  //! Inherited method.
+  /**
+   * Inherited method.
+   * Move item up in the QTreeWidget and in the document DOM tree.
+   * Overrides ItemXML::moveUp()
+   */
   virtual void moveUp();
-  //! Inherited method.
+
+  /**
+   * Inherited method.
+   * Move item down in the QTreeWidget and in the document DOM tree.
+   * Overrides ItemXML::moveDown()
+   */
   virtual void moveDown();
 };
 

@@ -18,14 +18,17 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-#include "ParameterSingleton.h"
 
+// This module
+#include "ParameterSingleton.h"
+// The C++ Standard Library
 #include <cassert>
 
 ParameterSingleton::ParameterSingleton(QTreeWidgetItem * _treeWidgetItem, 
 				       QTreeWidgetItem * _pre,
 				       QDomNode const& _node,
-				       QObject * _parent, const char * _name) :
+				       QObject * _parent,
+				       const char * _name) :
   Super(type(_node, XML_ATTRIBUTE_KEY),
 	_node, 
 	_treeWidgetItem, _pre, _parent, _name)

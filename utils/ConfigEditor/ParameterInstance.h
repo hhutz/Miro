@@ -53,10 +53,9 @@ public:
    * @param[in] _treeWidgetItem pointer to the QTreeWidgetItem for this item
    * @param[in] _pre pointer to the QTreeWidgetItem for the predecessor of this
    * item
-   * @param[in] _node Reference to the node in the xml document
+   * @param[in] _node reference to the node in the DOM tree
    * @param[in] _parent the QObject that is the parent of this ItemXML
    * @param[in] _name the name of this ItemXML; may be NULl or empty
-   * representing the item.
    */
   ParameterInstance(QTreeWidgetItem * _treeWidgetItem,
 		    QTreeWidgetItem * _pre,
