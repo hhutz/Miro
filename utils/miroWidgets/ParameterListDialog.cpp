@@ -244,9 +244,6 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 void
 ParameterListDialog::setXML()
 {
-  // Precondition
-  assert(item_ != 0);
-
   // no edit -> nothing to be done
   if (!modified())
     return;
@@ -281,23 +278,27 @@ ParameterListDialog::setXML()
   //--------------------------------------
   // replace node by new content
 
-  // Fetch the QTreeWidgetItem corresponding to item_
-  QTreeWidgetItem * const pThisTreeWidgetItem = item_->treeWidgetItem();
-  // Fetch the parent of pThisTreeWidgetItem
-  QTreeWidgetItem * const pParentTreeWidgetItem = pThisTreeWidgetItem->parent();
-  // The pTreeWidgetItem that precedes pThisTreeWidgetItem, if it exists
-  QTreeWidgetItem * pre = NULL;
-  if (pParentTreeWidgetItem)
+  // remember the predecessor
+  QTreeWidgetItem* pre = NULL;
+  if (item_)
   {
-    // Find the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
-    const int thisIndex =
-      pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
-    if ((1 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()))
+    // Fetch the QTreeWidgetItem corresponding to item_
+    QTreeWidgetItem * const pThisTreeWidgetItem = item_->treeWidgetItem();
+    // Fetch the parent of pThisTreeWidgetItem
+    QTreeWidgetItem * const pParentTreeWidgetItem = pThisTreeWidgetItem->parent();
+    // The pTreeWidgetItem that precedes pThisTreeWidgetItem, if it exists
+    if (pParentTreeWidgetItem)
     {
-      const int predecessorIndex = thisIndex - 1;
-      pre = pParentTreeWidgetItem->child(predecessorIndex);
+      // Find the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
+      const int thisIndex =
+	pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+      if ((1 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()))
+      {
+        const int predecessorIndex = thisIndex - 1;
+	pre = pParentTreeWidgetItem->child(predecessorIndex);
+      }
     }
-  }
+  } // if (item_)
 
   // delete the current content
   if (item_)
@@ -437,8 +438,6 @@ ParameterListDialog::add()
   }
   int rc = dialog->exec();
   if (rc == QDialog::Accepted) {
-    // DialogXML::item_ must have been set before setXML() can be called correctly
-    assert(item_ != 0);
     dialog->setXML();
     if (dialog->modified())
       setModified(true);

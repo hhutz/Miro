@@ -197,7 +197,6 @@ ParameterList::setParameters()
 
   ItemXML * parentItem = NULL;
   QTreeWidgetItem * const p = treeWidgetItem()->parent();
-  std::cout << "The parent " << p << std::endl;
   Item::ItemMap::const_iterator i = Item::itemMap().find(p);
   // If the ParameterList's parent is a QTreeWidgetItem, it will be in the map
   if (i != Item::itemMap().end())
