@@ -374,8 +374,6 @@ ParameterListDialog::add()
 {
   // Precondition
   assert(list_ != NULL);
-  // DialogXML::item_ must have been set before setXML() can be called correctly
-  assert(item_ != 0);
 
   ParameterXML * newParam = NULL;
 
@@ -439,7 +437,8 @@ ParameterListDialog::add()
   }
   int rc = dialog->exec();
   if (rc == QDialog::Accepted) {
-
+    // DialogXML::item_ must have been set before setXML() can be called correctly
+    assert(item_ != 0);
     dialog->setXML();
     if (dialog->modified())
       setModified(true);

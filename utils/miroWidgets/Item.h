@@ -81,9 +81,9 @@ public:
   //! Virtual destructor.
   virtual ~Item();
 
-  //! Accessor for the associated list view.
+  //! Accessor for the associated QTreeWidget.
   QTreeWidgetItem * treeWidgetItem();
-  //! Const accessor for the associated list view.
+  //! Const accessor for the associated QTreeWidget.
   QTreeWidgetItem const * treeWidgetItem() const;
 
   //! Move item up in list view.

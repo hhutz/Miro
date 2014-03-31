@@ -168,8 +168,8 @@ ParameterDialog::initDialog()
         QObject * c;
         while (it.hasNext()) {
           c = it.next();
-	  // The child of the parameter ItemXML must be an ItemXML
 	  childItem = dynamic_cast<ItemXML *>(c);
+	  // The child of the parameter ItemXML must be an ItemXML
 	  assert(childItem != NULL);
 	  // Looking for a child ItemXML whose name is that of the parameter
 	  if (childItem->node().toElement().attribute("name") == n) {

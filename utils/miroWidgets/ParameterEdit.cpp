@@ -18,12 +18,14 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterEdit.h"
-
+// This application
 #include "params/Parameter.h"
-
+// The Qt library
 #include <qwidget.h>
-
+// The C++ Standard Library
 #include <cassert>
 
 QString const ParameterEdit::XML_TAG_PARAMETER = "parameter";
@@ -32,9 +34,12 @@ QString const ParameterEdit::XML_ATTRIBUTE_VALUE = "value";
 
 
 ParameterEdit::ParameterEdit(Miro::CFG::Parameter const& _parameter,
-			     QDomNode& _parentNode, QDomNode& _node,
-			     ItemXML * _parentItem, ItemXML * _item,
-			     QWidget * _parent, const char * _name) :
+			     QDomNode& _parentNode,
+			     QDomNode& _node,
+			     ItemXML * _parentItem,
+			     ItemXML * _item,
+			     QWidget * _parent,
+			     const char * _name) :
   Super(_parent, _name),
   parameter_(_parameter),
   parentNode_(_parentNode),

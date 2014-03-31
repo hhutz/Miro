@@ -18,36 +18,33 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "SimpleParameterEdit.h"
+// This application
+#include "ConfigFile.h"
 #include "ParameterDialog.h"
 #include "Validators.h"
-#include "ConfigFile.h"
-
-#include "params/Parameter.h"
 #include "params/Generator.h"
-
-#include <qstring.h>
+#include "params/Parameter.h"
+// The Qt library
+#include <qcombobox.h>
+#include <QLayout>
 #include <qlineedit.h>
+#include <QListWidget>
+#include <qstring.h>
 #include <qtextedit.h>
 #include <qtooltip.h>
 #include <QTreeWidget>
-#include <qcombobox.h>
-#ifdef LSB_Q3LISTBOX
-#include <QLayout>
-#include <QListWidget>
-#else
-#include <q3listbox.h>
-#endif
-
-#include <climits>
+// The C++ Standard Library
 #include <cassert>
+#include <climits>
 
 using std::vector;
 using std::string;
 
 #include "qt_compatibility.h"
 
-#ifdef LSB_Q3LISTBOX
 /**
  * Function object for inserting an item into a QListWidget by string name.
  * @author Lee Brownston
@@ -64,7 +61,6 @@ public:
 private:
   QListWidget& m_lw;
 };
-#endif
 
 SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 					 Miro::CFG::Parameter const& _parameter,
@@ -92,7 +88,6 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     editWidget_ = typeBox_;
   } else if (parameter_.type_ == "Miro::EnumerationMultiple" || 
 	     parameter_.type_ == "EnumerationMultiple") {
-#ifdef LSB_Q3LISTBOX
     if (_parent->layout() != NULL)
       {
 	// Create the ListWidget without parent and add to the _parent's layout
@@ -104,9 +99,6 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	// Create the ListWidget as a child of _parent
 	listBox_ = new QListWidget(_parent);
       }
-#else
-    listBox_ = new Q3ListBox(_parent, "list_box");
-#endif
     editWidget_ = listBox_;
   } else if (parameter_.type_ == "Miro::Text" ||
 	     parameter_.type_ == "Text") {
@@ -255,7 +247,6 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     case SimpleParameter::ENUMERATIONMULTIPLE:
       // init list box
       // For each selected element of 
-#ifdef LSB_Q3LISTBOX
       // Precondition
       assert(listBox_ != NULL);
       listBox_->setSelectionMode(QAbstractItemView::MultiSelection);
@@ -263,27 +254,16 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
       stringvec = fullDef2StringVector(parameter_.fullDefault_);
       for_each(stringvec.begin(), stringvec.end(),
 	       InsertListBoxItem(*listBox_));
-#else
-      listBox_->setSelectionMode(Q3ListBox::Multi);
-      stringvec = fullDef2StringVector(parameter_.fullDefault_);
-      for (vector<string>::const_iterator i= stringvec.begin(); i!=stringvec.end(); ++i)
-	listBox_->insertItem(i->c_str());
-#endif
 
       // set current value
-#ifdef LSB_Q3LISTBOX
       /// @todo Does this still work? I can't find it in the documentation
       listBox_->clearSelection();
-#else
-      listBox_->clearSelection();
-#endif
       if (!node_.isNull()) {
 	QDomElement e = node_.toElement();
 	if (!e.isNull() && e.hasAttribute("value")) {
 	  QString tmp1 = e.attribute("value");
 	  std::vector<std::string> tmp2 = tokenizer(std::string(tmp1.latin1()));
 	  for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
-#ifdef LSB_Q3LISTBOX
 	    /// @todo Unify repeated code
 	    // Cache the string to avoid repeated lookups and construction
 	    const QString qs(i->c_str());
@@ -299,18 +279,11 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 		pItem->setSelected(true);
 	      }
 	    } // end for
-#else
-	    for (unsigned int j=0; j!=listBox_->count(); ++j) {
-	      if (listBox_->text(j) == QString(i->c_str()))
-		listBox_->setSelected(j, TRUE);
-	    }
-#endif
 	  }
 	}
       } else {
 	std::vector<std::string> tmp2 = tokenizer(std::string(parameter_.default_.latin1()));
 	for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
-#ifdef LSB_Q3LISTBOX
 	  /// @todo Unify repeated code
 	  // Cache the string to avoid repeated lookups and construction
 	  const QString qs(i->c_str());
@@ -326,12 +299,6 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
       	      pItem->setSelected(true);
 	    }
 	  } // end for
-#else
-	  for (unsigned int j=0; j!=listBox_->count(); ++j) {
-	    if (listBox_->text(j) == QString(i->c_str()))
-	      listBox_->setSelected(j, TRUE);
-	  }
-#endif
 	}
       }
 
@@ -455,7 +422,6 @@ SimpleParameterEdit::setXML()
     // create again a space separated string for all the selections
     QString selectString;
     int j=0; 
-#ifdef LSB_Q3LISTBOX
     // Cache the value to avoid repeated lookups
     const int rowCount = listBox_->count();
     for (int row = 0; row < rowCount; ++row)
@@ -481,17 +447,6 @@ SimpleParameterEdit::setXML()
 	selectString += " " + pItem->text();
       }
     }
-#else
-    for (unsigned int i=0; i<listBox_->count(); ++i)
-      if (listBox_->isSelected(i)) {
-	selectString = listBox_->text(i);
-	j = i;
-	break;
-      }
-    for (unsigned int i=j+1; i<listBox_->count(); ++i)
-      if (listBox_->isSelected(i))
-	selectString += " " + listBox_->text(i);
-#endif
     //
     if (e.attribute(XML_ATTRIBUTE_VALUE) != selectString) {
       e.setAttribute(XML_ATTRIBUTE_VALUE, selectString);

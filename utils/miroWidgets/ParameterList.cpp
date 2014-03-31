@@ -182,7 +182,11 @@ ParameterList::init()
 void
 ParameterList::setParameters()
 {
-  // generate nested parameter descirption
+  // Precondition
+  assert(treeWidgetItem() != NULL);
+
+  // Create a parameter description for the ParameterList element's type
+  // (the "nested" type)
   Miro::CFG::Parameter nestedParameter;
   nestedParameter.type_ = nestedTypeName_;
   nestedParameter.name_ = param_.name_;
@@ -193,15 +197,27 @@ ParameterList::setParameters()
 
   ItemXML * parentItem = NULL;
   QTreeWidgetItem * const p = treeWidgetItem()->parent();
+  std::cout << "The parent " << p << std::endl;
   Item::ItemMap::const_iterator i = Item::itemMap().find(p);
+  // If the ParameterList's parent is a QTreeWidgetItem, it will be in the map
   if (i != Item::itemMap().end())
+  {
+    // The ParameterList's parent is a QTreeWidgetItem.
+    // The object to which it is mapped must be an ItemXML*.
     parentItem = dynamic_cast<ItemXML *>(i->second);
+    assert(parentItem != NULL);
+  }
 
-  ParameterListDialog dialog(type_,
-			     nestedParameter,
-			     node_.parentNode(), node_,
-			     parentItem, this,
-			     NULL, nestedParameter.name_);
+  // Create the dialog to edit the ParameterList
+  ParameterListDialog
+    dialog(type_,
+	   nestedParameter,        // description of the nested parameter
+	   node_.parentNode(),     // parent of the edited DOME tree node
+	   node_,                  // the edited DOME tree node
+	   parentItem,             // the parent ItemXML of the QTreeWidgetItem
+	   this,                   // this ParameterList
+	   NULL,                   // the parent of the ParameterListDialog
+	   nestedParameter.name_); // print name of the nested Parameter's type
   int rc = dialog.exec();
   if (rc == QDialog::Accepted) {
     dialog.setXML();
