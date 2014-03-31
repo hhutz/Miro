@@ -122,11 +122,14 @@ ParameterDialog::initDialog()
   gridLayout->setSpacing(spacing);
 
   // add parameter structs:
+  // Sequential position of the current parameter
   unsigned long i = 0;
+  // For each parameter
   Miro::CFG::ParameterVector::const_iterator first, last = params_.end();
   for (first = params_.begin(); first != last; ++first, ++i) {
 
-    // name
+    // Create a Label the text of which is the parameter named capitalized.
+    // Add the label to the Layout
     QLabel * name = new QLabel(frame_);
     QString n = first->name_;
     n[0] = n[0].upper();
@@ -134,9 +137,11 @@ ParameterDialog::initDialog()
     gridLayout->addWidget(name, i, 0);
 
 
-    // search existing entry
-
+    // Search the QDomNode for a child the name of which is the parameter
+    // name capitalized. If found, store it in parameterNode.
     QDomNode parameterNode;
+    assert(parameterNode.isNull());
+
     if (!node_.isNull()) {
       parameterNode = node_.firstChild();
       while(!parameterNode.isNull()) {
@@ -148,22 +153,25 @@ ParameterDialog::initDialog()
       }
     }
 
-    // if there is an existing entry
-    // and we know our listview,
+    // If there is an existing entry and we know our listview,
     // get the corresponding listview item
 
     ItemXML * childItem = NULL;
     if (!parameterNode.isNull() &&
 	item_ != NULL) {
+      // The QDomNode was found and this dialog has a parameter ItemXML
       if (!item_->children().isEmpty()) {
+	// The parameter ItemXML has children
 	QObjectList childList = item_->children();
+	// For each child of the parameter ItemXML
         QListIterator<QObject*> it(childList);
         QObject * c;
         while (it.hasNext()) {
           c = it.next();
+	  // The child of the parameter ItemXML must be an ItemXML
 	  childItem = dynamic_cast<ItemXML *>(c);
 	  assert(childItem != NULL);
-
+	  // Looking for a child ItemXML whose name is that of the parameter
 	  if (childItem->node().toElement().attribute("name") == n) {
 	    break;
 	  }

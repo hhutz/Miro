@@ -21,18 +21,20 @@
 #ifndef Item_h
 #define Item_h
 
+// The Qt library
 #include <qobject.h>
+// The C++ Standard Library
 #include <map>
 
 #include "miroWidgets_Export.h"
 
-// forward declarations
+// Forward declarations
 class QMenu;
 class QTreeWidget;
 class QTreeWidgetItem;
 
-//! This class represents a QTreeWidgetItem descendant
 /** 
+ * This class represents a QTreeWidgetItem descendant
  * As we want a QObject as base class for signals and slots,
  * we need to tie the QTreeWidgetItem and the Item class together
  * by the use of a std::map. Sorry for the inconvenience.
@@ -53,20 +55,28 @@ public:
   // public types
   //----------------------------------------------------------------------------
 
-  // Mapping QListViewItem instances to Item instances.
+  /**
+   * Mapping QTreeWidgetItem instances to Item instances.
+   * the Item constructors insert entries and the Item destructor erases
+   * entries.
+   */
   typedef std::map<QTreeWidgetItem *, Item *> ItemMap;
 
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
-  //! Initializing constructor, creating a QListView sibling item.
-  Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
+  //! Initializing constructor, creating a QTreeWidget sibling item.
+  Item(QTreeWidgetItem * _parentItem,
+       QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL,
+       const char * _name = NULL);
 
-  //! Initializing constructor, creating a QListView toplevel item.
-  Item(QTreeWidget * _view, QTreeWidgetItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
+  //! Initializing constructor, creating a QTreeWidget toplevel item.
+  Item(QTreeWidget * _view,
+       QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL,
+       const char * _name = NULL);
 
   //! Virtual destructor.
   virtual ~Item();

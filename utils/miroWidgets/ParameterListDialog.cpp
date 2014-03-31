@@ -18,18 +18,18 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-// Enable migration from Qt v3 to Qt v4
 
+// This module
 #include "ParameterListDialog.h"
+// This application
 #include "SimpleParameter.h"
 #include "CompoundParameter.h"
 #include "SingleParameterDialog.h"
 #include "ParameterDialog.h"
 #include "ConfigFile.h"
-
 #include "miro/Exception.h"
 #include "params/Generator.h"
-
+// The Qt library
 #include <QGroupBox>
 #include <QWidget>
 #include <qlayout.h>
@@ -37,7 +37,7 @@
 #include <qmessagebox.h>
 #include <QTreeWidget>
 #include <QMenu>
-
+// The C++ Standard Library
 #include <cassert>
 
 ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
@@ -46,7 +46,8 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 					 QDomNode const& _node,
 					 ItemXML * _parentItem,
 					 ItemXML * _item,
-					 QWidget * _parent, const char * _name) :
+					 QWidget * _parent,
+					 const char * _name) :
   Super(_parentNode, _node, 
 	_parentItem, _item,
 	_parent, _name, TRUE),       // TRUE = modal dialog
@@ -62,7 +63,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 {
 
   //----------------------------------------------------------------------------
-  // create a copy of the parameters xml tree
+  // create a copy of the parameter's xml tree
   tmpParentNode_ = tmpDocument_.createElement("section");
   tmpDocument_.appendChild(tmpParentNode_);
 
@@ -82,14 +83,21 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 
   list_ = new QTreeWidget();
   assert(list_ != NULL);
+
+  // Column 0 is the serial enumerator and column 1 is the value
   list_->setColumnCount(2);
   QStringList headerLabels;
   headerLabels << "Position" << parameter_.type_;
   list_->setHeaderLabels(headerLabels);
+
+  // Always sort in order of the serial enumerator
   list_->setSortingEnabled(false);
+
   /// @todo What is the QTreeWidget counterpart of this?
   // list_->setResizeMode(QTreeWidget::AllColumns);
   list_->setRootIsDecorated(true);
+
+  // Add the QTreeWidget to the QGroupBox's Layout
   assert(groupBox_ != NULL);
   assert(groupBox_->layout() != NULL);
   groupBox_->layout()->addWidget(list_);
@@ -126,11 +134,14 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   groupBox_->layout()->addWidget(fileButtonsBox);
 
   //----------------------------------------------------------------------------
-  // add the list view items
+  // add the QTreeWidgetItems
 
-  // get nested parameter type category
+  // Find if the ParameterList elements are SimpleParameter or CompountParameter
+  // If CompoundParameter, store the parameter type in
+  // ParameterListDialog::nestedType_
   if (SimpleParameter::typeFromName(parameter_.type_) !=
       SimpleParameter::NONE) {
+    // It is a SimpleParameter
     nestedCompound_ = false;
   }
   else {
@@ -141,45 +152,62 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 				    parameter_.type_ +
 				    " not found.\nCheck whether the relevant description file is loaded (1)."));
     }
+    // It is a CompoundParameter
   }
   
-  // iterate over all members
+  // For each element of the ParameterList
+  // The first element of the ParameterList
   QDomNode n = tmpNode_.firstChild();
+  // The predecessor of the QTreeWidgetItem to be created; NULL for the first
   QTreeWidgetItem * pre = NULL;
   while (!n.isNull()) {
+    // Create a ParameterXML and a QTreeWidgetItem for this DOM tree node
     QDomElement e = n.toElement();
     if (!e.isNull() &&
 	e.tagName() == ParameterXML::XML_TAG) {
+      // The DOM tree node is for a <parameter> element
       
+      // The SimpleParameter or CompoundParameter to be created
       ParameterXML * newParam = NULL;
 
+      // The name of the Item is its serial enumerator
       QString indexName;
       indexName.setNum(index_);
 
       if (nestedCompound_ == false) {
-
+	// It is a SimpleParameter
+	// The <parameter> tag must have a "value" attribute
 	if (!e.hasAttribute(SimpleParameter::XML_ATTRIBUTE_VALUE))
 	  throw Miro::Exception(QString("Parameter tag without value in (" + 
 					parameter_.type_ + ") " + name()));
 
-	
+	/// @todo This variable is not used; remove it
 	QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
-	newParam = new SimpleParameter(parameter_,
-				       n,
-				       list_, pre,
-				       &collector_, indexName);
+	newParam = new SimpleParameter(parameter_,     // Parameter description
+				       n,              // DOM tree node
+				       list_,          // QTreeWidget
+				       pre,            // QTreeWidgetItem
+				       &collector_,    // QObject
+				       indexName);     // Serial enumerator name
       }
       else {
-	newParam = new CompoundParameter(*nestedType_,
-					 n,
-					 list_, pre,
-					 &collector_, indexName);
+	// It is a CompoundParameter
+	newParam = new CompoundParameter(*nestedType_, // Paameter description
+					 n,            // DOM tree node
+					 list_,        // QTreeWidget
+					 pre,          // QTreeWidgetItem
+					 &collector_,  // QObject
+					 indexName);   // Serial enumerator name
       }
 
+      // Initialize the ParameterXML (necessary if CompoundParameter)
       newParam->init();
+      // The just-created QTreeWidgetItem becomes predecessor of the next one
       pre = newParam->treeWidgetItem();
+      // Increment the serial enumerator
       ++index_;
     }
+    // Advance to the next DOM tree node
     n = n.nextSibling();
   }
 
@@ -208,6 +236,9 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 void
 ParameterListDialog::setXML()
 {
+  // Precondition
+  assert(item_ != 0);
+
   // no edit -> nothing to be done
   if (!modified())
     return;
@@ -291,11 +322,17 @@ ParameterListDialog::setXML()
     parameter.description_ = parameter_.description_;
 
     QString p = node.toElement().attribute(ParameterXML::XML_ATTRIBUTE_KEY);
-    item_ = new ParameterList(parameter,
+    // Store as the derived class type to avoid having to downcast
+    ParameterList * const pParameterList =
+      new ParameterList(parameter,
 			      node,
 			      parentItem_->treeWidgetItem(), pre,
 			      parentItem_, p);
-    dynamic_cast<ParameterXML *>(item_)->init();
+    assert(pParameterList != 0);
+    // Store the ParameterList* as an ItemXML* in DialogXML::item_
+    item_ = pParameterList;
+    assert(item_ != 0);
+    pParameterList->init();
   }
 }
 
@@ -304,12 +341,18 @@ ParameterListDialog::selectListItem()
 {
   // Precondition
   assert(list_ != NULL);
-  // If list_ has no children
-  QTreeWidgetItem * const pCurrentTreeWidgetItem = list_->currentItem();
-  const bool currentItemExists = (pCurrentTreeWidgetItem != NULL);
-  if (currentItemExists) {
-    // Select the current QTreeWidgetItem
-    pCurrentTreeWidgetItem->setSelected(true);
+
+  bool currentItemExists = false;
+  // If QTreeWidget list_ has children
+  if (list_->topLevelItemCount() > 0)
+  {
+    // The current QTreeWidgetItem
+    QTreeWidgetItem * const pCurrentTreeWidgetItem = list_->currentItem();
+    if (pCurrentTreeWidgetItem != 0) {
+      currentItemExists = true;
+      // Select the current QTreeWidgetItem
+      pCurrentTreeWidgetItem->setSelected(true);
+    }
   }
   
   delButton_->setEnabled(currentItemExists);
@@ -319,28 +362,39 @@ ParameterListDialog::selectListItem()
 void 
 ParameterListDialog::add()
 {
-  ParameterXML * newParam = NULL;
   // Precondition
   assert(list_ != NULL);
+  ParameterXML * newParam = NULL;
 
+  // All the QTreeWidgetItems selected when the "Add..." button was clicked
   const QList<QTreeWidgetItem*> selectedItems = list_->selectedItems();
-  // The first selected item, if any
+  // The first selected Item, if any
+  // The new Item will be added at the selected location
   QTreeWidgetItem * pre = selectedItems.isEmpty() ? NULL : selectedItems[0];
+
+  // The ItemXML the corresponds to the selected QTreeWidgetItem
   ItemXML * preItem = NULL;
 
   if (pre != NULL) {
+    // A QTreeWidgetItem was selected. Replace it with its root ancestor.
     while (pre->parent()) {
       pre = pre->parent();
     }
+    assert(pre != NULL);
 
+    // Look up the ItemXML that is mapped to the selected QTreeWidgetItem's root
     Item::ItemMap::const_iterator i = Item::itemMap().find(pre);
     if (i != Item::itemMap().end())
+    {
       preItem = dynamic_cast<ItemXML * >(i->second);
+      // If the QTreeWidgetItem* is in the map, it must be an ItemXML*
+      assert(preItem != 0);
+    }
   }
 
   //----------------------------------------------------------------------------
-  // insert element into document
-  // it will be deleted afterwards, if nothing was entered.
+  // Insert a <parameter> element into the document's DOM tree
+  // It will be deleted afterwards if nothing was entered (cancel operation)
   QDomElement e = tmpDocument_.createElement(ParameterXML::XML_TAG);
 
   // determine where to put it
@@ -372,6 +426,8 @@ ParameterListDialog::add()
   }
   int rc = dialog->exec();
   if (rc == QDialog::Accepted) {
+    // DialogXML::item_ must have been set before this can be called correctly
+    assert(item_ != 0);
     dialog->setXML();
     if (dialog->modified())
       setModified(true);
@@ -391,32 +447,42 @@ ParameterListDialog::add()
 
 
   //----------------------------------------------------------------------------
-  //create listview item
+  // Create the QTreeWidgetItem for this new ItemXML
 
+  // The name of the Item is its serial enumerator
   QString indexName;
   indexName.setNum(index_);
 
   if (!nestedCompound_) {
-    QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
-    newParam = new SimpleParameter(parameter_,
-				   newChild, 
-				   list_, pre,
-				   &collector_, indexName);
+    // The Item is a SimpleParameter
+    /// @todo This variable is not used; remove it
+    const QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
+    newParam = new SimpleParameter(parameter_,     // Parameter description
+				   newChild,       // DOM tree node
+				   list_,          // QTreeWidget
+				   pre,            // QTreeWidgetItem
+				   &collector_,    // QObject
+				   indexName);     // Serial enumerator name
   }
   else {
-    newParam = new CompoundParameter(*nestedType_, 
-				     newChild,
-				     list_, pre,
-				     &collector_, indexName);
+    // The Item is a CompoundParameter
+    newParam = new CompoundParameter(*nestedType_, // Parameter description
+				     newChild,     // DOM tree node
+				     list_,        // QTreeWidget
+				     pre,          // QTreeWidgetItem
+				     &collector_,  // QObject
+				     indexName);   // Serial enumerator name
   }
+  assert(newParam != NULL);
 
   newParam->init();
   ++index_;
 
   setModified(true);
-  assert(newParam != NULL);
+
   QTreeWidgetItem * const pTreeWidgetItem = newParam->treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
+
   pTreeWidgetItem->setSelected(true);
   selectListItem();
   renumberEntries();
@@ -427,11 +493,17 @@ ParameterListDialog::del()
 {
   QTreeWidgetItem * item; 
   if ((item = list_->currentItem()) != NULL) {
+    // There is a currently-selected item.
+    // Look up the Item using the QTreeWidgetItem as key
     Item::ItemMap::const_iterator i = Item::itemMap().find(item);
+    // The Item must be found
     assert(i != Item::itemMap().end());
 
-
-    ItemXML * ix = dynamic_cast<ItemXML * > (i->second);
+    // 
+    ItemXML * const ix = dynamic_cast<ItemXML * > (i->second);
+    // It must be an ItemXML
+    assert(ix != 0);
+    //
     ix->deleteItem();
     setModified(true);
   }
@@ -465,7 +537,6 @@ void
 ParameterListDialog::down()
 {}
 
-
 void
 ParameterListDialog::slotDoubleClick(QTreeWidgetItem * _item, int)
 {
@@ -483,17 +554,23 @@ ParameterListDialog::contextMenu(const QPoint& pos)
 {
   // Precondition
   assert(list_ != NULL);
+
+  // Map the position onto the selected QTreeWidgetItem
   QTreeWidgetItem * const _item = list_->itemAt(pos);
+  assert(_item != 0);
+
+  // Map the selected QTreeWidgetItem onto its Item
   Item::ItemMap::const_iterator i = Item::itemMap().find(_item);
   assert(i != Item::itemMap().end());
-
-  QMenu menu(NULL);
   const std::pair<QTreeWidgetItem*, Item*>& p = *i;
   Item * const pItem = p.second;
   assert(pItem != 0);
+
   // Populate this context menu based on the Item
+  QMenu menu(NULL);
   pItem->contextMenu(menu);
 
+  // Show the menu
   menu.exec(pos);
 }
 
@@ -503,11 +580,13 @@ ParameterListDialog::renumberEntries()
   // Precondition
   assert(list_ != NULL);
 
-  for (int i = 0; i < list_->invisibleRootItem()->childCount(); ++i)
+  // For each top-level item
+  for (int i = 0; i < list_->topLevelItemCount(); ++i)
   {
-    QTreeWidgetItem * const pTreeWidgetItem =
-      list_->invisibleRootItem()->child(i);
+    // Serially enumerate the children of the top-level item
+    QTreeWidgetItem * const pTreeWidgetItem = list_->topLevelItem(i);
     assert(pTreeWidgetItem != 0);
+
     QString number;
     number.setNum(i);
     pTreeWidgetItem->setText(0, number);

@@ -31,12 +31,16 @@ Item::ItemMap Item::itemMap_;
 // public methods
 //----------------------------------------------------------------------------
 
-Item::Item(QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-	   QObject * _parent, const char * _name) :
+Item::Item(QTreeWidgetItem * _parentItem,
+	   QTreeWidgetItem * _pre,
+	   QObject * _parent,
+	   const char * _name) :
   Super(_parent, _name),
   treeWidgetItem_(new QTreeWidgetItem(_parentItem, _pre))
 {
+  // Label the QTreeWidgetItem with the Item's name
   treeWidgetItem()->setText(0, name());
+  // Map the QTreeWidgetItem to the Item that it represents
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
@@ -46,6 +50,7 @@ Item::Item(QTreeWidget * _view, QTreeWidgetItem * _pre,
   treeWidgetItem_(new QTreeWidgetItem(_view, _pre))
 {
   treeWidgetItem()->setText(0, name());
+  // Map the QTreeWidgetItem to the Item that it represents
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
@@ -63,6 +68,7 @@ Item::~Item()
   //  cout << name() << " deleting listviewitem" << endl;
 
   delete treeWidgetItem_;
+  // Remove the QTreeWidgetItem from the map to Item
   itemMap_.erase(treeWidgetItem_);
 
   //  cout << name() << " deleting" << endl;

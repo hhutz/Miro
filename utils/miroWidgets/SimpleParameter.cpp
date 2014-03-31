@@ -88,19 +88,24 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
   param_(_param)
 {
   QDomElement e = node().toElement();
+
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
+
   QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
   assert(pTreeWidget != 0);
-  const int columnCount = pTreeWidget->invisibleRootItem()->columnCount();
+
+  // The number of columns used to display the QTreeWidgetItem
+  const int columnCount = pTreeWidget->columnCount();
   
   if (columnCount >= 2)
   {
+    // The value of the "value" attribute of the <parameter> element
     pTreeWidgetItem->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-    if (columnCount >= 3)
-    {
+  }
+  if (columnCount >= 3)
+  {
       pTreeWidgetItem->setText(2, param_.type_);
-    }
   }
 }
 
@@ -115,17 +120,21 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
   QDomElement e = node().toElement();
   QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
   assert(pTreeWidgetItem != NULL);
+
   QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
   assert(pTreeWidget != 0);
-  const int columnCount = pTreeWidget->invisibleRootItem()->columnCount();
+
+  // The number of columns used to display the QTreeWidgetItem
+  const int columnCount = pTreeWidget->columnCount();
   
   if (columnCount >= 2)
   {
+    // The value of the "value" attribute of the <parameter> element
     pTreeWidgetItem->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-    if (columnCount >= 3)
-    {
-      pTreeWidgetItem->setText(2, param_.type_);
-    }
+  }
+  if (columnCount >= 3)
+  {
+    pTreeWidgetItem->setText(2, param_.type_);
   }
 }
 

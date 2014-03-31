@@ -70,8 +70,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-  /// @todo If column count is 2, there is no column 2
-  if (treeWidgetItem()->treeWidget()->columnCount() == 2)
+  if (treeWidgetItem()->treeWidget()->columnCount() > 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
@@ -97,8 +96,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-  /// @todo If column count is 2, there is no column 2
-  if (treeWidgetItem()->treeWidget()->columnCount() == 2)
+  if (treeWidgetItem()->treeWidget()->columnCount() > 2)
   {
     treeWidgetItem()->setText(2, param_.type_);
   }
