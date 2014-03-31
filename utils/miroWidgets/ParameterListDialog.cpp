@@ -199,18 +199,26 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 					 &collector_,  // QObject
 					 indexName);   // Serial enumerator name
       }
+      // The newly-created ParameterXML must have a QTreeWidgetItem
+      QTreeWidgetItem * const pTreeWidgetItem = newParam->treeWidgetItem();
+      assert(pTreeWidgetItem != NULL);
 
       // Initialize the ParameterXML (necessary if CompoundParameter)
       newParam->init();
+      if (pre == NULL)
+      {
+	// The first time through the loop (when pre is NULL)
+	// Make current the first item
+	list_->setCurrentItem(pTreeWidgetItem);
+      }
       // The just-created QTreeWidgetItem becomes predecessor of the next one
-      pre = newParam->treeWidgetItem();
+      pre = pTreeWidgetItem;
       // Increment the serial enumerator
       ++index_;
     }
     // Advance to the next DOM tree node
     n = n.nextSibling();
   }
-
 
   //----------------------------------------------------------------------------
   // connect the dialogs functionality
@@ -342,9 +350,11 @@ ParameterListDialog::selectListItem()
   // Precondition
   assert(list_ != NULL);
 
+  const int topLevelItemCount = list_->topLevelItemCount();
+
   bool currentItemExists = false;
   // If QTreeWidget list_ has children
-  if (list_->topLevelItemCount() > 0)
+  if (topLevelItemCount > 0)
   {
     // The current QTreeWidgetItem
     QTreeWidgetItem * const pCurrentTreeWidgetItem = list_->currentItem();
@@ -364,6 +374,9 @@ ParameterListDialog::add()
 {
   // Precondition
   assert(list_ != NULL);
+  // DialogXML::item_ must have been set before setXML() can be called correctly
+  assert(item_ != 0);
+
   ParameterXML * newParam = NULL;
 
   // All the QTreeWidgetItems selected when the "Add..." button was clicked
@@ -426,8 +439,7 @@ ParameterListDialog::add()
   }
   int rc = dialog->exec();
   if (rc == QDialog::Accepted) {
-    // DialogXML::item_ must have been set before this can be called correctly
-    assert(item_ != 0);
+
     dialog->setXML();
     if (dialog->modified())
       setModified(true);
