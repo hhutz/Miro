@@ -19,9 +19,6 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
-// Enable migration from Qt v3 to Qt v4
-#define LSB_Q3LISTBOX
-
 #ifndef SimpleParameterEdit_h
 #define SimpleParameterEdit_h
 
@@ -94,11 +91,7 @@ protected:
   QLineEdit * lineEdit_;
   QTextEdit * textEdit_;
   QComboBox * typeBox_;
-#ifdef LSB_Q3LISTBOX
   QListWidget * listBox_;
-#else
-  Q3ListBox * listBox_;
-#endif
   bool typeBoxModified_;
   bool listBoxModified_;
   QString textEditText_;
