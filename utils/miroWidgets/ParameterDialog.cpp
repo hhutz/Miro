@@ -42,7 +42,6 @@
 #include <qtooltip.h>
 // The C++ Standard Library
 #include <cassert>
-#include <typeinfo>
 
 ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
 				 QDomNode const& _parentNode, 
