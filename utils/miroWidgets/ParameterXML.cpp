@@ -66,23 +66,23 @@ ParameterXML::contextMenu(QMenu& _menu)
   // "Delete"
   QAction * pAction = NULL;
 
-  pAction = new QAction(tr("Set Parameters"), this);
+  pAction = new QAction(tr("Set Parameters"), &_menu);
   connect(pAction, SIGNAL(triggered()), this, SLOT(slotSetParameters()));
   _menu.addAction(pAction);
 
   _menu.addSeparator();
 
-  pAction = new QAction(tr("Up"), this);
+  pAction = new QAction(tr("Up"), &_menu);
   connect(pAction, SIGNAL(triggered()), this, SLOT(up()));
   _menu.addAction(pAction);
 
-  pAction = new QAction(tr("Down"), this);
+  pAction = new QAction(tr("Down"), &_menu);
   connect(pAction, SIGNAL(triggered()), this, SLOT(down()));
   _menu.addAction(pAction);
 
   _menu.addSeparator();
 
-  pAction = new QAction(tr("Delete"), this);
+  pAction = new QAction(tr("Delete"), &_menu);
   connect(pAction, SIGNAL(triggered()), this, SLOT(slotDelete()));
   _menu.addAction(pAction);
 }
