@@ -19,18 +19,19 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 // Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3FRAME
 
+// This module
 #include "OkCancelDialog.h"
+// This application
 #include "ItemXML.h"
-
-#include <QGroupBox>
+// The Qt library
 #include <QFrame>
+#include <QGroupBox>
+#include <QHBoxLayout>
 #include <qlayout.h>
 #include <qpushbutton.h>
 #include <QVBoxLayout>
-#include <QHBoxLayout>
-
+// The C++ Standard Library
 #include <cassert>
 
 OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _modal) :
