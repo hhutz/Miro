@@ -19,28 +19,30 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+// This module
 #include "ParameterDialog.h"
+// This application
+#include "ConfigFile.h"
+#include "DeferredParameterEdit.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
-#include "DeferredParameterEdit.h"
-
-#include "ConfigFile.h"
-
-#include "params/Type.h"
 #include "params/Generator.h"
-
-#include <qstring.h>
-#include <QGroupBox>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qtooltip.h>
-#include <qmessagebox.h>
-#include <QScrollArea>
-#include <qobject.h>
-#include <QGridLayout>
+#include "params/Type.h"
+// The Qt library
+#include <QAction>
 #include <QFrame>
-
+#include <QGridLayout>
+#include <QGroupBox>
+#include <qlabel.h>
+#include <qlayout.h>
+#include <qmessagebox.h>
+#include <qobject.h>
+#include <QScrollArea>
+#include <qstring.h>
+#include <qtooltip.h>
+// The C++ Standard Library
 #include <cassert>
+#include <typeinfo>
 
 ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
 				 QDomNode const& _parentNode, 
@@ -153,8 +155,8 @@ ParameterDialog::initDialog()
       }
     }
 
-    // If there is an existing entry and we know our listview,
-    // get the corresponding listview item
+    // If there is an existing entry and we know our QTreeWidget,
+    // get the corresponding QTreeWidgetItem
 
     ItemXML * childItem = NULL;
     if (!parameterNode.isNull() &&
@@ -165,9 +167,8 @@ ParameterDialog::initDialog()
 	QObjectList childList = item_->children();
 	// For each child of the parameter ItemXML
         QListIterator<QObject*> it(childList);
-        QObject * c;
         while (it.hasNext()) {
-          c = it.next();
+          QObject * const c = it.next();
 	  childItem = dynamic_cast<ItemXML *>(c);
 	  // The child of the parameter ItemXML must be an ItemXML
 	  assert(childItem != NULL);
