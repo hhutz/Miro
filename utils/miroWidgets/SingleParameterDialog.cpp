@@ -19,21 +19,22 @@
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
 
+// This module
 #include "SingleParameterDialog.h"
+// This application
+#include "DeferredParameterEdit.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
-#include "DeferredParameterEdit.h"
-
 #include "params/Parameter.h"
-
-#include <qstring.h>
-#include <q3hgroupbox.h>
-#include <qlayout.h>
-#include <qlabel.h>
-#include <qtooltip.h>
-#include <qmessagebox.h>
+// The Qt library
 #include <QGridLayout>
-
+#include <QGroupBox>
+#include <qlayout.h>
+#include <qstring.h>
+#include <qlabel.h>
+#include <qmessagebox.h>
+#include <qtooltip.h>
+// The C++ Standard Library
 #include <cassert>
 
 /**
