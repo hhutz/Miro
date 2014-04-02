@@ -20,10 +20,11 @@
 //
 
 // Enable migration from Qt v3 to Qt v4
-// #define LSB_Q3GRIDLAYOUT
-// #define LSB_Q3HBOXLAYOUT
-// #define LSB_Q3PROGRESSDIALOG
-// #define LSB_Q3VBOXLAYOUT
+#define LSB_Q3FILEDIALOG
+#define LSB_Q3GRIDLAYOUT
+#define LSB_Q3HBOXLAYOUT
+#define LSB_Q3PROGRESSDIALOG
+#define LSB_Q3VBOXLAYOUT
 
 #include "MainForm.h"
 #include "LogFile.h"
