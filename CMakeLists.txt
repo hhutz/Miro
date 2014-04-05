@@ -34,8 +34,8 @@ build_with_var( WITH_JSON         JSONCPP_FOUND )
 minimum_requirements( ACE_FOUND QT4_FOUND QT_QT3SUPPORT_FOUND )
 
 set( MIRO_SOVERSION_MAJOR    3 ) # epoch
-set( MIRO_SOVERSION_MINOR    1 ) # revision
-set( MIRO_SOVERSION_PATCH    3 ) # age
+set( MIRO_SOVERSION_MINOR    2 ) # revision
+set( MIRO_SOVERSION_PATCH    0 ) # age
 set( MIRO_SOVERSION         "${MIRO_SOVERSION_MAJOR}.${MIRO_SOVERSION_MINOR}.${MIRO_SOVERSION_PATCH}" ) 
 
 ## this macro is normally pulled in through the
