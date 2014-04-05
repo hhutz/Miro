@@ -21,10 +21,10 @@
 #ifndef MainWindow_h
 #define MainWindow_h
 
+// This application
 #include "ConfigDocumentXML.h"
-
-#include <q3mainwindow.h>
-//Added by qt3to4:
+// The Qt library
+#include <QMainWindow>
 #include <QCloseEvent>
 
 // forward declarattions
@@ -33,7 +33,7 @@ class FileListDialog;
 class ConfigFile;
 
 //! Main class of the MainWindow application 
-class MainWindow : public Q3MainWindow
+class MainWindow : public QMainWindow
 {
   Q_OBJECT
 
@@ -42,7 +42,7 @@ class MainWindow : public Q3MainWindow
   //----------------------------------------------------------------------------
 
   //! The super class.
-  typedef Q3MainWindow Super;
+  typedef QMainWindow Super;
 
 public:
   //----------------------------------------------------------------------------
@@ -62,6 +62,10 @@ protected slots:
   //----------------------------------------------------------------------------
 
   // file menu
+  void slotNew();
+  void slotLoad();
+  void slotSave();
+  void slotSaveAs();
   void slotGetFrom();
   void slotSendTo();
 

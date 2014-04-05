@@ -22,10 +22,7 @@
 
 #include <qstring.h>
 #include <qobject.h>
-#include <q3listview.h>
-//Added by qt3to4:
-#include <Q3PopupMenu>
-
+#include <QTreeWidget>
 #include <cassert>
 
 Item::ItemMap Item::itemMap_;
@@ -34,22 +31,27 @@ Item::ItemMap Item::itemMap_;
 // public methods
 //----------------------------------------------------------------------------
 
-Item::Item(Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-	   QObject * _parent, const char * _name) :
+Item::Item(QTreeWidgetItem * _parentItem,
+	   QTreeWidgetItem * _pre,
+	   QObject * _parent,
+	   const char * _name) :
   Super(_parent, _name),
-  listViewItem_(new Q3ListViewItem(_parentItem, _pre))
+  treeWidgetItem_(new QTreeWidgetItem(_parentItem, _pre))
 {
-  listViewItem()->setText(0, name());
-  itemMap_.insert(std::make_pair(listViewItem_, this));
+  // Label the QTreeWidgetItem with the Item's name
+  treeWidgetItem()->setText(0, name());
+  // Map the QTreeWidgetItem to the Item that it represents
+  itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
-Item::Item(Q3ListView * _view, Q3ListViewItem * _pre,
+Item::Item(QTreeWidget * _view, QTreeWidgetItem * _pre,
 	   QObject * _parent, const char * _name) :
   Super(_parent, _name),
-  listViewItem_(new Q3ListViewItem(_view, _pre))
+  treeWidgetItem_(new QTreeWidgetItem(_view, _pre))
 {
-  listViewItem()->setText(0, name());
-  itemMap_.insert(std::make_pair(listViewItem_, this));
+  treeWidgetItem()->setText(0, name());
+  // Map the QTreeWidgetItem to the Item that it represents
+  itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
 Item::~Item()
@@ -65,8 +67,9 @@ Item::~Item()
 
   //  cout << name() << " deleting listviewitem" << endl;
 
-  delete listViewItem_;
-  itemMap_.erase(listViewItem_);
+  delete treeWidgetItem_;
+  // Remove the QTreeWidgetItem from the map to Item
+  itemMap_.erase(treeWidgetItem_);
 
   //  cout << name() << " deleting" << endl;
 }
@@ -76,9 +79,10 @@ Item::update()
 {
 }
 
-void 
-Item::contextMenu(Q3PopupMenu&)
+void
+Item::contextMenu(QMenu&)
 {
+  // The context menu is empty.
 }
 
 //------------------------------------------------------------------------------
@@ -100,75 +104,132 @@ Item::down()
 void
 Item::moveUp()
 {
-  // find the pre predecessor of the item
-  Q3ListViewItem * prePre = NULL;
-  Q3ListViewItem * pre = NULL;
-  Q3ListViewItem * self = NULL;
+  // Map this Item onto its QTreeWidgetItem
+  QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
+  assert(pThisTreeWidgetItem != NULL);
 
-  // get the parents first child
-  self = (listViewItem()->parent() == NULL)?
-    listViewItem()->listView()->firstChild() :
-    listViewItem()->parent()->firstChild();
+  // Fetch this Item's parent QTreeWidgetItem.
+  // If the QTreeWidgetItem doesn't supply it, use its QTreeWidget
+  QTreeWidgetItem * const pParentTreeWidgetItem =
+    pThisTreeWidgetItem->parent() ?
+    pThisTreeWidgetItem->parent() :
+    pThisTreeWidgetItem->treeWidget()->invisibleRootItem();
+  assert(pParentTreeWidgetItem != NULL);
 
-  // find ourselves
-  while (self != listViewItem()) {
-    assert(self != NULL);
+  // Fetch the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
+  const int thisIndex =
+    pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+  assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
 
-    prePre = pre;
-    pre = self;
-    self = self->nextSibling();
-  }
-
-  if (pre != NULL) {
-    if (prePre != NULL) {
-      listViewItem()->moveItem(prePre);
-    }
-    else {
-      pre->moveItem(listViewItem());
-    }
+  if (thisIndex != 0)
+  {
+    // This item has a predecessor, so it can be moved up
+    const int newIndex = thisIndex - 1;
+    pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
+    pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
 }
 
 void
 Item::moveDown()
 {
-  Q3ListViewItem * succ = listViewItem()->nextSibling();
-  if (succ != NULL) {
-    listViewItem()->moveItem(succ);
+  // Map this Item onto its QTreeWidgetItem
+  QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
+  assert(pThisTreeWidgetItem != NULL);
+
+  // Fetch this Item's parent QTreeWidgetItem.
+  // If the QTreeWidgetItem doesn't supply it, use its QTreeWidget
+  QTreeWidgetItem * const pParentTreeWidgetItem =
+    pThisTreeWidgetItem->parent() ?
+    pThisTreeWidgetItem->parent() :
+    pThisTreeWidgetItem->treeWidget()->invisibleRootItem();
+  assert(pParentTreeWidgetItem != NULL);
+
+  // Fetch the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
+  const int thisIndex =
+    pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+  assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
+
+  if (thisIndex != pParentTreeWidgetItem->childCount() - 1)
+  {
+    // This item has a successor, so it can be moved up
+    const int newIndex = thisIndex + 1;
+    pParentTreeWidgetItem->removeChild(pThisTreeWidgetItem);
+    pParentTreeWidgetItem->insertChild(newIndex, pThisTreeWidgetItem);
   }
 }
 
+/**
+ * Return the Item with precedes this Item.
+ * It is the Item corresponding the the predecessor of this item's
+ * QTreeViewItem.
+ */
 Item *
 Item::predecessor()
 {
-  // find the pre predecessor of the item
-  Q3ListViewItem * pre = NULL;
-  Q3ListViewItem * self = NULL;
+  // Map this Item onto its QTreeWidgetItem
+  QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
+  assert(pThisTreeWidgetItem != NULL);
 
-  // get the parents first child
-  self = (listViewItem()->parent() == NULL)?
-    listViewItem()->listView()->firstChild() :
-    listViewItem()->parent()->firstChild();
+  // Fetch this Item's parent QTreeWidgetItem.
+  // If the QTreeWidgetItem doesn't supply it, use its QTreeWidget
+  QTreeWidgetItem * const pParentTreeWidgetItem =
+    pThisTreeWidgetItem->parent() ?
+    pThisTreeWidgetItem->parent() :
+    pThisTreeWidgetItem->treeWidget()->invisibleRootItem();
+  assert(pParentTreeWidgetItem != NULL);
 
-  // find ourselves
-  while (self != listViewItem()) {
-    assert(self != NULL);
+  // Fetch the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
+  const int thisIndex =
+    pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+  assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
 
-    pre = self;
-    self = self->nextSibling();
-  }
+  // Fetch the predecessor; NULL if there is none
+  QTreeWidgetItem * const pPredecessorTreeWidgetItem =
+    (thisIndex == 0) ?  NULL : pParentTreeWidgetItem->child(thisIndex - 1);
 
-  return itemFromListViewItem(pre);
+  // Map the predecessor's QTreeWidgetItem onto its Item
+  Item * const result = itemFromTreeWidgetItem(pPredecessorTreeWidgetItem);
+
+  return result;
+
+  // Fetch the index of this
 }
 
 Item *
 Item::successor()
 {
-  return itemFromListViewItem(listViewItem_->nextSibling());
+  // Map this Item onto its QTreeWidgetItem
+  QTreeWidgetItem * const pThisTreeWidgetItem = treeWidgetItem();
+  assert(pThisTreeWidgetItem != NULL);
+
+  // Fetch this Item's parent QTreeWidgetItem.
+  // If the QTreeWidgetItem doesn't supply it, use its QTreeWidget
+  QTreeWidgetItem * const pParentTreeWidgetItem =
+    pThisTreeWidgetItem->parent() ?
+    pThisTreeWidgetItem->parent() :
+    pThisTreeWidgetItem->treeWidget()->invisibleRootItem();
+  assert(pParentTreeWidgetItem != NULL);
+
+  // Fetch the index of pThisTreeWidgetItem wrt pParentTreeWidgetItem
+  const int thisIndex =
+    pParentTreeWidgetItem->indexOfChild(pThisTreeWidgetItem);
+  assert((0 <= thisIndex) && (thisIndex < pParentTreeWidgetItem->childCount()));
+  
+  QTreeWidgetItem * const pSuccessorTreeWidgetItem =
+    (thisIndex < pParentTreeWidgetItem->childCount() - 1) ?
+    // It has a successor
+    pParentTreeWidgetItem->child(thisIndex + 1) :
+    // There is no successor
+    NULL;
+
+  // Map the succcessor QTreeWidgetItem onto its Item
+  Item * const result = itemFromTreeWidgetItem(pSuccessorTreeWidgetItem);
+  return result;
 }
 
 Item *
-Item::itemFromListViewItem(Q3ListViewItem * _lvi)
+Item::itemFromTreeWidgetItem(QTreeWidgetItem * _lvi)
 {
   if (_lvi == NULL)
     return NULL;

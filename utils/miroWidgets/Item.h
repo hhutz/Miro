@@ -21,24 +21,23 @@
 #ifndef Item_h
 #define Item_h
 
+// The Qt library
 #include <qobject.h>
-//Added by qt3to4:
-#include <Q3PopupMenu>
-
+// The C++ Standard Library
 #include <map>
 
 #include "miroWidgets_Export.h"
 
-// forward declarations
-class Q3PopupMenu;
-class Q3ListView;
-class Q3ListViewItem;
+// Forward declarations
+class QMenu;
+class QTreeWidget;
+class QTreeWidgetItem;
 
-//! This class represents a QListViewItem descendand
 /** 
+ * This class represents a QTreeWidgetItem descendant
  * As we want a QObject as base class for signals and slots,
- * we need to tie the QListViewItem and the Item class together
- * by the use of a std::map. Sorry, for the inconvenience.
+ * we need to tie the QTreeWidgetItem and the Item class together
+ * by the use of a std::map. Sorry for the inconvenience.
  */
 class miroWidgets_Export Item : public QObject
 {
@@ -56,26 +55,36 @@ public:
   // public types
   //----------------------------------------------------------------------------
 
-  // Mapping QListViewItem instances to Item instances.
-  typedef std::map<Q3ListViewItem *, Item *> ItemMap;
+  /**
+   * Mapping QTreeWidgetItem instances to Item instances.
+   * the Item constructors insert entries and the Item destructor erases
+   * entries.
+   */
+  typedef std::map<QTreeWidgetItem *, Item *> ItemMap;
 
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
-  //! Initializing constructor, creating a QListView sibling item.
-  Item(Q3ListViewItem * _parentItem, Q3ListViewItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
-  //! Initializing constructor, creating a QListView toplevel item.
-  Item(Q3ListView * _view, Q3ListViewItem * _pre = NULL,
-       QObject * _parent = NULL, const char * _name = NULL);
+  //! Initializing constructor, creating a QTreeWidget sibling item.
+  Item(QTreeWidgetItem * _parentItem,
+       QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL,
+       const char * _name = NULL);
+
+  //! Initializing constructor, creating a QTreeWidget toplevel item.
+  Item(QTreeWidget * _view,
+       QTreeWidgetItem * _pre = NULL,
+       QObject * _parent = NULL,
+       const char * _name = NULL);
+
   //! Virtual destructor.
   virtual ~Item();
 
-  //! Accessor for the associated list view.
-  Q3ListViewItem * listViewItem();
-  //! Const accessor for the associated list view.
-  Q3ListViewItem const * listViewItem() const;
+  //! Accessor for the associated QTreeWidget.
+  QTreeWidgetItem * treeWidgetItem();
+  //! Const accessor for the associated QTreeWidget.
+  QTreeWidgetItem const * treeWidgetItem() const;
 
   //! Move item up in list view.
   virtual void moveUp();
@@ -84,7 +93,7 @@ public:
   //! Update the item tree.
   virtual void update();
   //! Populate the provided context menu with entries for the item.
-  virtual void contextMenu(Q3PopupMenu& _menu);
+  virtual void contextMenu(QMenu& _menu);
 
   //----------------------------------------------------------------------------
   // static public methods
@@ -92,8 +101,8 @@ public:
 
   //! Accesor for the QListViewItem/Item map.
   static ItemMap const& itemMap();
-  //! Retriev the associated Item for a QListView.
-  static Item * itemFromListViewItem(Q3ListViewItem * _lvi);
+  //! Retrieve the associated Item for a QListView.
+  static Item * itemFromTreeWidgetItem(QTreeWidgetItem * _lvi);
 
 public slots:
   //----------------------------------------------------------------------------
@@ -127,8 +136,8 @@ private:
   // private members
   //----------------------------------------------------------------------------
 
-  //! Pointer to the corresponding QListViewItem.
-  Q3ListViewItem * listViewItem_;
+  //! Pointer to the corresponding QTreeWidgetItem.
+  QTreeWidgetItem * treeWidgetItem_;
 
   //----------------------------------------------------------------------------
   // hidden methods
@@ -137,14 +146,15 @@ private:
 };
 
 inline
-Q3ListViewItem *
-Item::listViewItem() {
-  return listViewItem_;
+QTreeWidgetItem *
+Item::treeWidgetItem() {
+  return treeWidgetItem_;
 }
+
 inline
-Q3ListViewItem const *
-Item::listViewItem() const {
-  return listViewItem_;
+const QTreeWidgetItem *
+Item::treeWidgetItem() const {
+  return treeWidgetItem_;
 }
 inline
 Item::ItemMap const&

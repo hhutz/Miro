@@ -18,15 +18,27 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+// #define LSB_Q3MAINWINDOW
+// #define LSB_Q3POPUPMENU
+
 #ifndef Mainform_h
 #define MainForm_h
 
 #include <ace/Time_Value.h>
 
+#ifdef LSB_Q3MAINWINDOW
+#include <QMainWindow>
+#else
 #include <q3mainwindow.h>
+#endif
 #include <qstring.h>
 
+#ifdef LSB_Q3POPUPMENU
+#else
 #include <Q3PopupMenu>
+#endif
 
 #include <map>
 
@@ -36,14 +48,24 @@ class FileListDialog;
 class EventView;
 
 class QApplication;
+#ifdef LSB_Q3POPUPMENU
+class QAction;
+class QMenu;
+#else
 class Q3PopupMenu;
+#endif
 class QTimer;
 class QSlider;
 class QLCDNumber;
 class QDial;
 
+#ifdef LSB_Q3POPUPMENU
+typedef std::map<QAction*, QString> QActionQStrMap;
+typedef std::map<QObject*, QActionQStrMap> QObjQActionQStrMap;
+#else
 typedef std::map<int, QString> IntQStrMap;
 typedef std::map<QObject *, IntQStrMap> QObjIntQStrMap;
+#endif
 
 
 class SubmenuEvent : public QObject
@@ -63,11 +85,21 @@ signals:
   void activated(QObject *, int);
 };
 
-class MainForm : public Q3MainWindow
+class MainForm : public
+#ifdef LSB_Q3MAINWINDOW
+QMainWindow
+#else
+Q3MainWindow
+#endif
 {
   Q_OBJECT
 
+#ifdef LSB_Q3MAINWINDOW
+  typedef QMainWindow Super;
+#else
   typedef Q3MainWindow Super;
+#endif
+
 public:
   MainForm(QApplication& _app, FileSet& _fileSet,
            QWidget * parent = 0, const char * name = 0 );
@@ -102,7 +134,11 @@ public slots:
   void setSlider();
   void setHistory();
 
+#ifdef LSB_Q3POPUPMENU
+  void toggleExcludeEvent(QObject * const obj, QAction * const pQAction);
+#else
   void toggleExcludeEvent(QObject*, int);
+#endif
 
   void toggleEventView();
   void eventViewClosed();
@@ -133,8 +169,13 @@ protected:
   QTimer *          timer_;
   QTimer *          autoStartTimer_;
 
+#ifdef LSB_Q3POPUPMENU
+  QMenu *     eventMenu_;
+  QMenu *     toolsMenu_;
+#else
   Q3PopupMenu *     eventMenu_;
   Q3PopupMenu *     toolsMenu_;
+#endif
 
   QWidget *     playButton;
   QWidget *     stopButton;
@@ -154,12 +195,22 @@ protected:
   ACE_Time_Value timeCBase_;
 
   int domainNameMenuId_;
+
+#ifdef LSB_Q3POPUPMENU
+  QAction * m_pToggleEventViewAction;
+#else
   int eventViewId_;
+#endif
 
   bool  exitOnReplayEnd_;
   int   numConsumers_;
 
+#ifdef LSB_Q3POPUPMENU
+  // Maps a QObject* onto a map from QAction* to QString
+  QObjQActionQStrMap eventMenuTypesMap_;
+#else
   QObjIntQStrMap eventMenuTypesMap_;
+#endif
 
   static ACE_Time_Value const MIN_TIME;
 

@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// Enable migration from Qt v3 to Qt v4
+
 #ifndef FileListDialog_h
 #define FileListDialog_h
 
@@ -26,11 +29,12 @@
 #include "miroWidgets_Export.h"
 
 // forward declarations
-class Q3ListBox;
+class QListWidget;
+class QFileDialog;
 class QPushButton;
 class QString;
 class QStringList;
-class Q3FileDialog;
+class QVBoxLayout;
 
 /**
  * This class shows a dialog for the behaviour parameters.
@@ -58,11 +62,17 @@ public slots:
 protected:
   void selectListItem();
 
-  Q3ListBox * list_;
+  QListWidget * list_;
   QPushButton * delButton_;  
-  Q3FileDialog * fileDialog_;
+  QFileDialog * fileDialog_;
 
   bool modified_;
+
+ private:
+  QVBoxLayout * createLayout();
+  void createDialogBox(const QString& title, const char * filters[]);
+  void createFileButtonsBox(QVBoxLayout * const pFileBoxlayout);
+  void createDialogButtonsBox(QVBoxLayout * const pFileListDialogLayout);
 };
 
 inline

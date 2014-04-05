@@ -18,6 +18,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #ifndef DocumentView_h
 #define DocumentView_h
 
@@ -25,29 +26,32 @@
 
 #include "miroWidgets_Export.h"
 
-#include <q3listview.h>
+#include <QTreeWidget>
 //Added by qt3to4:
 #include <QCloseEvent>
 
 // forward declarattions
+class QTreeWidgetItem;
 class DocumentFile;
 class QWidget;
 class QStatusBar;
 
 //! Main class of the DocumentView application 
 /**
- * A specialized QListView, that holds an XML document visualization.
+ * A specialized QTreeWidget that holds an XML document visualization.
  */
-class miroWidgets_Export DocumentView : public Q3ListView
+class miroWidgets_Export DocumentView : public QTreeWidget
 {
   Q_OBJECT
+
+  friend class MainWindow;
 
   //----------------------------------------------------------------------------
   // private types
   //----------------------------------------------------------------------------
 
   //! The super class.
-  typedef Q3ListView Super;
+  typedef QTreeWidget Super;
 
 public:
   //----------------------------------------------------------------------------
@@ -97,9 +101,9 @@ protected slots:
   void slotSaveAs();
 
   //! Context Menu request.
-  void slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int);
-  //! Double Click event.
-  void slotDoubleClick(Q3ListViewItem * _item);
+  void slotContextMenu(const QPoint & _pos);
+  //! Double Click event shows an item editor.
+  void slotDoubleClick(QTreeWidgetItem * _item, int column);
 
 protected:
   //----------------------------------------------------------------------------

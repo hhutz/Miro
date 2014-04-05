@@ -20,16 +20,16 @@
 //
 #define QT_ALTERNATE_QTSMANIP
 
+// This module
 #include "DocumentXML.h"
-
+// This application
 #include "miro/Exception.h"
-
+// The Qt library
 #include <qfile.h>
 #include <qobject.h>
-#include <q3listview.h>
-
 #include <QTextStream>
-
+#include <QTreeWidget>
+// The C++ Standard Library
 #include <cassert>
 
 //------------------------------------------------------------------------------
@@ -37,9 +37,10 @@
 //------------------------------------------------------------------------------
 
 DocumentXML::DocumentXML(QDomDocument const& _document,
-			 Q3ListView * _listView, 
-			 QObject * _parent, const char * _name) :
-  Super(_document, _listView, NULL, _parent, ""),
+			 QTreeWidget * _treeWidget, 
+			 QObject * _parent,
+			 const char * _name) :
+  Super(_document, _treeWidget, NULL, _parent, ""),
   document_(_document)
 {}
 
@@ -57,11 +58,16 @@ DocumentXML::init(QString const& _rootTag)
   QDomNode n = document_.appendChild( root );
   assert(!n.isNull());
 
-  listViewItem()->setText(0, _rootTag);
-  listViewItem()->setText(2, document_.doctype().name());
-  listViewItem()->setOpen(true);
+  // Label the root TreeWidgetItem
+  treeWidgetItem()->setText(0, _rootTag);
+  // Write the root node's type
+  treeWidgetItem()->setText(2, document_.doctype().name());
+  // Display the root node expanded
+  treeWidgetItem()->setExpanded(true);
 
-  setModified(false, true);
+  const bool modified = false;
+  const bool recurse =  true;
+  setModified(modified, recurse);
 }
 
 void
@@ -70,8 +76,11 @@ DocumentXML::initXML(QString const& _xml)
   clear();
   setName("");
 
+  // If a parse error occurred, the parser's error message
   QString error;
+  // If a parse error occurred, the line number of the error
   int line;
+  // If a parse error occurred, the column number of the error
   int column;
   if (!document_.setContent(_xml, &error, &line, &column)) {
     QString l, c;
@@ -80,15 +89,20 @@ DocumentXML::initXML(QString const& _xml)
     throw Miro::Exception(QString("XML parsing error!\n" + error + "in line " + l + ", column " + c));
   }
 
-  setModified(false, true);
+  const bool modified = false;
+  const bool recurse = true;
+  setModified(modified, recurse);
 }
 
 void
 DocumentXML::clear()
 {
+  // Remove the root element
   document_.removeChild(document_.documentElement());
+  // Notify that the document has been modified
   setModified(true);
 
+  // Delete all children of the QObject
   if(!children().isEmpty()) {
     QObjectList childList = children();
     while(!childList.isEmpty()) {

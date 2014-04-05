@@ -18,15 +18,15 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #include "DocumentView.h"
 #include "ParameterXML.h"
 #include "ItemXML.h"
 
-#include <q3filedialog.h>
+#include <QFileDialog>
 #include <qmessagebox.h>
 #include <qstatusbar.h>
-#include <q3popupmenu.h>
-//Added by qt3to4:
+#include <QMenu>
 #include <QCloseEvent>
 
 #include <cassert>
@@ -41,7 +41,7 @@ namespace
 }
 
 DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f) :
-  Super(_parent, _name, _f),
+  Super(_parent),
   titleBar_(NULL),
   statusBar_(NULL),
   document_(NULL),
@@ -49,20 +49,28 @@ DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f)
 {
   //----------------------------------------------------------------------------
   // init list view
-
-  addColumn("Item Name");
-  addColumn("Value");
-  addColumn("Type");
+  const int columnCount = 3;
+  setColumnCount(columnCount);
+  QStringList headerLabels;
+  headerLabels << "Item Name" << "Value" << "Type";
+  setHeaderLabels(headerLabels);
+  setContextMenuPolicy(Qt::CustomContextMenu);
   setRootIsDecorated(true);
-  setSorting(-1);
-  setResizeMode(Q3ListView::AllColumns);
+  // Disable sorting
+  setSortingEnabled(false);
+  /// @todo How do we do this in Qt4?
+  // setResizeMode(Q3ListView::AllColumns);
 
+  // When the user right licks, present the context menu
   connect(this, 
-	  SIGNAL(contextMenuRequested(Q3ListViewItem *, const QPoint&, int)),
+	  SIGNAL(customContextMenuRequested(const QPoint&)),
 	  this,
-	  SLOT(slotContextMenu(Q3ListViewItem *, const QPoint&, int)));
-  connect(this, SIGNAL(doubleClicked(Q3ListViewItem *)),
-	  this, SLOT(slotDoubleClick(Q3ListViewItem *)));
+	  SLOT(slotContextMenu(const QPoint&)));
+  // When the user double clicks, display an item editor
+  connect(this,
+	  SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
+	  this,
+	  SLOT(slotDoubleClick(QTreeWidgetItem *, int)));
 }
 
 DocumentView::~DocumentView()
@@ -200,8 +208,15 @@ DocumentView::saveDocumentAs()
 
   while (!selected) {
     // show file dialog
-    filename = Q3FileDialog::getSaveFileName(0, "*.xml", this);
-	
+    QWidget * const parent = this;
+    const QString caption("Save File");
+    const QString dir;
+    const QString filter("Parameter Description (*.xml)");
+    QString * const selectedFilter = 0;
+    const QFileDialog::Options options = 0;
+    filename = QFileDialog::getSaveFileName(parent, caption, dir, filter,
+					    selectedFilter, options);
+
     if (filename.isEmpty()) {
       rc = false;
       break;
@@ -250,10 +265,16 @@ void
 DocumentView::slotLoad()
 {
   if (saveIfModified()) {
-    QString filename =
-      Q3FileDialog::getOpenFileName(0, 
-				   "Polycies *.xml\nAlle Dateien *", 
-				   this);
+    QWidget * const parent = this;
+    const QString caption("Open File");
+    const QString dir;
+    const QString filter("Policies (*.xml);;All Data (*)");
+    QString * const selectedFilter = 0;
+    const QFileDialog::Options options = 0;
+    const QString filename =
+      QFileDialog::getOpenFileName(parent, caption, dir, filter, 
+				   selectedFilter, options);
+
     if (filename.isNull())
       return;
 
@@ -277,25 +298,36 @@ DocumentView::slotSaveAs()
 }
 
 void 
-DocumentView::slotContextMenu(Q3ListViewItem * _item, const QPoint & _pos, int)
+DocumentView::slotContextMenu(const QPoint & _pos)
 {
+  // Find the QTreeWidgetItem at the position passed in from the Signal
+  QTreeWidgetItem * const _item = itemAt(_pos);
+
   if (_item == NULL)
     return;
 
   ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
   assert(item != ItemXML::itemMap().end());
 
-  Q3PopupMenu menu(NULL, "conext_menu");
-  item->second->contextMenu(menu);
-
-  if (menu.count() > 0)
-    menu.exec(_pos);
+  QMenu menu(NULL);
+  const std::pair<QTreeWidgetItem*, Item*>& p = *item;
+  Item * const pItem = p.second;
+  assert(pItem != 0);
+  // Populate this context menu based on the Item
+  pItem->contextMenu(menu);
+  if (!menu.isEmpty())
+  {
+    const QTreeWidget * const pTreeWidget = _item->treeWidget();
+    assert(pTreeWidget != NULL);
+    const QPoint pos = pTreeWidget->mapToGlobal(_pos);
+    menu.exec(pos);
+  }
 }
 
 void
-DocumentView::slotDoubleClick(Q3ListViewItem * _item)
+DocumentView::slotDoubleClick(QTreeWidgetItem * _item, int column)
 {
-  if (_item->firstChild() == NULL) {
+  if (_item->child(0) == NULL) {
     ItemXML::ItemMap::const_iterator item = ItemXML::itemMap().find(_item);
     assert(item != ItemXML::itemMap().end());
     

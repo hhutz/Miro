@@ -18,58 +18,62 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "CompoundParameter.h"
+// This application
 #include "SimpleParameter.h"
 #include "ParameterList.h"
-
 #include "ParameterDialog.h"
 #include "ConfigFile.h"
-
 #include "params/Type.h"
 #include "params/Generator.h"
-
 #include "miro/Exception.h"
+// The Qt library
+#include <QTreeWidget>
+// The C++ Standard Library
+#include <cassert>
 
-#if QT_VERSION >= 0x040000
-  #include <Q3PopupMenu>
-  #include <Q3ListView>
-#else 
-  #include <q3popupmenu.h>
-  #include <q3listview.h>
-#endif 
 
 CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
-				     Q3ListViewItem * _parentItem,
-				     Q3ListViewItem * _pre,
-				     QObject * _parent, const char * _name) :
+				     QTreeWidgetItem * _parentItem,
+				     QTreeWidgetItem * _pre,
+				     QObject * _parent,
+				     const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   type_(_type)
 {
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, type_.fullName());
+  if (treeWidgetItem()->treeWidget()->columnCount() >= 3)
+  {
+    treeWidgetItem()->setText(2, type_.fullName());
+  }
 }
 
 CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QDomNode const& _node,
-				     Q3ListView * _list,
-				     Q3ListViewItem * _pre,
-				     QObject * _parent, const char * _name) :
+				     QTreeWidget * _list,
+				     QTreeWidgetItem * _pre,
+				     QObject * _parent,
+				     const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   type_(_type)
 {
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, type_.fullName());
+  if (treeWidgetItem()->treeWidget()->columnCount() >= 3)
+  {
+    treeWidgetItem()->setText(2, type_.fullName());
+  }
 }
 
 void
 CompoundParameter::init()
 {
   // get complete parameter set including super classes
-  Miro::CFG::ParameterVector params = config_->description().getFullParameterSet(type_);
+  Miro::CFG::ParameterVector params =
+    config_->description().getFullParameterSet(type_);
 
   QDomNode n = node().firstChild();
-  Q3ListViewItem * pre = NULL;
+  QTreeWidgetItem * pre = NULL;
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull() &&
@@ -96,20 +100,24 @@ CompoundParameter::init()
 
       if (SimpleParameter::typeFromName(i->type_) != 
 	  SimpleParameter::NONE) {
-	newParam = new SimpleParameter(*i, n, listViewItem(), pre, this, p);
+	QTreeWidgetItem * const  pTreeWidgetItem = treeWidgetItem();
+	assert(pTreeWidgetItem != NULL);
+	newParam = new SimpleParameter(*i, n, pTreeWidgetItem, pre, this, p);
       }
       else if (ParameterList::typeFromName(i->type_) !=
 	       ParameterList::NONE) {
-	newParam = new ParameterList(*i, n, listViewItem(), pre, this, p);
+	QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+	assert(pTreeWidgetItem != NULL);
+	newParam = new ParameterList(*i, n, pTreeWidgetItem, pre, this, p);
       }
       else {
 	Miro::CFG::Type const * const t = 
 	  config_->description().getType(i->type_);
 	if (t != NULL) {
-	  newParam = new CompoundParameter(*t, 
-					   n, listViewItem(), pre,
-					   this, p);
-				       
+	  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  	  assert(pTreeWidgetItem != NULL);
+	  newParam =
+	    new CompoundParameter(*t, n, pTreeWidgetItem, pre, this, p);
 	}
 	else
 	  throw Miro::Exception(QString("Type " + i->type_ + " of parameter " + p +
@@ -140,12 +148,15 @@ CompoundParameter::setParameters()
 }
 
 Miro::CFG::Type const&
-CompoundParameter::type(QDomNode const& _node, QString const& _attribute)
+CompoundParameter::type(QDomNode const& _node,
+			QString const& _attribute)
 {
+  // Fetch the value of the given attribute from the given QDomNode
   QDomNode n = _node;
   QDomElement e = n.toElement();
   QString typeName = e.attribute(_attribute);
 
+  // Map the attribute's value onto a Miro::CFG::Type
   Miro::CFG::Type const * const parameterType =
     ConfigFile::instance()->description().getType(typeName);
   

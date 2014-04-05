@@ -18,36 +18,36 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "Section.h"
+// This application
 #include "ParameterInstance.h"
 #include "ParameterSingleton.h"
 #include "ConfigDocumentXML.h"
-
 #include "miroWidgets/ConfigFile.h"
-
 #include "params/Generator.h"
 #include "params/Type.h"
-
-#include <q3popupmenu.h>
-#include <q3listview.h>
+// The Qt library
+#include <QMenu>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 #include <qinputdialog.h>
 #include <qmessagebox.h>
-
+// The C++ Standard Library
 #include <algorithm>
-#include <iostream>
-
 #include <cassert>
 
 const QString Section::XML_TAG("section");
 
 Section::Section(QDomNode const& _node,
-		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
+		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
 		 QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   menuAddParameter_(NULL),
   menuAddInstance_(NULL)
 {
-  listViewItem()->setText(2, className());
+  treeWidgetItem()->setText(2, className());
 
   assert(!node_.isNull());
 
@@ -55,31 +55,41 @@ Section::Section(QDomNode const& _node,
 }
 
 void
-Section::contextMenu(Q3PopupMenu& _menu)
+Section::contextMenu(QMenu& _menu)
 {
+  // The number of QActions in the context menu varies with what is loaded.
   // get all current parameters
   Miro::CFG::QStringVector childParameters;
-  Q3ListViewItem * item = listViewItem()->firstChild();
-  while (item != NULL) {
-    ItemXML * itemXML =
-      dynamic_cast<ItemXML *>(Item::itemMap().find(item)->second);
-    assert(itemXML != NULL);
+  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  assert(pTreeWidgetItem != NULL);
 
-    QDomElement e = itemXML->node().toElement();
+  const int childCount = pTreeWidgetItem->childCount();
+  for (int i = 0; i < childCount; ++i)
+  {
+    QTreeWidgetItem * const pChildTreeWidgetItem =  pTreeWidgetItem->child(i);
+    const ItemMap::const_iterator it =
+      Item::itemMap().find(pChildTreeWidgetItem);
+    assert(it != Item::itemMap().end());
+    const Item* const pItem = it->second;
+    assert(pItem != NULL);
+    const ItemXML * const pItemXML = dynamic_cast<const ItemXML *>(pItem);
+    assert(pItemXML != NULL);
+    const QDomElement e = pItemXML->node().toElement();
     assert(!e.isNull());
 
-    if (e.tagName() == ParameterXML::XML_TAG) {
-      childParameters.push_back(item->text(0));
-    }
-    item = item->nextSibling();
+    if (e.tagName() == ParameterXML::XML_TAG)
+    {
+      childParameters.push_back(pChildTreeWidgetItem->text(0));
+    }    
   }
 
   typedef std::vector<QString> QStringVector;
 
+  // A list of the names of all parameters that can be added
   QStringVector paramsList;
   QStringVector instanceList;
 
-  QString section = listViewItem()->text(0);
+  const QString section = treeWidgetItem()->text(0);
 
   Miro::CFG::GroupMap::const_iterator first, last;
   ConfigFile::instance()->description().getGroupedTypes(section, first, last);
@@ -101,9 +111,9 @@ Section::contextMenu(Q3PopupMenu& _menu)
   }
 
   // create a new parameter selection menu
-  menuAddParameter_ = new Q3PopupMenu(&_menu);
+  menuAddParameter_ = _menu.addMenu(tr("Add Parameter"));
   // create a new instance selection menu
-  menuAddInstance_ = new Q3PopupMenu(&_menu);
+  menuAddInstance_ = _menu.addMenu(tr("Add Instance"));
 
   {
     std::sort(paramsList.begin(), paramsList.end());
@@ -124,13 +134,22 @@ Section::contextMenu(Q3PopupMenu& _menu)
   connect(menuAddParameter_, SIGNAL(activated(int)), 
 	  this, SLOT(onAddParameter(int)));
 
-  _menu.insertItem("Add Parameter", menuAddParameter_);
-  _menu.insertItem("Add Instance", menuAddInstance_);
-  _menu.insertSeparator();
-  _menu.insertItem("Up", this, SLOT(up()));
-  _menu.insertItem("Down", this, SLOT(down()));
-  _menu.insertSeparator();
-  _menu.insertItem("Delete", this, SLOT(slotDelete()));
+  _menu.addSeparator();
+
+  QAction* pAction = 0;
+  pAction = new QAction(tr("Up"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(up()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Down"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(down()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+
+  pAction = new QAction(tr("Delete"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotDelete()));
+  _menu.addAction(pAction); 
 }
 
 void
@@ -145,14 +164,15 @@ Section::onAddInstance(int _n)
     QDomDocument document = node_.ownerDocument();
     QDomElement e = document.createElement(ParameterInstance::XML_TAG);
     e.setAttribute(ParameterInstance::XML_ATTRIBUTE_KEY, name);
-    e.setAttribute(ParameterInstance::XML_ATTRIBUTE_TYPE, menuAddInstance_->text(_n));
+    e.setAttribute(ParameterInstance::XML_ATTRIBUTE_TYPE,
+		   menuAddInstance_->text(_n));
     
     QDomNode n = node_.firstChild();
     QDomNode newChild = node_.insertBefore(e, n);
     
     assert(!newChild.isNull());
     try {
-      new ParameterInstance(listViewItem(), NULL, newChild, 
+      new ParameterInstance(treeWidgetItem(), NULL, newChild, 
 			    this, name);
     }
     catch (QString const& e) {
@@ -176,7 +196,7 @@ Section::onAddParameter(int _n)
     
   assert(!newChild.isNull());
   try {
-    new ParameterSingleton(listViewItem(), NULL, newChild, 
+    new ParameterSingleton(treeWidgetItem(), NULL, newChild,
 			   this,  menuAddParameter_->text(_n));
   }
   catch (QString const& e) {
@@ -191,7 +211,7 @@ void
 Section::buildSubtree()
 {
   QDomNode n = node_.firstChild();
-  Q3ListViewItem * pre = NULL;
+  QTreeWidgetItem * pre = NULL;
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull()) {
@@ -200,19 +220,19 @@ Section::buildSubtree()
 	if (e.tagName() == ParameterInstance::XML_TAG &&
 	    e.hasAttribute(XML_ATTRIBUTE_KEY)) {
 	  param =
-	    new ParameterInstance(listViewItem(), pre,
+	    new ParameterInstance(treeWidgetItem(), pre,
 				  e, this, e.attribute(XML_ATTRIBUTE_KEY));
 	}
 	if (e.tagName() == ParameterXML::XML_TAG &&
 	    e.hasAttribute(XML_ATTRIBUTE_KEY)) {
 	  param =
-	    new ParameterSingleton(listViewItem(), pre,
+	    new ParameterSingleton(treeWidgetItem(), pre,
 				   e, this, 
 				   e.attribute(XML_ATTRIBUTE_KEY));
 	}
 	if (param != NULL) {
 	  param->init();
-	  pre = param->listViewItem();
+	  pre = param->treeWidgetItem();
 	}
       }
       catch (QString const& e) {

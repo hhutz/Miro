@@ -18,28 +18,29 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterDialog.h"
+// This application
+#include "ConfigFile.h"
+#include "DeferredParameterEdit.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
-#include "DeferredParameterEdit.h"
-
-#include "ConfigFile.h"
-
-#include "params/Type.h"
 #include "params/Generator.h"
-
-#include <qstring.h>
-#include <q3hgroupbox.h>
-#include <qlayout.h>
+#include "params/Type.h"
+// The Qt library
+#include <QAction>
+#include <QFrame>
+#include <QGridLayout>
+#include <QGroupBox>
 #include <qlabel.h>
-#include <qtooltip.h>
+#include <qlayout.h>
 #include <qmessagebox.h>
-#include <q3scrollview.h>
 #include <qobject.h>
-//Added by qt3to4:
-#include <Q3GridLayout>
-#include <Q3Frame>
-
+#include <QScrollArea>
+#include <qstring.h>
+#include <qtooltip.h>
+// The C++ Standard Library
 #include <cassert>
 
 ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
@@ -62,12 +63,27 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
   if (s.width() > 800 || 
       s.height() > 600) {
 
+    // Replace the Frame with one in a ScrollArea
     delete frame_;
-    Q3ScrollView * sv = new Q3ScrollView(groupBox_, "scrollview");
-    frame_ = new Q3Frame(sv->viewport());
-    sv->addChild(frame_);
-    sv->setResizePolicy(Q3ScrollView::AutoOneFit);
+    // Create the ScrollArea as a child of the GroupBox
+    QScrollArea * const sv = new QScrollArea;
+    assert(sv != NULL);
+
+    // Create the Frame as a child of the ScrollArea's viewport
+    QWidget * const pFrameParent = sv->viewport();
+    frame_ = new QFrame(pFrameParent);
+    sv->setWidget(frame_);
+
+    // Set the resize policy
+    /// @todo What is the counterpart of
+    /// Q3ScrollView::setResizePolicy(Q3ScrollView::AutoOneFit)?
+    sv->setWidgetResizable(true);
     
+    // Add the ScrollArea to the GroupBox's layout
+    assert(groupBox_ != NULL);
+    assert(groupBox_->layout() != NULL);
+    groupBox_->layout()->addWidget(sv);
+
     initDialog();
 
     frame_->sizeHint();
@@ -95,15 +111,26 @@ ParameterDialog::initDialog()
 {
   editFelds_.clear();
 
-  Q3GridLayout * gridLayout = 
-    new Q3GridLayout(frame_, params_.size(), 3, 2, 5, "gridLayout"); 
+  // The GridLayout is a child of the ScrollView's viewport
+  QWidget * const pGridLayoutParent = frame_;
+  QGridLayout * const gridLayout = new QGridLayout(pGridLayoutParent);
+  assert(gridLayout != 0);
+  // Specify the margin but not the number of rows (params_.size(),
+  // columns (3)
+  const int margin = 5;
+  gridLayout->setContentsMargins(margin, margin, margin, margin);
+  const int spacing = 5;
+  gridLayout->setSpacing(spacing);
 
   // add parameter structs:
+  // Sequential position of the current parameter
   unsigned long i = 0;
+  // For each parameter
   Miro::CFG::ParameterVector::const_iterator first, last = params_.end();
   for (first = params_.begin(); first != last; ++first, ++i) {
 
-    // name
+    // Create a Label the text of which is the parameter named capitalized.
+    // Add the label to the Layout
     QLabel * name = new QLabel(frame_);
     QString n = first->name_;
     n[0] = n[0].upper();
@@ -111,9 +138,11 @@ ParameterDialog::initDialog()
     gridLayout->addWidget(name, i, 0);
 
 
-    // search existing entry
-
+    // Search the QDomNode for a child the name of which is the parameter
+    // name capitalized. If found, store it in parameterNode.
     QDomNode parameterNode;
+    assert(parameterNode.isNull());
+
     if (!node_.isNull()) {
       parameterNode = node_.firstChild();
       while(!parameterNode.isNull()) {
@@ -125,22 +154,24 @@ ParameterDialog::initDialog()
       }
     }
 
-    // if there is an existing entry
-    // and we know our listview,
-    // get the corresponding listview item
+    // If there is an existing entry and we know our QTreeWidget,
+    // get the corresponding QTreeWidgetItem
 
     ItemXML * childItem = NULL;
     if (!parameterNode.isNull() &&
 	item_ != NULL) {
+      // The QDomNode was found and this dialog has a parameter ItemXML
       if (!item_->children().isEmpty()) {
+	// The parameter ItemXML has children
 	QObjectList childList = item_->children();
+	// For each child of the parameter ItemXML
         QListIterator<QObject*> it(childList);
-        QObject * c;
         while (it.hasNext()) {
-          c = it.next();
+          QObject * const c = it.next();
 	  childItem = dynamic_cast<ItemXML *>(c);
+	  // The child of the parameter ItemXML must be an ItemXML
 	  assert(childItem != NULL);
-
+	  // Looking for a child ItemXML whose name is that of the parameter
 	  if (childItem->node().toElement().attribute("name") == n) {
 	    break;
 	  }

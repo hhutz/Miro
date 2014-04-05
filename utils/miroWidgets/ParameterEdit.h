@@ -21,12 +21,13 @@
 #ifndef ParameterEdit_h
 #define ParameterEdit_h
 
+// The Qt library
 #include <qobject.h>
 #include <qdom.h>
 
 #include "miroWidgets_Export.h"
 
-// forward declarations
+// Forward declarations
 namespace Miro {
   namespace CFG {
     struct Parameter;
@@ -48,23 +49,29 @@ class miroWidgets_Export ParameterEdit : public QObject
   typedef QObject Super;
 
 public:
+
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
   //! Initializing constructor.
   ParameterEdit(Miro::CFG::Parameter const& _parameter,
-		QDomNode& _parentNode, QDomNode& _node,
-		ItemXML * _parentItem, ItemXML * _item,
-		QWidget * _parent, const char * _name);
+		QDomNode& _parentNode,
+		QDomNode& _node,
+		ItemXML * _parentItem,
+		ItemXML * _item,
+		QWidget * _parent,
+		const char * _name);
 
   QWidget * editWidget();
   //! Updates the xml tree with the data provided in the edit field.
   virtual void setXML() = 0;
+
   //! True, if the user entered something into the dialog.
   virtual bool modified() const = 0;
 
 protected:
+
   //----------------------------------------------------------------------------
   // protected data
   //----------------------------------------------------------------------------
@@ -75,6 +82,7 @@ protected:
   //! Parent node of the parameter in the xml tree.
   /** Needed if the parameter does not have an xml entry yet. */
   QDomNode parentNode_;
+
   //! The xml node of the parameter.
   QDomNode node_;
 
@@ -83,7 +91,8 @@ protected:
   //! Parent item in the QListView.
   /** Needed if the parameter does not have an xml entry yet. */
   ItemXML * parentItem_;
-  //! Item in the QListView.
+
+  //! Item in the QTreeWidget.
   ItemXML * item_;
 
   //----------------------------------------------------------------------------
@@ -92,8 +101,10 @@ protected:
 
   //! Tag denoting a parameter.
   static QString const XML_TAG_PARAMETER;
+
   //! The key attribute of the parameter.
   static QString const XML_ATTRIBUTE_KEY;
+
   //! The value attribute of the parameter.
   static QString const XML_ATTRIBUTE_VALUE;
 };

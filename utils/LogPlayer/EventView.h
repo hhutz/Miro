@@ -18,6 +18,9 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+// Enable migration from Qt v3 to Qt v4
+#define LSB_Q3LISTVIEW
+
 #ifndef EventView_h
 #define EventView_h
 
@@ -28,8 +31,14 @@
 #include <QHideEvent>
 
 // forward declarations
+#ifdef LSB_Q3LISTVIEW
+class QTreeWidget;
+class QTreeWidgetItem;
+#else
 class Q3ListView;
 class Q3ListViewItem;
+#endif
+
 class FileSet;
 namespace CosNotification
 {
@@ -54,7 +63,11 @@ public slots:
                    const QString& _domain, const QString& _type, const QString& _event);
 
 protected slots:
+#ifdef LSB_Q3LISTVIEW
+  void selectionChanged(QTreeWidgetItem * _item);
+#else
   void selectionChanged(Q3ListViewItem * _item);
+#endif
   void excludeEvent(const QString& _domainName, const QString& _typeName);
   void includeEvent(const QString& _domainName, const QString& _typeName);
 
@@ -62,11 +75,23 @@ protected:
   virtual void hideEvent(QHideEvent * _event);
 
   void pruneHistory();
+#ifdef LSB_Q3LISTVIEW
+  static ACE_Time_Value eventTime(QTreeWidgetItem * _item);
+#else
   static ACE_Time_Value eventTime(Q3ListViewItem * _item);
+#endif
 
   FileSet * fileSet_;
+#ifdef LSB_Q3LISTVIEW
+  QTreeWidget * list_;
+#else
   Q3ListView * list_;
+#endif
+#ifdef LSB_Q3LISTVIEW
+  QTreeWidgetItem * last_;
+#else
   Q3ListViewItem * last_;
+#endif
 
   bool internalSetSelection_;
 

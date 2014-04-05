@@ -18,23 +18,23 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "SingleParameterDialog.h"
+// This application
+#include "DeferredParameterEdit.h"
 #include "SimpleParameter.h"
 #include "SimpleParameterEdit.h"
-#include "DeferredParameterEdit.h"
-
 #include "params/Parameter.h"
-
-#include <qstring.h>
-#include <q3hgroupbox.h>
+// The Qt library
+#include <QGridLayout>
+#include <QGroupBox>
 #include <qlayout.h>
+#include <qstring.h>
 #include <qlabel.h>
-#include <qtooltip.h>
 #include <qmessagebox.h>
-#include <q3scrollview.h>
-//Added by qt3to4:
-#include <Q3GridLayout>
-
+#include <qtooltip.h>
+// The C++ Standard Library
 #include <cassert>
 
 /**
@@ -58,8 +58,13 @@ SingleParameterDialog(Miro::CFG::Parameter const& _parameter,
 {
   assert(!_node.isNull());
 
-  Q3GridLayout * gridLayout = 
-    new Q3GridLayout(frame_, 1, 3, 2, 5, "gridLayout"); 
+  QWidget * const pGridLayoutParent = frame_;
+  QGridLayout * const gridLayout = new QGridLayout(pGridLayoutParent);
+  assert(gridLayout != 0);
+  const int margin = 2;
+  gridLayout->setContentsMargins(margin, margin, margin, margin);
+  const int spacing = 5;
+  gridLayout->setSpacing(spacing);
 
   // add parameter struct:
   QLabel * name = new QLabel(frame_);

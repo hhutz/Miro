@@ -18,29 +18,49 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "SimpleParameterEdit.h"
+// This application
+#include "ConfigFile.h"
 #include "ParameterDialog.h"
 #include "Validators.h"
-#include "ConfigFile.h"
-
-#include "params/Parameter.h"
 #include "params/Generator.h"
-
-#include <qstring.h>
+#include "params/Parameter.h"
+// The Qt library
+#include <qcombobox.h>
+#include <QLayout>
 #include <qlineedit.h>
+#include <QListWidget>
+#include <qstring.h>
 #include <qtextedit.h>
 #include <qtooltip.h>
-#include <q3listview.h>
-#include <qcombobox.h>
-#include <q3listbox.h>
-
-#include <climits>
+#include <QTreeWidget>
+// The C++ Standard Library
 #include <cassert>
+#include <climits>
 
 using std::vector;
 using std::string;
 
 #include "qt_compatibility.h"
+
+/**
+ * Function object for inserting an item into a QListWidget by string name.
+ * @author Lee Brownston
+ * @date 07 Feb 2014
+ */
+class InsertListBoxItem 
+{
+public:
+  InsertListBoxItem(QListWidget& lw) : m_lw(lw) { }
+  void operator()(const std::string& s) {
+    const int row = m_lw.count(); // insert at the end
+    m_lw.insertItem(row, s.c_str());
+  }
+private:
+  QListWidget& m_lw;
+};
 
 SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 					 Miro::CFG::Parameter const& _parameter,
@@ -68,7 +88,17 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     editWidget_ = typeBox_;
   } else if (parameter_.type_ == "Miro::EnumerationMultiple" || 
 	     parameter_.type_ == "EnumerationMultiple") {
-    listBox_ = new Q3ListBox(_parent, "list_box");
+    if (_parent->layout() != NULL)
+      {
+	// Create the ListWidget without parent and add to the _parent's layout
+	listBox_ = new QListWidget;
+	_parent->layout()->addWidget(listBox_);
+      }
+    else
+      {
+	// Create the ListWidget as a child of _parent
+	listBox_ = new QListWidget(_parent);
+      }
     editWidget_ = listBox_;
   } else if (parameter_.type_ == "Miro::Text" ||
 	     parameter_.type_ == "Text") {
@@ -216,12 +246,17 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 
     case SimpleParameter::ENUMERATIONMULTIPLE:
       // init list box
-      listBox_->setSelectionMode(Q3ListBox::Multi);
+      // For each selected element of 
+      // Precondition
+      assert(listBox_ != NULL);
+      listBox_->setSelectionMode(QAbstractItemView::MultiSelection);
+      // Parse the parameter_ member variable into std::vector<std::string>
       stringvec = fullDef2StringVector(parameter_.fullDefault_);
-      for (vector<string>::const_iterator i= stringvec.begin(); i!=stringvec.end(); ++i)
-	listBox_->insertItem(i->c_str());
+      for_each(stringvec.begin(), stringvec.end(),
+	       InsertListBoxItem(*listBox_));
 
       // set current value
+      /// @todo Does this still work? I can't find it in the documentation
       listBox_->clearSelection();
       if (!node_.isNull()) {
 	QDomElement e = node_.toElement();
@@ -229,19 +264,41 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	  QString tmp1 = e.attribute("value");
 	  std::vector<std::string> tmp2 = tokenizer(std::string(tmp1.latin1()));
 	  for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
-	    for (unsigned int j=0; j!=listBox_->count(); ++j) {
-	      if (listBox_->text(j) == QString(i->c_str()))
-		listBox_->setSelected(j, TRUE);
-	    }
+	    /// @todo Unify repeated code
+	    // Cache the string to avoid repeated lookups and construction
+	    const QString qs(i->c_str());
+	    const int rowCount = listBox_->count();
+	    for (int row = 0; row < rowCount; ++row)
+	    {
+	      // The item at this row
+	      QListWidgetItem * const pItem = listBox_->item(row);
+	      assert(pItem != 0);
+	      const QString& text = pItem->text();
+	      if (text == qs)
+	      {
+		pItem->setSelected(true);
+	      }
+	    } // end for
 	  }
 	}
       } else {
 	std::vector<std::string> tmp2 = tokenizer(std::string(parameter_.default_.latin1()));
 	for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
-	  for (unsigned int j=0; j!=listBox_->count(); ++j) {
-	    if (listBox_->text(j) == QString(i->c_str()))
-	      listBox_->setSelected(j, TRUE);
-	  }
+	  /// @todo Unify repeated code
+	  // Cache the string to avoid repeated lookups and construction
+	  const QString qs(i->c_str());
+	  const int rowCount = listBox_->count();
+	  for (int row = 0; row < rowCount; ++row)
+	  {
+	    // The item at this row
+	    QListWidgetItem * const pItem = listBox_->item(row);
+	    assert(pItem != 0);
+	    const QString& text = pItem->text();
+	    if (text == qs)
+	    {
+      	      pItem->setSelected(true);
+	    }
+	  } // end for
 	}
       }
 
@@ -307,7 +364,7 @@ SimpleParameterEdit::setXML()
       ParameterXML * newParam =
 	new SimpleParameter(parameter_,
 			    node_,
-			    parentItem_->listViewItem(), NULL,
+			    parentItem_->treeWidgetItem(), NULL,
 			    parentItem_, name());
       newParam->init();
       item_ = newParam;
@@ -323,7 +380,7 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
     }
     else {
       lineEdit_->setEdited(false);
@@ -355,7 +412,7 @@ SimpleParameterEdit::setXML()
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
     }
     else {
       typeBoxModified_ = false;
@@ -365,22 +422,38 @@ SimpleParameterEdit::setXML()
     // create again a space separated string for all the selections
     QString selectString;
     int j=0; 
-    for (unsigned int i=0; i<listBox_->count(); ++i)
-      if (listBox_->isSelected(i)) {
-	selectString = listBox_->text(i);
-	j = i;
+    // Cache the value to avoid repeated lookups
+    const int rowCount = listBox_->count();
+    for (int row = 0; row < rowCount; ++row)
+    {
+      const QListWidgetItem * const pItem = listBox_->item(row);
+      assert(pItem != 0);
+      if (pItem->isSelected())
+      {
+	selectString = pItem->text();
+	j = row;
 	break;
       }
-    for (unsigned int i=j+1; i<listBox_->count(); ++i)
-      if (listBox_->isSelected(i))
-	selectString += " " + listBox_->text(i);
+    }
+    // selectString consists of the text of the first selected item and
+    // j is the index of the first selected item
+    // Now concatenate the text of all the other selected items
+    for (int row = j + 1; row < rowCount; ++row)
+    {
+      const QListWidgetItem * const pItem = listBox_->item(row);
+      assert(pItem != 0);
+      if (pItem->isSelected())
+      {
+	selectString += " " + pItem->text();
+      }
+    }
     //
     if (e.attribute(XML_ATTRIBUTE_VALUE) != selectString) {
       e.setAttribute(XML_ATTRIBUTE_VALUE, selectString);
       // if we know about the associated list view,
       // we set the new value there, too
       if (item_ != NULL)
-	item_->listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
     }
     else {
       listBoxModified_ = false;

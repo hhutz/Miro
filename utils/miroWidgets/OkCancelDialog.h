@@ -18,21 +18,21 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #ifndef OkCancelDialog_h
 #define OkCancelDialog_h
 
 #include <qdialog.h>
 #include <qdom.h>
-//Added by qt3to4:
-#include <Q3Frame>
 
 #include <iostream>
 
 #include "miroWidgets_Export.h"
 
 // forward declarations
-class Q3Frame;
-class Q3GroupBox;
+class QFrame;
+class QGroupBox;
+class QVBoxLayout;
 class ItemXML;
 
 //! Dialog base class, for editing XML nodes of the parameter framework.
@@ -96,9 +96,14 @@ protected:
   //----------------------------------------------------------------------------
 
   //! Layout element needed.
-  Q3GroupBox * groupBox_;
+  QGroupBox * groupBox_;
   //! Layout element.
-  Q3Frame * frame_;
+  QFrame * frame_;
+
+private:
+  QVBoxLayout* createLayout();
+  void createFrame();
+  void createGroupBox();
 
 private:
   //----------------------------------------------------------------------------

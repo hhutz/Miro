@@ -18,18 +18,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
-#include "SimpleParameter.h"
 
+// This module
+#include "SimpleParameter.h"
+// This application
 #include "ConfigFile.h"
 #include "SimpleParameterEdit.h"
 #include "ParameterDialog.h"
 #include "ParameterListDialog.h"
 #include "SingleParameterDialog.h"
-
 #include "params/Generator.h"
-
-#include <q3popupmenu.h>
-#include <q3listview.h>
+// The Qt library
+#include <QTreeWidget>
+// The C++ Standard Library
+#include <cassert>
 
 namespace 
 {
@@ -79,32 +81,61 @@ SimpleParameter::typeFromName(QString const& _type)
 
 SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
-				 Q3ListViewItem * _parentItem,
-				 Q3ListViewItem * _pre,
+				 QTreeWidgetItem * _parentItem,
+				 QTreeWidgetItem * _pre,
 				 QObject * _parent, const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param)
 {
   QDomElement e = node().toElement();
-  if (listViewItem()->listView()->columns() >= 2)
-    listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, param_.type_);
+
+  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  assert(pTreeWidgetItem != NULL);
+
+  QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
+  assert(pTreeWidget != 0);
+
+  // The number of columns used to display the QTreeWidgetItem
+  const int columnCount = pTreeWidget->columnCount();
+  
+  if (columnCount >= 2)
+  {
+    // The value of the "value" attribute of the <parameter> element
+    pTreeWidgetItem->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+  }
+  if (columnCount >= 3)
+  {
+      pTreeWidgetItem->setText(2, param_.type_);
+  }
 }
 
 SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
-				 Q3ListView * _list,
-				 Q3ListViewItem * _pre,
+				 QTreeWidget * _list,
+				 QTreeWidgetItem * _pre,
 				 QObject * _parent, const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   param_(_param)
 {
   QDomElement e = node().toElement();
-  if (listViewItem()->listView()->columns() >= 2)
-    listViewItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
-  if (listViewItem()->listView()->columns() >= 3)
-    listViewItem()->setText(2, param_.type_);
+  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  assert(pTreeWidgetItem != NULL);
+
+  QTreeWidget * const pTreeWidget = pTreeWidgetItem->treeWidget();
+  assert(pTreeWidget != 0);
+
+  // The number of columns used to display the QTreeWidgetItem
+  const int columnCount = pTreeWidget->columnCount();
+  
+  if (columnCount >= 2)
+  {
+    // The value of the "value" attribute of the <parameter> element
+    pTreeWidgetItem->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
+  }
+  if (columnCount >= 3)
+  {
+    pTreeWidgetItem->setText(2, param_.type_);
+  }
 }
 
 void

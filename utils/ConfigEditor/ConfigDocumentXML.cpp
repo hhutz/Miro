@@ -18,35 +18,36 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #define QT_ALTERNATE_QTSMANIP
 
+// This module
 #include "ConfigDocumentXML.h"
+// This application
 #include "Section.h"
 
 #include "miroWidgets/ConfigFile.h"
 
 #include "params/Generator.h"
-
-#include <q3listview.h>
-#include <q3popupmenu.h>
+// The Qt library
+#include <QMenu>
 #include <qstring.h>
-
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+// The C++ Standard Library
 #include <algorithm>
-#include <iostream>
 #include <cassert>
-
 
 const QString ConfigDocumentXML::XML_DOCTYPE("MiroConfigDocument");
 const QString ConfigDocumentXML::XML_TAG("config");
 
-
 //------------------------------------------------------------------------------
 // public methods
 
-ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document, 
-				     Q3ListView * _listView,
+ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document,
+				     QTreeWidget * _treeWidget,
 				     QObject * _parent, const char * _name) :
-  Super(_document, _listView, _parent, _name),
+  Super(_document, _treeWidget, _parent, _name),
   menuAddSection_(NULL)
 {
 }
@@ -58,23 +59,39 @@ ConfigDocumentXML::~ConfigDocumentXML()
 // inherited public methods
 
 void
-ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
+ConfigDocumentXML::contextMenu(QMenu& _menu)
 {
-  menuAddSection_ = new Q3PopupMenu(&_menu);
+  // The context menu has one QAction, "Add Section"
+  // The "Add Section" menu is a submenu of the menu passed as argument.
+  // Its signal is invoked when it is activated, not triggered.
+  menuAddSection_ = _menu.addMenu(tr("Add Section"));
 
-  _menu.insertItem("Add Section", menuAddSection_);
-
+  // Construct a list of all siblings of the QTreeWidgetItem
   Miro::CFG::QStringVector childSections;
-  Q3ListViewItem * item = listViewItem()->firstChild();
-  while (item != NULL) {
-    childSections.push_back(item->text(0));
-    item = item->nextSibling();
+  // Fetch the QTreeWidgetItem
+  QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+  assert(pTreeWidgetItem != NULL);
+  // For each child of the QTreeWidgetItem
+  for (int i = 0; i < pTreeWidgetItem->childCount(); ++i)
+  {
+      // Fetch the ith sibling
+      const QTreeWidgetItem * const pChildTreeWidgetItem =
+	pTreeWidgetItem->child(i);
+      assert(pChildTreeWidgetItem != NULL);
+      // Fetch the sibling's label text
+      const QString text = pChildTreeWidgetItem->text(0);
+      // Append the label text to the QStringVector
+      childSections.push_back(text);
   }
+  // The QStringVector should have as many elements as the parent has children
+  assert(static_cast<size_t>(pTreeWidgetItem->childCount()) == 
+	 static_cast<size_t>(childSections.size()));
 
-  // submenu: add all section names
-  // not yet available in the document
+
+  // submenu: add all section names not yet available in the document
   Miro::CFG::QStringVector sections =
     ConfigFile::instance()->description().groups();
+
   Miro::CFG::QStringVector::const_iterator first, last = sections.end();
   for (first = sections.begin(); first != last; ++first) {
 
@@ -98,10 +115,19 @@ ConfigDocumentXML::contextMenu(Q3PopupMenu& _menu)
     if (itemCount == 0)
       continue;
 
-    menuAddSection_->insertItem(*first);
+    // The name of the Action
+    const QString name = *first;
+    // From "http://qt-project.org/doc/qt4-8/qaction.html":
+    // "We recommend that actions are created as children of the window they
+    // are used in. In most cases, actions will be children of the application's
+    // main window."
+    // This class doesn't have a handle to any window.
+    QWidget * const pActionParent = NULL;
+    QAction * const pAction = new QAction(name, pActionParent);
+    connect(pAction, SIGNAL(activated(int)), this, SLOT(onAddSection(int)));
+    // Add the Action to the Menu
+    menuAddSection_->addAction(pAction);
   }
-  connect(menuAddSection_, SIGNAL(activated(int)),
-	  this, SLOT(onAddSection(int)));
 }
 
 //----------------------------------------------------------------------------  
@@ -123,9 +149,12 @@ ConfigDocumentXML::onAddSection(int _n)
     newChild = config.insertBefore(e, n);
 
   assert(!newChild.isNull());
+  // The constructor registers the constructed element
   new Section(newChild, 
-	      listViewItem(), NULL, 
-	      this, menuAddSection_->text(_n));
+	      treeWidgetItem(), // QTreeWidget for the ConfigDocumentXML
+	      NULL, 
+	      this, // parent QObject
+	      menuAddSection_->text(_n));
   setModified();
 }
 
@@ -135,20 +164,29 @@ ConfigDocumentXML::onAddSection(int _n)
 void
 ConfigDocumentXML::parse()
 {
+  // The root element
   QDomNode n = document_.firstChild();
   if (!n.isNull()) {
+    // The DOM tree is not empty.
+    // Iterate over the children of the root element, which are Sections
     QDomNode n1 = n.firstChild();
-    Q3ListViewItem * pre = NULL;
+    // The QTreeWidgetItem for the predecessor Section
+    QTreeWidgetItem * pre = NULL;
     while (!n1.isNull()) {
       QDomElement e = n1.toElement();
       if (!e.isNull() &&
-	  e.tagName() == Section::XML_TAG) {
+	  (e.tagName() == Section::XML_TAG)) {
+	// The XML element is for a Section; create a Section object
 	Section * section =
 	  new Section(e, 
-		      listViewItem(), pre, 
-		      this, e.attribute("name"));
-	pre = section->listViewItem();
+		      treeWidgetItem(), // parent QTreeWidgetItem
+		      pre,
+		      this, // parent QObject
+		      e.attribute("name"));
+	// The QTreeWidgetItem for the section
+	pre = section->treeWidgetItem();
       }
+      // Advance to the next child of the root element
       n1 = n1.nextSibling();
     }
   }

@@ -18,20 +18,20 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterList.h"
+// This application
 #include "SimpleParameter.h"
 #include "CompoundParameter.h"
-
 #include "ConfigFile.h"
 #include "ParameterListDialog.h"
-
 #include "params/Generator.h"
-
 #include "miro/Exception.h"
-
-#include <q3popupmenu.h>
-#include <q3listview.h>
-
+// The Qt library
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+// The C++ Standard Library
 #include <cassert>
 
 namespace 
@@ -60,18 +60,20 @@ ParameterList::typeFromName(QString const& _type)
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-			     Q3ListViewItem * _parentItem,
-			     Q3ListViewItem * _pre,
-			     QObject * _parent, const char * _name) :
+			     QTreeWidgetItem * _parentItem,
+			     QTreeWidgetItem * _pre,
+			     QObject * _parent,
+			     const char * _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param),
   type_(typeFromName(_param.type_))
 {
   assert(type_ != NONE);
 
-  if (listViewItem()->listView()->columns() == 2)
-    listViewItem()->setText(2, param_.type_);
-
+  if (treeWidgetItem()->treeWidget()->columnCount() > 2)
+  {
+    treeWidgetItem()->setText(2, param_.type_);
+  }
 
   // get the nested parameter type
   int len = param_.type_.length();
@@ -85,8 +87,8 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 
 ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
-			     Q3ListView * _list,
-			     Q3ListViewItem * _pre,
+			     QTreeWidget * _list,
+			     QTreeWidgetItem * _pre,
 			     QObject * _parent, const char * _name) :
   Super(_node, _list, _pre, _parent, _name),
   param_(_param),
@@ -94,9 +96,10 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 {
   assert(type_ != NONE);
 
-  if (listViewItem()->listView()->columns() == 2)
-    listViewItem()->setText(2, param_.type_);
-
+  if (treeWidgetItem()->treeWidget()->columnCount() > 2)
+  {
+    treeWidgetItem()->setText(2, param_.type_);
+  }
 
   // get the nested parameter type
   int len = param_.type_.length();
@@ -130,7 +133,7 @@ ParameterList::init()
   
   unsigned int index = 0;
   QDomNode n = node().firstChild();
-  Q3ListViewItem * pre = NULL;
+  QTreeWidgetItem * pre = NULL;
   while (!n.isNull()) {
     QDomElement e = n.toElement();
     if (!e.isNull() &&
@@ -158,17 +161,17 @@ ParameterList::init()
 
 	
 	QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
-	newParam = new SimpleParameter(nestedParameter, n, listViewItem(), pre,
-				       this, indexName);
+	newParam = new SimpleParameter(nestedParameter, n, treeWidgetItem(),
+				       pre, this, indexName);
       }
       else {
-	newParam = new CompoundParameter(*nestedType, n, listViewItem(), pre,
+	newParam = new CompoundParameter(*nestedType, n, treeWidgetItem(), pre,
 					 this, indexName);
       }
 
       if (newParam != NULL) {
 	newParam->init();
-	pre = newParam->listViewItem();
+	pre = newParam->treeWidgetItem();
 	++index;
       }
     }
@@ -179,7 +182,11 @@ ParameterList::init()
 void
 ParameterList::setParameters()
 {
-  // generate nested parameter descirption
+  // Precondition
+  assert(treeWidgetItem() != NULL);
+
+  // Create a parameter description for the ParameterList element's type
+  // (the "nested" type)
   Miro::CFG::Parameter nestedParameter;
   nestedParameter.type_ = nestedTypeName_;
   nestedParameter.name_ = param_.name_;
@@ -189,16 +196,27 @@ ParameterList::setParameters()
   nestedParameter.description_ = param_.description_;
 
   ItemXML * parentItem = NULL;
-  Q3ListViewItem * p = listViewItem()->parent();
+  QTreeWidgetItem * const p = treeWidgetItem()->parent();
   Item::ItemMap::const_iterator i = Item::itemMap().find(p);
+  // If the ParameterList's parent is a QTreeWidgetItem, it will be in the map
   if (i != Item::itemMap().end())
+  {
+    // The ParameterList's parent is a QTreeWidgetItem.
+    // The object to which it is mapped must be an ItemXML*.
     parentItem = dynamic_cast<ItemXML *>(i->second);
+    assert(parentItem != NULL);
+  }
 
-  ParameterListDialog dialog(type_,
-			     nestedParameter,
-			     node_.parentNode(), node_,
-			     parentItem, this,
-			     NULL, nestedParameter.name_);
+  // Create the dialog to edit the ParameterList
+  ParameterListDialog
+    dialog(type_,
+	   nestedParameter,        // description of the nested parameter
+	   node_.parentNode(),     // parent of the edited DOME tree node
+	   node_,                  // the edited DOME tree node
+	   parentItem,             // the parent ItemXML of the QTreeWidgetItem
+	   this,                   // this ParameterList
+	   NULL,                   // the parent of the ParameterListDialog
+	   nestedParameter.name_); // print name of the nested Parameter's type
   int rc = dialog.exec();
   if (rc == QDialog::Accepted) {
     dialog.setXML();

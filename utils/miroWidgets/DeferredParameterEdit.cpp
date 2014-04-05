@@ -18,6 +18,7 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #include "DeferredParameterEdit.h"
 #include "ParameterDialog.h"
 #include "ParameterListDialog.h"
@@ -32,7 +33,8 @@
 
 #include <qpushbutton.h>
 #include <qstring.h>
-#include <q3listview.h>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
 
 #include "qt_compatibility.h"
 
@@ -248,20 +250,28 @@ DeferredParameterEdit::setXML()
   //--------------------------------------
   // replace node by new content
 
-  // remember the predecessor
-  Q3ListViewItem * pre = NULL;
-  if (item_) {
-    Q3ListViewItem * parent = item_->listViewItem()->parent();
-    if (parent != NULL) {
-      pre = parent->firstChild();
-      while (pre != NULL) {
-	if (pre->nextSibling() == item_->listViewItem())
-	  break;
-	pre = pre->nextSibling();
+  // remember the predecessor, if there is one
+  QTreeWidgetItem * pre = NULL;
+  if (item_)
+  {
+    // Fetch the QTreeWidgetItem in the Item
+    QTreeWidgetItem * const pTreeWidgetItem = item_->treeWidgetItem();
+    assert(pTreeWidgetItem);
+    // Fetch the parent of the QTreeWidgetItem, if there is one
+    const QTreeWidgetItem * const pParent = pTreeWidgetItem->parent();
+    if (pParent)
+    {
+      // Fetch the child index of the QTreeWidgetItem wrt its parent
+      const int index = pParent->indexOfChild(pTreeWidgetItem);
+      // Fetch the QTreeWidgetItem's predecessor QTreeWidgetItem
+      if (index > 0)
+      {
+	pre = pParent->child(index - 1);
       }
     }
-    // delete the current content
+    // We are going to replace this item, so delete it now
     delete item_;
+    item_ = 0;
   }
 
   // replace the xml subtree
@@ -271,31 +281,48 @@ DeferredParameterEdit::setXML()
 
   // reconstruct the listview if available
   if (parentItem_) {
-    item_ = NULL;
+    // Store the newly-created ItemXML as the derived type to avoid downcasting
+    ParameterXML * pParameterXML = 0;
     QString typeName = parameter_.type_;
     if (type_ == NESTED_PARAMETER) {
       Miro::CFG::Type const * const parameterType =
 	ConfigFile::instance()->description().getType(typeName);
       
       if (parameterType == NULL) {
+	// The Item is a CompoundParameter
 	throw Miro::Exception(QString("Parameter description for " + typeName +
 				      " not found.\nCheck whether the relevant description file is loaded (4)."));
       }
     
-      item_ = new CompoundParameter(*parameterType,
+      pParameterXML =
+	      new CompoundParameter(*parameterType,
 				    node,
-				    parentItem_->listViewItem(), pre,
+				    parentItem_->treeWidgetItem(), pre,
 				    parentItem_, name());
+      assert(pParameterXML != 0);
     }
     else if (type_ == VECTOR ||
 	     type_ == SET) {
-      item_ = new ParameterList(parameter_, 
+      // The Item is a ParameterList
+      pParameterXML =
+	      new ParameterList(parameter_, 
 				node,
-				parentItem_->listViewItem(), pre,
+				parentItem_->treeWidgetItem(), pre,
 				parentItem_, name());
+      assert(pParameterXML != 0);
     }
-    if (item_ != NULL)
-      dynamic_cast<ParameterXML *>(item_)->init();
+    else
+    {
+      pParameterXML = NULL;
+    }
+    // Store the ParameterXML* as an ItemXML* in DialogXML::item_
+    item_ = pParameterXML;
+    assert(item_ == pParameterXML);
+    // If it is a CompoundParameter or ParameterList, initialize it
+    if (pParameterXML != NULL)
+    {
+      pParameterXML->init();
+    }
   }
 }
 

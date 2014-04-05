@@ -18,12 +18,14 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
 #ifndef SimpleParameterEdit_h
 #define SimpleParameterEdit_h
 
+// This application
 #include "ParameterEdit.h"
 #include "SimpleParameter.h"
-
+// The C++ Standard Library
 #include <string>
 #include <vector>
 
@@ -34,9 +36,8 @@ class QString;
 class QLineEdit;
 class QTextEdit;
 class QComboBox;
-class Q3ListBox;
+class QListWidget;
 class ConfigFile;
-
 
 class miroWidgets_Export SimpleParameterEdit : public ParameterEdit
 {
@@ -50,15 +51,19 @@ class miroWidgets_Export SimpleParameterEdit : public ParameterEdit
   typedef ParameterEdit Super;
 
 public:
+
   //----------------------------------------------------------------------------
   // public methods
   //----------------------------------------------------------------------------
 
   SimpleParameterEdit(SimpleParameter::Type _type,
 		      Miro::CFG::Parameter const& _parameter,
-		      QDomNode& _parentNode, QDomNode& _node,
-		      ItemXML * _parentItem, ItemXML * _item,
-		      QWidget * _parent, const char * _name);
+		      QDomNode& _parentNode,
+		      QDomNode& _node,
+		      ItemXML * _parentItem,
+		      ItemXML * _item,
+		      QWidget * _parent,
+		      const char * _name);
 
   //! Inherited interface.
   virtual void setXML();
@@ -86,7 +91,7 @@ protected:
   QLineEdit * lineEdit_;
   QTextEdit * textEdit_;
   QComboBox * typeBox_;
-  Q3ListBox * listBox_;
+  QListWidget * listBox_;
   bool typeBoxModified_;
   bool listBoxModified_;
   QString textEditText_;

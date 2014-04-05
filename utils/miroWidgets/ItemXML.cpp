@@ -18,21 +18,26 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ItemXML.h"
-
-#include <q3popupmenu.h>
-#include <qobject.h>
+// The Qt library
 #include <qinputdialog.h>
+#include <QMenu>
 #include <qmessagebox.h>
-#include <q3listview.h>
-
+#include <qobject.h>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+// The C++ Standard Library
 #include <cassert>
 
 QString const ItemXML::XML_ATTRIBUTE_KEY = "name";
 
 ItemXML::ItemXML(QDomNode const& _node,
-		 Q3ListViewItem * _parentItem, Q3ListViewItem * _pre,
-		 QObject * _parent, const char * _name) :
+		 QTreeWidgetItem * _parentItem,
+		 QTreeWidgetItem * _pre,
+		 QObject * _parent,
+		 const char * _name) :
   Super(_parentItem, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
@@ -42,8 +47,10 @@ ItemXML::ItemXML(QDomNode const& _node,
 }
 
 ItemXML::ItemXML(QDomNode const& _node,
-		 Q3ListView * _view, Q3ListViewItem * _pre,
-		 QObject * _parent, const char * _name) :
+		 QTreeWidget * _view,
+		 QTreeWidgetItem * _pre,
+		 QObject * _parent,
+		 const char * _name) :
   Super(_view, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
@@ -91,10 +98,12 @@ ItemXML::setModified(bool _modified, bool _recurse)
 }
 
 void 
-ItemXML::contextMenu(Q3PopupMenu& _menu)
+ItemXML::contextMenu(QMenu& _menu)
 {
-  _menu.insertItem("Set Name", this, SLOT(slotRename()));
-  _menu.insertSeparator();
+  // The context menu contains only a "Set Name" QAction.
+  QAction * const pAction = new QAction(tr("Set Name"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotRename()));
+  _menu.addAction(pAction);
 }
 
 void
@@ -222,7 +231,7 @@ ItemXML::rename(QString const& _name)
     // rename element
     element.setAttribute(XML_ATTRIBUTE_KEY, _name);
     setName(_name.latin1());
-    listViewItem()->setText(0, _name);
+    treeWidgetItem()->setText(0, _name);
     setModified();
   }
 

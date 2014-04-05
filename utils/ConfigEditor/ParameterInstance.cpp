@@ -18,22 +18,24 @@
 // along with this program; if not, write to the Free Software Foundation,
 // Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 //
+
+// This module
 #include "ParameterInstance.h"
-
-#include <q3popupmenu.h>
-
+// The Qt library
+#include <QMenu>
+// The C++ Standard Library
 #include <cassert>
 
 QString const ParameterInstance::XML_TAG = "instance";
 QString const ParameterInstance::XML_ATTRIBUTE_TYPE = "type";
 
-ParameterInstance::ParameterInstance(Q3ListViewItem * _listViewItem, 
-				     Q3ListViewItem * _pre,
+ParameterInstance::ParameterInstance(QTreeWidgetItem * _treeWidgetItem, 
+				     QTreeWidgetItem * _pre,
 				     QDomNode const& _node,
 				     QObject * _parent, const char * _name) :
   Super(type(_node, XML_ATTRIBUTE_TYPE),
 	_node,
-	_listViewItem, _pre, _parent, _name)
+	_treeWidgetItem, _pre, _parent, _name)
 {
 }
 
@@ -83,14 +85,33 @@ ParameterInstance::moveDown()
 }
 
 void
-ParameterInstance::contextMenu(Q3PopupMenu& _menu)
+ParameterInstance::contextMenu(QMenu& _menu)
 {
-  _menu.insertItem("Set Name", this, SLOT(slotRename()));
-  _menu.insertItem("Set Parameters", this, SLOT(slotSetParameters()));
-  _menu.insertSeparator();
-  _menu.insertItem("Up", this, SLOT(up()));
-  _menu.insertItem("Down", this, SLOT(down()));
-  _menu.insertSeparator();
-  _menu.insertItem("Delete", this, SLOT(slotDelete()));
-}
+  // The context menu has 5 QActions: "Set Name", "Set Parameters", "Up",
+  // "Down" and "Delete"
+  QAction * pAction = NULL;
 
+  pAction = new QAction(tr("Set Name"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotRename()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Set Parameters"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotSetParameters()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+
+  pAction = new QAction(tr("Up"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(up()));
+  _menu.addAction(pAction);
+
+  pAction = new QAction(tr("Down"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(down()));
+  _menu.addAction(pAction);
+
+  _menu.addSeparator();
+ 
+  pAction = new QAction(tr("Delete"), this);
+  connect(pAction, SIGNAL(triggered()), this, SLOT(slotDelete()));
+  _menu.addAction(pAction);
+}
