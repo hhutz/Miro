@@ -38,8 +38,10 @@
 class CatchingQApplication : public QApplication
 {
 public:
+  /** The constructor that this application needs. */
   CatchingQApplication(int& argc, char** argv) : QApplication(argc, argv) { }
 
+  /** Override QApplication::notify() to catch exceptions. */
   bool notify(QObject*  receiver, QEvent* event)
   {
     bool done = true;
@@ -49,23 +51,33 @@ public:
     }
     catch (const Miro::Exception& e)
     {
-       std::cout << "Miro exception:\n" << e << std::endl;
+      displayMessageDialog(QString(e.what()));
     }
     catch (const std::exception& e)
     {
-      std::cout << e.what() << std::endl;
+      displayMessageDialog(QString(e.what()));
     }
     catch (const QString& s)
     {
-      QMessageBox msgBox;
-      msgBox.setText(s);
-      msgBox.exec();
+      displayMessageDialog(s);
     }
     catch (...)
     {
-      std::cout << "An exception not in std::except" << std::endl;
+      displayMessageDialog(QString("An exception of unknown type was thrown"));
     }
     return done;
+  }
+private:
+
+  /**
+   * Create and display a message dialog with the supplied text.
+   * @param[in] s the message text to display
+   */
+  void displayMessageDialog(const QString& s)
+  {
+    QMessageBox msgBox;
+    msgBox.setText(s);
+    msgBox.exec();
   }
 };
 
