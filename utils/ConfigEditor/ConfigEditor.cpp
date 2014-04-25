@@ -27,8 +27,47 @@
 //#include "miro/Client.h"
 
 #include <qapplication.h>
-
+#include <QMessageBox>
 #include <iostream>
+
+/**
+ * A class derived from QApplication so that it can override member function
+ * notify() so as to catch exceptions. Exceptions should not be thrown from
+ * slots, and if they are, this is the way to catch them.
+ */
+class CatchingQApplication : public QApplication
+{
+public:
+  CatchingQApplication(int& argc, char** argv) : QApplication(argc, argv) { }
+
+  bool notify(QObject*  receiver, QEvent* event)
+  {
+    bool done = true;
+    try
+    {
+      done = QApplication::notify(receiver, event);
+    }
+    catch (const Miro::Exception& e)
+    {
+       std::cout << "Miro exception:\n" << e << std::endl;
+    }
+    catch (const std::exception& e)
+    {
+      std::cout << e.what() << std::endl;
+    }
+    catch (const QString& s)
+    {
+      QMessageBox msgBox;
+      msgBox.setText(s);
+      msgBox.exec();
+    }
+    catch (...)
+    {
+      std::cout << "An exception not in std::except" << std::endl;
+    }
+    return done;
+  }
+};
 
 int
 main(int argc, char * argv[]) 
@@ -38,7 +77,7 @@ main(int argc, char * argv[])
   ConfigFileName::instance()->setFileName(".ConfigEditor.xml");
 
   //  Miro::Client client(argc, argv);
-  QApplication app(argc, argv);
+  CatchingQApplication app(argc, argv);
 
   try {
     MainWindow mainWindow;
