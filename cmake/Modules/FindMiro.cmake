@@ -52,7 +52,9 @@ if( NOT MIRO_MAKEPARAMS_EXECUTABLE )
   )
 endif( NOT MIRO_MAKEPARAMS_EXECUTABLE )
 
-string(REGEX REPLACE "/[^/]*/[^/]*$" "" MIRO_ROOT_DIR ${MIRO_MAKEPARAMS_EXECUTABLE})
+string(REGEX REPLACE "/[^/]*/[^/]*$" "" _MIRO_ROOT_DIR ${MIRO_MAKEPARAMS_EXECUTABLE})
+# resolve any symlinks
+get_filename_component(MIRO_ROOT_DIR ${_MIRO_ROOT_DIR} REALPATH)
 
 if( MIRO_ROOT_DIR )
   
