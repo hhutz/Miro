@@ -194,7 +194,18 @@ FileListDialog::add()
 	text.append("\n");
 	text.append(duplicates.at(i));	    
       }
+#if (0)
+      /*
+       * The text in the QMessageBox can be so long that the dismiss button
+       * is not visible. At the request of Mark Allan, this QMessageBox is
+       * no longer displayed. The text is still built in case it can be used
+       * in some other way, such as writing to standard output or a log file.
+       * If this feature is to be removed completely, remove the definition
+       * of local variable "duplicates" and all the code that depends on
+       * that definition.
+       */
       QMessageBox::warning(this, title, text);
+#endif
     }
   }
 
