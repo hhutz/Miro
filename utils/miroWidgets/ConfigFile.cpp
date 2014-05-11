@@ -167,12 +167,25 @@ ConfigFile::parseDescriptionFiles()
       QString fileName = *first;
       QFile xmlFile( fileName );
       if (!xmlFile.exists()) {
-      QString infoText("Error parsing behaviour description file: \n" +
-		       fileName + "\n" +
-		       "File not found.");
-      QMessageBox::information(0, "Policy Editor", infoText);
-      descriptionFiles_.remove(first);
-      break;
+	// Always remove the pathname of the nonexistent file.
+	// Do this unconditionally before calling writeConfigFile() and
+	// before break;
+	descriptionFiles_.remove(first);
+	// For why this QMessageBox is built in this way, see
+	// http://qt-project.org/doc/qt-4.8/qmessagebox.html#the-property-based-api
+	// where it says: "Using the property-based API is recommended."
+	QMessageBox msgBox;
+	msgBox.setText("Parameter Description File not found:\n" +
+		       fileName + "\n");
+	msgBox.setInformativeText("Do you want to remove this file from the list?");
+	msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+	msgBox.setDefaultButton(QMessageBox::No);
+	const int ret = msgBox.exec();
+	if (ret == QMessageBox::Yes)
+	{
+	  writeConfigFile();
+	}
+	break;
       }
       QXmlInputSource source( xmlFile );
       QXmlSimpleReader reader;

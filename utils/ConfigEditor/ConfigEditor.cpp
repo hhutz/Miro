@@ -27,8 +27,59 @@
 //#include "miro/Client.h"
 
 #include <qapplication.h>
-
+#include <QMessageBox>
 #include <iostream>
+
+/**
+ * A class derived from QApplication so that it can override member function
+ * notify() so as to catch exceptions. Exceptions should not be thrown from
+ * slots, and if they are, this is the way to catch them.
+ */
+class CatchingQApplication : public QApplication
+{
+public:
+  /** The constructor that this application needs. */
+  CatchingQApplication(int& argc, char** argv) : QApplication(argc, argv) { }
+
+  /** Override QApplication::notify() to catch exceptions. */
+  bool notify(QObject*  receiver, QEvent* event)
+  {
+    bool done = true;
+    try
+    {
+      done = QApplication::notify(receiver, event);
+    }
+    catch (const Miro::Exception& e)
+    {
+      displayMessageDialog(QString(e.what()));
+    }
+    catch (const std::exception& e)
+    {
+      displayMessageDialog(QString(e.what()));
+    }
+    catch (const QString& s)
+    {
+      displayMessageDialog(s);
+    }
+    catch (...)
+    {
+      displayMessageDialog(QString("An exception of unknown type was thrown"));
+    }
+    return done;
+  }
+private:
+
+  /**
+   * Create and display a message dialog with the supplied text.
+   * @param[in] s the message text to display
+   */
+  void displayMessageDialog(const QString& s)
+  {
+    QMessageBox msgBox;
+    msgBox.setText(s);
+    msgBox.exec();
+  }
+};
 
 int
 main(int argc, char * argv[]) 
@@ -38,7 +89,7 @@ main(int argc, char * argv[])
   ConfigFileName::instance()->setFileName(".ConfigEditor.xml");
 
   //  Miro::Client client(argc, argv);
-  QApplication app(argc, argv);
+  CatchingQApplication app(argc, argv);
 
   try {
     MainWindow mainWindow;
