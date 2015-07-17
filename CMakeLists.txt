@@ -16,17 +16,17 @@ catkin_package(
   LIBRARIES miroCore miroBase miroParams miroXml
   )
 else (catkin_FOUND)
-  ## set up some defaults
-  set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
+## set up some defaults
+set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
-  include( SetArchitecture )
-  include( SetupBuildSwitch )
-  include( SetupConfigureFile )
-  include( SetupInstall )
-  include( SetupRPATH )
-  include( SetupUtilities )
-  include( UserOptions )
-  include( SetupWarnLevel )
+include( SetArchitecture )
+include( SetupBuildSwitch )
+include( SetupConfigureFile )
+include( SetupInstall )
+include( SetupRPATH )
+include( SetupUtilities )
+include( UserOptions )
+include( SetupWarnLevel )
 endif(catkin_FOUND)
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
@@ -60,7 +60,7 @@ include( GenerateMiroMakeParams )
 if (${CATKIN_TOPLEVEL})
   set( MIRO_MAKEPARAMS_EXECUTABLE ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION}/MakeParams )
 else (${CATKIN_TOPLEVEL})
-  set( MIRO_MAKEPARAMS_EXECUTABLE ${PROJECT_BINARY_DIR}/src/makeParams/${CMAKE_CFG_INTDIR}/MakeParams )
+set( MIRO_MAKEPARAMS_EXECUTABLE ${PROJECT_BINARY_DIR}/src/makeParams/${CMAKE_CFG_INTDIR}/MakeParams )
 endif (${CATKIN_TOPLEVEL})
 
 
@@ -111,7 +111,9 @@ install_export()
 
 # package script
 #------------------------------------
-#include( CMakePack.txt )
+if (NOT ${CATKIN_TOPLEVEL})
+include( CMakePack.txt )
+endif (NOT ${CATKIN_TOPLEVEL})
 
 #------------------------------------
 print_build_switches()
