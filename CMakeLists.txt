@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(Miro)
 
+###################################
+## catkin                        ##
+###################################
 if (${CATKIN_TOPLEVEL})
   find_package(catkin  REQUIRED COMPONENTS
     irg_cmake
@@ -11,22 +14,26 @@ if (catkin_FOUND)
 ###################################
 ## catkin specific configuration ##
 ###################################
-catkin_package(
-  INCLUDE_DIRS src
-  LIBRARIES miroCore miroBase miroParams miroXml
+  catkin_package(
+    INCLUDE_DIRS src
+    LIBRARIES miroCore miroBase miroParams miroXml
+    CFG_EXTRAS Miro-extras.cmake
   )
+  ## set variable with full path of extras file so we can append library info
+  set_cfg_extras_file()
+  
 else (catkin_FOUND)
-## set up some defaults
-set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
+  ## set up some defaults
+  set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
-include( SetArchitecture )
-include( SetupBuildSwitch )
-include( SetupConfigureFile )
-include( SetupInstall )
-include( SetupRPATH )
-include( SetupUtilities )
-include( UserOptions )
-include( SetupWarnLevel )
+  include( SetArchitecture )
+  include( SetupBuildSwitch )
+  include( SetupConfigureFile )
+  include( SetupInstall )
+  include( SetupRPATH )
+  include( SetupUtilities )
+  include( UserOptions )
+  include( SetupWarnLevel )
 endif(catkin_FOUND)
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
@@ -67,10 +74,9 @@ endif (${CATKIN_TOPLEVEL})
 ## add in and out of source dirs to include path
 ##-----------------------------------------------
 include_directories(
-    ${PROJECT_SOURCE_DIR}
     ${PROJECT_SOURCE_DIR}/src
-    ${PROJECT_BINARY_DIR}
     ${PROJECT_BINARY_DIR}/src
+    ${CATKIN_DEVEL_PREFIX}/include
 )
 
 ## Set up RPATH and *Config.h
@@ -119,3 +125,32 @@ endif (NOT ${CATKIN_TOPLEVEL})
 print_build_switches()
 
 message(STATUS "Miro version is ${MIRO_SOVERSION}")
+
+###############################################
+## We deviate from the standard usage of catkin's CFG_EXTRAS because 
+## that must run before targets are added, but we want this to run 
+## after targets are added (so we have a list of exported libraries 
+## that is consistent with the build switches). 
+## I"M PRETTY SURE THIS WILL BREAK WHEN BUILDING INSTALLSPACE
+## installation will be tricky. For now, we just acknowledge its
+## probably broken and carry on...
+if( Miro_CFG_EXTRAS_FILE )
+
+  cfg_extras_append_libraries()
+  
+  # copy the develspace extras to the one that will go into installspace
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${Miro_CFG_EXTRAS_FILE} ${Miro_CFG_EXTRAS_FILE}-install)
+
+  file( APPEND ${Miro_CFG_EXTRAS_FILE} "\n#-- Executables -----\n" )
+  file( APPEND ${Miro_CFG_EXTRAS_FILE} "set( MIRO_MAKEPARAMS_EXECUTABLE ${MIRO_MAKEPARAMS_EXECUTABLE} )\n" )
+  
+  # install file
+  ## there is not a consistent ordering of installation if install is called
+  ## at this level. Therefore, we create a cmake/postinstall subdirectory and make the 
+  ## call there. The last subdirectory added will have its install commands exectued last. 
+  file( APPEND ${Miro_CFG_EXTRAS_FILE}-install "\n#-- Executables -----\n" )
+  file( APPEND ${Miro_CFG_EXTRAS_FILE}-install "set( MIRO_MAKEPARAMS_EXECUTABLE ${CMAKE_INSTALL_PREFIX}/bin/MakeParams )\n" )
+  add_subdirectory( cmake/postinstall )
+  
+endif( Miro_CFG_EXTRAS_FILE )
+###############################################
