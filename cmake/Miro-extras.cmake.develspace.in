@@ -1,0 +1,9 @@
+# source: Miro-extras.cmake.develspace.in
+
+include( GenerateMiroMakeParams )
+
+## we have to add devel/include to catkin_INCLUDE_DIRS
+## so generated MakeParams include files can be seen
+set( MIRO_INCLUDE_DIR @CATKIN_DEVEL_PREFIX@/include )
+
+set( catkin_INCLUDE_DIRS ${catkin_INCLUDE_DIRS} ${MIRO_INCLUDE_DIR} )

@@ -1,0 +1,11 @@
+##
+## Miro-extras.cmake.installspace.in
+##
+## NOTE: This file is not used - it is here to trick catkin into thinking it
+## should install a Miro-extras.cmake file. What we actually install is 
+## a modified Miro-extras.cmake.develspace.in which has the install 
+## destination for MIRO_MAKEPARAMS_EXECUTABLE.
+## Prior to installing, the file is stored in develspace as
+## devel/share/Miro/cmake/Miro-extras.cmake-install
+##
+
