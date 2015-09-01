@@ -136,8 +136,6 @@ message(STATUS "Miro version is ${MIRO_SOVERSION}")
 ## probably broken and carry on...
 if( Miro_CFG_EXTRAS_FILE )
 
-  cfg_extras_append_libraries()
-  
   # copy the develspace extras to the one that will go into installspace
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${Miro_CFG_EXTRAS_FILE} ${Miro_CFG_EXTRAS_FILE}-install)
 
