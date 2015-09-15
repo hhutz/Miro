@@ -4,25 +4,13 @@ project(Miro)
 ###################################
 ## catkin                        ##
 ###################################
-if (${CATKIN_TOPLEVEL})
+if (CATKIN_DEVEL_PREFIX)
   find_package(catkin  REQUIRED COMPONENTS
     irg_cmake
 )
-endif(${CATKIN_TOPLEVEL})
+endif(CATKIN_DEVEL_PREFIX)
 
-if (catkin_FOUND)
-###################################
-## catkin specific configuration ##
-###################################
-  catkin_package(
-    INCLUDE_DIRS src
-    LIBRARIES miroCore miroBase miroParams miroXml
-    CFG_EXTRAS Miro-extras.cmake
-  )
-  ## set variable with full path of extras file so we can append library info
-  set_cfg_extras_file()
-  
-else (catkin_FOUND)
+if(NOT catkin_FOUND)
   ## set up some defaults
   set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
@@ -34,7 +22,7 @@ else (catkin_FOUND)
   include( SetupUtilities )
   include( UserOptions )
   include( SetupWarnLevel )
-endif(catkin_FOUND)
+endif(NOT catkin_FOUND)
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
@@ -53,6 +41,28 @@ build_with_var( WITH_JSON         JSONCPP_FOUND )
 ##-----------------------------------------------
 minimum_requirements( ACE_FOUND QT4_FOUND QT_QT3SUPPORT_FOUND )
 
+if (catkin_FOUND)
+###################################
+## catkin specific configuration ##
+###################################
+  set(MIRO_CATKIN_DEPENDS ACE QT_QTCORE QT_QTXML )
+  if(MIRO_BUILD_WITH_TAO)
+    set(MIRO_CATKIN_DEPENDS ${MIRO_CATKIN_DEPENDS} TAO)
+  endif(MIRO_BUILD_WITH_TAO)
+  if(MIRO_BUILD_WITH_JSON)
+    set(MIRO_CATKIN_DEPENDS ${MIRO_CATKIN_DEPENDS} JSONCPP)
+  endif(MIRO_BUILD_WITH_JSON)
+  
+  catkin_package(
+    INCLUDE_DIRS src
+    LIBRARIES miroCore miroBase miroParams miroXml
+    CFG_EXTRAS Miro-extras.cmake
+    DEPENDS ${MIRO_CATKIN_DEPENDS}
+  )
+  ## set variable with full path of extras file so we can append library info
+  set_cfg_extras_file()
+endif(catkin_FOUND)
+
 set( MIRO_SOVERSION_MAJOR    3 ) # epoch
 set( MIRO_SOVERSION_MINOR    2 ) # revision
 set( MIRO_SOVERSION_PATCH    0 ) # age
@@ -64,11 +74,11 @@ set( MIRO_SOVERSION         "${MIRO_SOVERSION_MAJOR}.${MIRO_SOVERSION_MINOR}.${M
 include( GenerateMiroMakeParams )
 # we need to tell the macro where to find the executable
 # because it isn't "installed" yet...
-if (${CATKIN_TOPLEVEL})
+if (CATKIN_DEVEL_PREFIX)
   set( MIRO_MAKEPARAMS_EXECUTABLE ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION}/MakeParams )
-else (${CATKIN_TOPLEVEL})
+else (CATKIN_DEVEL_PREFIX)
 set( MIRO_MAKEPARAMS_EXECUTABLE ${PROJECT_BINARY_DIR}/src/makeParams/${CMAKE_CFG_INTDIR}/MakeParams )
-endif (${CATKIN_TOPLEVEL})
+endif (CATKIN_DEVEL_PREFIX)
 
 
 ## add in and out of source dirs to include path
@@ -117,9 +127,9 @@ install_export()
 
 # package script
 #------------------------------------
-if (NOT ${CATKIN_TOPLEVEL})
+if (NOT CATKIN_DEVEL_PREFIX)
 include( CMakePack.txt )
-endif (NOT ${CATKIN_TOPLEVEL})
+endif (NOT CATKIN_DEVEL_PREFIX)
 
 #------------------------------------
 print_build_switches()
@@ -135,8 +145,6 @@ message(STATUS "Miro version is ${MIRO_SOVERSION}")
 ## installation will be tricky. For now, we just acknowledge its
 ## probably broken and carry on...
 if( Miro_CFG_EXTRAS_FILE )
-
-  cfg_extras_append_libraries()
   
   # copy the develspace extras to the one that will go into installspace
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy ${Miro_CFG_EXTRAS_FILE} ${Miro_CFG_EXTRAS_FILE}-install)
