@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package>
+  <name>Miro</name>
+  <version>3.0.0</version>
+  <description>The Middleware for Robots</description>
+  <maintainer email="hans.utz@gmx.de">Hans Utz</maintainer>
+
+  <license>LGPL</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>irg_cmake</build_depend>
+</package>

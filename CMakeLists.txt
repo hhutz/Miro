@@ -1,9 +1,21 @@
+cmake_minimum_required(VERSION 2.8.3)
 project(Miro)
 
-## target-specific defines in src/miro require version 2.6
-cmake_minimum_required(VERSION 2.6)
-cmake_policy(SET CMP0003 NEW)  
+if (${CATKIN_TOPLEVEL})
+  find_package(catkin  REQUIRED COMPONENTS
+    irg_cmake
+)
+endif(${CATKIN_TOPLEVEL})
 
+if (catkin_FOUND)
+###################################
+## catkin specific configuration ##
+###################################
+catkin_package(
+  INCLUDE_DIRS src
+  LIBRARIES miroCore miroBase miroParams miroXml
+  )
+else (catkin_FOUND)
 ## set up some defaults
 set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
@@ -15,6 +27,7 @@ include( SetupRPATH )
 include( SetupUtilities )
 include( UserOptions )
 include( SetupWarnLevel )
+endif(catkin_FOUND)
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
@@ -44,7 +57,11 @@ set( MIRO_SOVERSION         "${MIRO_SOVERSION_MAJOR}.${MIRO_SOVERSION_MINOR}.${M
 include( GenerateMiroMakeParams )
 # we need to tell the macro where to find the executable
 # because it isn't "installed" yet...
+if (${CATKIN_TOPLEVEL})
+  set( MIRO_MAKEPARAMS_EXECUTABLE ${CATKIN_DEVEL_PREFIX}/${CATKIN_PACKAGE_BIN_DESTINATION}/MakeParams )
+else (${CATKIN_TOPLEVEL})
 set( MIRO_MAKEPARAMS_EXECUTABLE ${PROJECT_BINARY_DIR}/src/makeParams/${CMAKE_CFG_INTDIR}/MakeParams )
+endif (${CATKIN_TOPLEVEL})
 
 
 ## add in and out of source dirs to include path
@@ -94,7 +111,9 @@ install_export()
 
 # package script
 #------------------------------------
+if (NOT ${CATKIN_TOPLEVEL})
 include( CMakePack.txt )
+endif (NOT ${CATKIN_TOPLEVEL})
 
 #------------------------------------
 print_build_switches()
