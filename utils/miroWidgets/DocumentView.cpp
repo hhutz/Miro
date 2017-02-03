@@ -71,6 +71,10 @@ DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f)
 	  SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)),
 	  this,
 	  SLOT(slotDoubleClick(QTreeWidgetItem *, int)));
+
+  setColumnWidth(0, 400);
+  setColumnWidth(1, 150);
+  setColumnWidth(2, 200);
 }
 
 DocumentView::~DocumentView()
