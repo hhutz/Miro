@@ -52,7 +52,7 @@ if (catkin_FOUND)
   if(MIRO_BUILD_WITH_JSON)
     set(MIRO_CATKIN_DEPENDS ${MIRO_CATKIN_DEPENDS} JSONCPP)
   endif(MIRO_BUILD_WITH_JSON)
-  
+
   catkin_package(
     INCLUDE_DIRS src
     LIBRARIES miroCore miroBase miroParams miroXml
@@ -61,6 +61,10 @@ if (catkin_FOUND)
   )
   ## set variable with full path of extras file so we can append library info
   set_cfg_extras_file()
+  
+  # add devel/include - this should add to persistent catkin metadata
+  list(APPEND ${PROJECT_NAME}_INCLUDE_DIRS ${CATKIN_DEVEL_PREFIX}/include)
+
 endif(catkin_FOUND)
 
 set( MIRO_SOVERSION_MAJOR    3 ) # epoch
@@ -158,6 +162,7 @@ if( Miro_CFG_EXTRAS_FILE )
   file( APPEND ${Miro_CFG_EXTRAS_FILE}-install "\n#-- Executables -----\n" )
   file( APPEND ${Miro_CFG_EXTRAS_FILE}-install "set( MIRO_MAKEPARAMS_EXECUTABLE ${CMAKE_INSTALL_PREFIX}/bin/MakeParams )\n" )
   add_subdirectory( cmake/postinstall )
-  
+    
 endif( Miro_CFG_EXTRAS_FILE )
 ###############################################
+
