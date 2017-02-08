@@ -4,6 +4,8 @@ project(Miro)
 ## set up some defaults
 set( CMAKE_MODULE_PATH  ${PROJECT_SOURCE_DIR}/cmake/Modules ${CMAKE_MODULE_PATH})
 
+include( CMakePackageConfigHelpers )
+
 include( SetArchitecture )
 include( SetupBuildSwitch )
 include( SetupConfigureFile )
@@ -97,3 +99,19 @@ install_export()
 print_build_switches()
 
 message(STATUS "Miro version is ${MIRO_SOVERSION}")
+
+## create a cmake config file that
+## is compatible with catkin_tools
+##------------------------------------
+set ( ${PROJECT_UPPER}_INCLUDE_DIRS "include" )
+set ( CMAKE_CONFIG_DEST "share/${PROJECT_NAME}/cmake" )
+configure_package_config_file (                         
+        "cmake/${PROJECT_NAME}Config.cmake.in"
+        "${CMAKE_BINARY_DIR}/${PROJECT_NAME}Config.cmake"  
+        INSTALL_DESTINATION "${CMAKE_CONFIG_DEST}"
+        PATH_VARS ${PROJECT_UPPER}_INCLUDE_DIRS
+)
+export ( PACKAGE ${PROJECT_NAME} ) 
+install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}Config.cmake 
+         DESTINATION ${CMAKE_CONFIG_DEST} )
+
