@@ -37,6 +37,7 @@
 #include <QMenuBar>
 #include <QMessageBox>
 #include <QPushButton>
+#include <QSettings>
 // The C++ Standard Library
 #include <cassert>
 
@@ -57,7 +58,7 @@ MainWindow::MainWindow() :
   configDialog_(new FileListDialog(this, "Config dialog", "Parameter description files", filters)),
   interfaceName_("Video")
 {
-  resize(400, 300);
+  resize(1000, 400);
   //-----------//
   // init menu //
   //-----------//
@@ -132,6 +133,8 @@ MainWindow::MainWindow() :
   view_->setDocument(&document_, ConfigDocumentXML::XML_TAG);
 
   setCentralWidget(view_);
+  
+  readSettings();
 }
 
 MainWindow::~MainWindow()
@@ -247,8 +250,18 @@ void
 MainWindow::closeEvent(QCloseEvent *e)
 {
   view_->tryClose(e);
+  QSettings settings("Miro", "ConfigEditor");
+  settings.setValue("geometry", saveGeometry());
+  settings.setValue("windowState", saveState());
+  QMainWindow::closeEvent(e);
 }
 
+void MainWindow::readSettings()
+{
+  QSettings settings("Miro", "ConfigEditor");
+  restoreGeometry(settings.value("geometry").toByteArray());
+  restoreState(settings.value("windowState").toByteArray());
+}
 void MainWindow::slotNew()    { if (view_) { view_->slotNew();    } }
 void MainWindow::slotLoad()   { if (view_) { view_->slotLoad();   } }
 void MainWindow::slotSave()   { if (view_) { view_->slotSave();   } }
