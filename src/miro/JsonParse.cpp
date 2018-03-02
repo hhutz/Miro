@@ -52,7 +52,7 @@ namespace Miro
       throw Miro::Exception("expected char");
 
 #if QT_VERSION >= 0x040000
-    lhs = value[0].toAscii();
+    lhs = value[0].toLatin1();
 #else
     lhs = value[0].latin1();
 #endif
