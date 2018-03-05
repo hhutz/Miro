@@ -20,8 +20,8 @@ add_dependencies( MakeParams miroParams_static )
 install_targets( /bin MakeParams )
 
 target_link_libraries( MakeParams
+  ${QT_QTXML_LIBRARY}
+  ${QT_QTCORE_LIBRARY}
   ${ACE_LIBRARIES}
   ${JSONCPP_LIBRARIES}
-  Qt5::Widgets
-  Qt5::Xml
 )

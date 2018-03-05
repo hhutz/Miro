@@ -44,7 +44,8 @@ add_library( ${XML_LIB_NAME} SHARED
 target_link_libraries( ${XML_LIB_NAME}
   ${BASE_LIB_NAME}
   ${CORE_LIB_NAME}
-  Qt5::Xml
+  ${QT_QTXML_LIBRARY}
+  ${QT_QTCORE_LIBRARY}
 )
 
 # add target-specific defines
