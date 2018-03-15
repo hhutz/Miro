@@ -22,8 +22,8 @@
 #ifndef OkCancelDialog_h
 #define OkCancelDialog_h
 
-#include <QDialog>
-#include <QDom>
+#include <qdialog.h>
+#include <qdom.h>
 
 #include <iostream>
 
