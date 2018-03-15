@@ -27,7 +27,6 @@ endif(NOT catkin_FOUND)
 
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
-add_build_var( WITH_QT4         BUILD_DEFAULT_TRUE )
 
 if("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
   message(STATUS "FOUND QT 5")
