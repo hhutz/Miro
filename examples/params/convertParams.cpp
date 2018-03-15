@@ -88,7 +88,7 @@ SimpleSurveyParameters readXml(const string& xmlName)
   QFile xmlFile(xmlName.c_str());
   if (!xmlFile.open(QIODevice::ReadOnly)) {
     cerr << "couldn't open " << xmlName << " for reading: "
-         << ((const char*) xmlFile.errorString().toAscii()) << endl;
+         << ((const char*) xmlFile.errorString().toLatin1()) << endl;
     exit(1);
   }
 
@@ -116,7 +116,7 @@ void writeXml(const string& xmlName, const SimpleSurveyParameters& params)
   QFile xmlFile(xmlName.c_str());
   if (!xmlFile.open(QIODevice::WriteOnly)) {
     cerr << "couldn't open " << xmlName << " for writing: "
-         << ((const char*) xmlFile.errorString().toAscii()) << endl;
+         << ((const char*) xmlFile.errorString().toLatin1()) << endl;
     exit(1);
   }
   QTextStream ts(&xmlFile);

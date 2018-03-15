@@ -1,9 +1,6 @@
 set( UTILS_BIN_DIR /bin )
 
-include_directories(
-  ${QT_QTGUI_INCLUDE_DIR}
-  ${QT_QT3SUPPORT_INCLUDE_DIR}
-)
+
 
 link_libraries(
   ${QT_QTGUI_LIBRARY}

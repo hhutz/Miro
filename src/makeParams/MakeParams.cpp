@@ -28,7 +28,9 @@
 #include "params/Generator.h"
 #include "params/TextErrorHandler.h"
 
-#include <qstring.h>
+#include <QApplication>
+
+#include <QString>
 #include <qfile.h>
 #include <qxml.h>
 

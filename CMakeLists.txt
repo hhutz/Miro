@@ -7,6 +7,7 @@ project(Miro)
 if (CATKIN_DEVEL_PREFIX)
   find_package(catkin  REQUIRED COMPONENTS
     irg_cmake
+    qt_gui_cpp
 )
 endif(CATKIN_DEVEL_PREFIX)
 
@@ -27,9 +28,29 @@ endif(NOT catkin_FOUND)
 add_build_var( WITH_TAO          BUILD_DEFAULT_TRUE )
 add_build_var( WITH_JSON         BUILD_DEFAULT_TRUE )
 
-find_package( ACE )
-find_package( Qt4 )
+if("${qt_gui_cpp_USE_QT_MAJOR_VERSION} " STREQUAL "5 ")
+  message(STATUS "FOUND QT 5")
+  find_package(Qt5Widgets REQUIRED)
+  find_package(Qt5Xml REQUIRED)
+  if (Qt5_POSITION_INDEPENDENT_CODE)
+    SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  endif()
+  include_directories(SYSTEM "${Qt5Widgets_INCLUDE_DIRS}")
+  include_directories(SYSTEM "${Qt5Xml_INCLUDE_DIRS}")
+  set(QT_QTXML_LIBRARY Qt5::Xml)
+  set(QT_QTCORE_LIBRARY Qt5::Widgets)
+  add_build_var( WITH_QT4         BUILD_DEFAULT_FALSE )
+else()
+  message(STATUS "FOUND QT 4")
+  find_package(Qt4 COMPONENTS QtCore QtGui REQUIRED)
+  include(${QT_USE_FILE})
+  include_directories(SYSTEM "${QT_INCLUDE_DIR}")
+  include_directories(SYSTEM "${QT_QTXML_INCLUDE_DIR}")
+  include_directories(SYSTEM "${QT_QTCORE_INCLUDE_DIR}")
+  add_build_var( WITH_QT4    BUILD_DEFAULT_TRUE )
+endif()
 
+find_package( ACE )
 find_package_if( TAO     MIRO_BUILD_WITH_TAO  )
 find_package_if( JsonCpp MIRO_BUILD_WITH_JSON )
 
@@ -39,13 +60,13 @@ build_with_var( WITH_JSON         JSONCPP_FOUND )
 ## if we don't have the following components, 
 ## we cannot continue
 ##-----------------------------------------------
-minimum_requirements( ACE_FOUND QT4_FOUND QT_QT3SUPPORT_FOUND )
+minimum_requirements( ACE_FOUND )
 
 if (catkin_FOUND)
 ###################################
 ## catkin specific configuration ##
 ###################################
-  set(MIRO_CATKIN_DEPENDS ACE QT_QTCORE QT_QTXML )
+  set(MIRO_CATKIN_DEPENDS ACE )
   if(MIRO_BUILD_WITH_TAO)
     set(MIRO_CATKIN_DEPENDS ${MIRO_CATKIN_DEPENDS} TAO)
   endif(MIRO_BUILD_WITH_TAO)
@@ -108,20 +129,10 @@ include_directories(
   ${TAO_INCLUDE_DIRS}
 )
 
-# everything needs to link to Qt, so set it
-# up at the top level for convinience
-##-----------------------------------------------
-include_directories(
-  ${QT_INCLUDE_DIR}
-  ${QT_QT_INCLUDE_DIR}
-  ${QT_QTXML_INCLUDE_DIR}
-  ${QT_QTCORE_INCLUDE_DIR}
-)
-
 # always build these
 #----------------------
 add_subdirectory( src )
-add_build_switch( utils    BUILD_DEFAULT_TRUE )
+add_build_switch( utils    MIRO_BUILD_WITH_QT4 )
 add_build_switch( examples BUILD_DEFAULT_TRUE )
 add_build_switch( tests    BUILD_DEFAULT_TRUE )
 
