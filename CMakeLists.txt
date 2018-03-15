@@ -48,7 +48,7 @@ else()
   include_directories(SYSTEM "${QT_INCLUDE_DIR}")
   include_directories(SYSTEM "${QT_QTXML_INCLUDE_DIR}")
   include_directories(SYSTEM "${QT_QTCORE_INCLUDE_DIR}")
-add_build_var( WITH_QT4         BUILD_DEFAULT_TRUE )
+  add_build_var( WITH_QT4    BUILD_DEFAULT_TRUE )
 endif()
 
 find_package( ACE )
@@ -133,7 +133,7 @@ include_directories(
 # always build these
 #----------------------
 add_subdirectory( src )
-add_build_switch( utils    WITH_QT4 )
+add_build_switch( utils    MIRO_BUILD_WITH_QT4 )
 add_build_switch( examples BUILD_DEFAULT_TRUE )
 add_build_switch( tests    BUILD_DEFAULT_TRUE )
 
