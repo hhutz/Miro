@@ -21,7 +21,6 @@
 // $Id$
 //
 #define QT_ALTERNATE_QTSMANIP
-#define __PIC__
 
 #include <ace/Get_Opt.h>
 
