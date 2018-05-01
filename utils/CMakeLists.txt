@@ -12,6 +12,7 @@ link_libraries(
 
 include_directories(
   ${PROJECT_SOURCE_DIR}/utils
+  ${QT_QT3SUPPORT_INCLUDE_DIR}
 )
 
 add_definitions( -DQT3_SUPPORT ) 
