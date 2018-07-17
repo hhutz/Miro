@@ -21,6 +21,7 @@ if ( MIRO_BUILD_WITH_JSON )
 endif ( MIRO_BUILD_WITH_JSON )
 
 link_libraries(
+  ${ACE_LIBRARIES}
   miroParamsExample
   miroJson
 )
