@@ -209,7 +209,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     if (!e.isNull()) {
       QDomNodeList l = e.childNodes();
       int i;
-      for (i = 0; i < l.length(); ++i) {
+      for (i = 0; i < (int)l.length(); ++i) {
 	if (l.item(i).isText()) {
 	  QDomText t = l.item(i).toText();
 	  textEditText_ = t.data();
@@ -224,6 +224,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     switch (_type) {
 
     case SimpleParameter::ENUMERATION:
+    {
       // init combo box
       typeBox_->setEditable(false);
       stringvec = fullDef2StringVector(parameter_.fullDefault_);
@@ -231,19 +232,27 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	typeBox_->insertItem(-1, i->c_str());
 
       // set current value
+      QString text = parameter_.default_;
       if (!node_.isNull()) {
 	QDomElement e = node_.toElement();
-	if (!e.isNull() && e.hasAttribute("value")) {
-	  typeBox_->setCurrentText(e.attribute("value"));
-	}
-      } else {
-	typeBox_->setCurrentText(parameter_.default_);
+       if (!e.isNull() && e.hasAttribute("value")) {
+         text = e.attribute("value");
+       }
       }
-
+      int i = typeBox_->findText(text);
+      if (i != -1) {
+        typeBox_->setCurrentIndex(i);
+      }
+      else if (typeBox_->isEditable()) {
+        typeBox_->setEditText(text);
+      }
+      else {
+        typeBox_->setItemText(typeBox_->currentIndex(), text);
+      }
       // connect to function, so we recognize, if value is changed
       connect(typeBox_, SIGNAL(activated(const QString&)), this, SLOT(typeBoxModified()));
       break;
-
+    }
     case SimpleParameter::ENUMERATIONMULTIPLE:
       // init list box
       // For each selected element of 
@@ -391,7 +400,7 @@ SimpleParameterEdit::setXML()
     // if already existing, replace text
     QDomNodeList l = e.childNodes();
     int i;
-    for (i = 0; i < l.length(); ++i) {
+    for (i = 0; i < (int)l.length(); ++i) {
       if (l.item(i).isText()) {
 	QDomText t = l.item(i).toText();
 	t.setNodeValue(textEdit_->toPlainText());
@@ -399,7 +408,7 @@ SimpleParameterEdit::setXML()
       }
     }
     // otherwise create text node and add text
-    if (i == l.length()) {
+    if (i == (int)l.length()) {
       std::cout << "ping" << std::endl;
       QDomText t = parentNode_.ownerDocument().createTextNode(textEdit_->toPlainText());
       e.appendChild(t);
