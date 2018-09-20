@@ -134,7 +134,7 @@ include_directories(
 # always build these
 #----------------------
 add_subdirectory( src )
-add_build_switch( utils    MIRO_BUILD_WITH_QT4 )
+add_subdirectory( utils )
 add_build_switch( examples BUILD_DEFAULT_TRUE )
 add_build_switch( tests    BUILD_DEFAULT_TRUE )
 

@@ -24,9 +24,22 @@ set( MOC_HEADERS
 	MainForm.h
 )
 
+include_directories(
+  ${QT_QT3SUPPORT_INCLUDE_DIR}
+)
+
+add_definitions( -DQT3_SUPPORT )
+
 qt_wrap_cpp(${EXEC} MOC_FILES ${MOC_HEADERS})
 
 link_libraries( miro miroParams miroWidgets )
+link_libraries(
+  ${QT_QTGUI_LIBRARY}
+  ${QT_QT3SUPPORT_LIBRARY}
+  # Qt3Support also requires the following libs...
+  ${QT_QTSQL_LIBRARY}
+  ${QT_QTNETWORK_LIBRARY}
+)
 
 add_executable( ${EXEC}
 	${SOURCES}
