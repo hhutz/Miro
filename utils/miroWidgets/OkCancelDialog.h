@@ -54,7 +54,7 @@ public:
   //----------------------------------------------------------------------------
 
   //! Initializing constructor.
-  OkCancelDialog(QWidget * _parent, const char * _name, bool _modal = true);
+  OkCancelDialog(QWidget * _parent, QString const& _name, bool _modal = true);
 
   bool modified() const;
   

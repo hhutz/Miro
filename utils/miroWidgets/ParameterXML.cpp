@@ -36,7 +36,7 @@ ParameterXML::ParameterXML(QDomNode const& _node,
 			   QTreeWidgetItem * _parentItem,
 			   QTreeWidgetItem * _pre,
 			   QObject * _parent,
-			   const char * _name) :
+			   QString const& _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   config_(ConfigFile::instance())
 {
@@ -47,7 +47,7 @@ ParameterXML::ParameterXML(QDomNode const& _node,
 			   QTreeWidget * _view,
 			   QTreeWidgetItem * _pre,
 			   QObject * _parent,
-			   const char * _name) :
+			   QString const& _name) :
   Super(_node, _view, _pre, _parent, _name),
   config_(ConfigFile::instance())
 {

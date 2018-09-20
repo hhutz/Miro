@@ -32,7 +32,7 @@ QString const ParameterInstance::XML_ATTRIBUTE_TYPE = "type";
 ParameterInstance::ParameterInstance(QTreeWidgetItem * _treeWidgetItem, 
 				     QTreeWidgetItem * _pre,
 				     QDomNode const& _node,
-				     QObject * _parent, const char * _name) :
+				     QObject * _parent, QString const& _name) :
   Super(type(_node, XML_ATTRIBUTE_TYPE),
 	_node,
 	_treeWidgetItem, _pre, _parent, _name)

@@ -37,7 +37,7 @@ ItemXML::ItemXML(QDomNode const& _node,
 		 QTreeWidgetItem * _parentItem,
 		 QTreeWidgetItem * _pre,
 		 QObject * _parent,
-		 const char * _name) :
+		 QString const& _name) :
   Super(_parentItem, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
@@ -50,7 +50,7 @@ ItemXML::ItemXML(QDomNode const& _node,
 		 QTreeWidget * _view,
 		 QTreeWidgetItem * _pre,
 		 QObject * _parent,
-		 const char * _name) :
+		 QString const& _name) :
   Super(_view, _pre, _parent, _name),
   node_(_node),
   widget_(NULL),
@@ -114,13 +114,13 @@ ItemXML::slotRename()
 
   bool ok = false;
   QString text = 
-    QInputDialog::getText(tr( "Rename Entry" ),
+    QInputDialog::getText(NULL, tr( "Rename Entry" ),
 			  tr( "New name:" ),
 			  QLineEdit::Normal,
-			  name(), &ok, NULL);
+			  objectName(), &ok);
   if (ok && 
       !text.isEmpty() && 
-      text != name()) {
+      text != objectName()) {
     rename(text);
   }
 }
@@ -230,7 +230,7 @@ ItemXML::rename(QString const& _name)
   if (name != _name) {
     // rename element
     element.setAttribute(XML_ATTRIBUTE_KEY, _name);
-    setName(_name.latin1());
+    setObjectName(_name);
     treeWidgetItem()->setText(0, _name);
     setModified();
   }

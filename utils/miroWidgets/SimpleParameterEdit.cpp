@@ -69,7 +69,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 					 ItemXML * _parentItem, 
 					 ItemXML * _item,
 					 QWidget * _parent, 
-					 const char * _name) :
+					 QString const& _name) :
   Super(_parameter, _parentNode, _node, 
 	_parentItem, _item,
 	_parent, _name),
@@ -84,7 +84,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 {
   if (parameter_.type_ == "Miro::Enumeration" || 
       parameter_.type_ == "Enumeration") {
-    typeBox_ = new QComboBox(_parent, "type_box");
+    typeBox_ = new QComboBox(_parent);
     editWidget_ = typeBox_;
   } else if (parameter_.type_ == "Miro::EnumerationMultiple" || 
 	     parameter_.type_ == "EnumerationMultiple") {
@@ -102,12 +102,12 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     editWidget_ = listBox_;
   } else if (parameter_.type_ == "Miro::Text" ||
 	     parameter_.type_ == "Text") {
-    textEdit_ = new QTextEdit(_parent, "text_edit");
+    textEdit_ = new QTextEdit(_parent);
     textEdit_->setAcceptRichText(false);
     textEdit_->setAutoFormatting(QTextEdit::AutoNone);
     editWidget_ = textEdit_;
   } else {
-    lineEdit_ = new QLineEdit(_parent, "line_edit");
+    lineEdit_ = new QLineEdit(_parent);
     editWidget_ = lineEdit_;
   }
 
@@ -190,7 +190,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 
     // add default as tooltip
     if (!parameter_.default_.isEmpty()) {
-      QToolTip::add(lineEdit_, QString("default: ") + parameter_.default_);
+      lineEdit_->setToolTip(QString("default: ") + parameter_.default_);
     }
 
     // set current value
@@ -202,13 +202,13 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
     }
 
     // set lineEdit to unedited
-    lineEdit_->setEdited(false);
+    lineEdit_->setModified(false);
   }
   else if (textEdit_ != NULL) {
     QDomElement e = node_.toElement();
     if (!e.isNull()) {
       QDomNodeList l = e.childNodes();
-      unsigned int i;
+      int i;
       for (i = 0; i < l.length(); ++i) {
 	if (l.item(i).isText()) {
 	  QDomText t = l.item(i).toText();
@@ -225,10 +225,10 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 
     case SimpleParameter::ENUMERATION:
       // init combo box
-      typeBox_->setEditable(FALSE);
+      typeBox_->setEditable(false);
       stringvec = fullDef2StringVector(parameter_.fullDefault_);
       for (vector<string>::const_iterator i= stringvec.begin(); i!=stringvec.end(); ++i)
-	typeBox_->insertItem(i->c_str());
+	typeBox_->insertItem(-1, i->c_str());
 
       // set current value
       if (!node_.isNull()) {
@@ -262,7 +262,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	QDomElement e = node_.toElement();
 	if (!e.isNull() && e.hasAttribute("value")) {
 	  QString tmp1 = e.attribute("value");
-	  std::vector<std::string> tmp2 = tokenizer(std::string(tmp1.latin1()));
+	  std::vector<std::string> tmp2 = tokenizer(tmp1.toStdString());
 	  for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
 	    /// @todo Unify repeated code
 	    // Cache the string to avoid repeated lookups and construction
@@ -282,7 +282,7 @@ SimpleParameterEdit::SimpleParameterEdit(SimpleParameter::Type _type,
 	  }
 	}
       } else {
-	std::vector<std::string> tmp2 = tokenizer(std::string(parameter_.default_.latin1()));
+	std::vector<std::string> tmp2 = tokenizer(parameter_.default_.toStdString());
 	for (std::vector<std::string>::const_iterator i=tmp2.begin(); i!=tmp2.end(); ++i) {
 	  /// @todo Unify repeated code
 	  // Cache the string to avoid repeated lookups and construction
@@ -316,7 +316,7 @@ void
 SimpleParameterEdit::setXML()
 {
   // no edit -> nothing to be done
-  if (lineEdit_ && !lineEdit_->edited())
+  if (lineEdit_ && !lineEdit_->isModified())
     return;
 
   // delete entry if edit field is empty
@@ -335,7 +335,7 @@ SimpleParameterEdit::setXML()
     }
     else {
       if (lineEdit_)
-	lineEdit_->setEdited(false);
+	lineEdit_->setModified(false);
       else if (textEdit_)
 	textEditText_ = textEdit_->toPlainText();
       else if (typeBox_)
@@ -353,7 +353,7 @@ SimpleParameterEdit::setXML()
     assert(!parentNode_.ownerDocument().isNull());
     QDomElement e = parentNode_.ownerDocument().createElement(XML_TAG_PARAMETER);
 
-    e.setAttribute(XML_ATTRIBUTE_KEY, name());
+    e.setAttribute(XML_ATTRIBUTE_KEY, objectName());
     node_ = parentNode_.appendChild(e);
 
     assert(!node_.isNull());
@@ -365,7 +365,7 @@ SimpleParameterEdit::setXML()
 	new SimpleParameter(parameter_,
 			    node_,
 			    parentItem_->treeWidgetItem(), NULL,
-			    parentItem_, name());
+			    parentItem_, objectName());
       newParam->init();
       item_ = newParam;
     }
@@ -383,14 +383,14 @@ SimpleParameterEdit::setXML()
 	item_->treeWidgetItem()->setText(1, e.attribute(XML_ATTRIBUTE_VALUE));
     }
     else {
-      lineEdit_->setEdited(false);
+      lineEdit_->setModified(false);
     }
   }
   else if (textEdit_) {
 
     // if already existing, replace text
     QDomNodeList l = e.childNodes();
-    unsigned int i;
+    int i;
     for (i = 0; i < l.length(); ++i) {
       if (l.item(i).isText()) {
 	QDomText t = l.item(i).toText();
@@ -465,7 +465,7 @@ bool
 SimpleParameterEdit::modified() const 
 {
   if (lineEdit_) 
-    return lineEdit_->edited();
+    return lineEdit_->isModified();
   else if (textEdit_) 
     return textEdit_->toPlainText() != textEditText_;
   else if (typeBox_)

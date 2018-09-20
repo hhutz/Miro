@@ -34,10 +34,10 @@ class miroWidgets_Export MyIntValidator : public QIntValidator
 
 public:
   //! Inherited method.
-  MyIntValidator(QObject * parent, const char *name = 0);
+  MyIntValidator(QObject * parent, QString const& name = QString());
   //! Inherited method.
   MyIntValidator(int bottom, int top,
-		 QObject * parent, const char *name = 0);
+		 QObject * parent, QString const& name = QString());
   //! Inherited method.
   QValidator::State validate(QString &, int &) const;
 
@@ -59,10 +59,10 @@ class MyFloatValidator : public QDoubleValidator
 
 public:
   //! Inherited method.
-  MyFloatValidator(QObject * parent, const char *name = 0);
+  MyFloatValidator(QObject * parent, QString const& name = QString());
   //! Inherited method.
   MyFloatValidator(float bottom, float top, int decimals,
-		    QObject * parent, const char *name = 0);
+                   QObject * parent, QString const& name = QString());
   //! Inherited method.
   QValidator::State validate(QString &, int &) const;
 
@@ -84,10 +84,10 @@ class MyDoubleValidator : public QDoubleValidator
 
 public:
   //! Inherited method.
-  MyDoubleValidator(QObject * parent, const char *name = 0);
+  MyDoubleValidator(QObject * parent, QString const& name = QString());
   //! Inherited method.
   MyDoubleValidator(double bottom, double top, int decimals,
-		    QObject * parent, const char *name = 0);
+                    QObject * parent, QString const& name = QString());
   //! Inherited method.
   QValidator::State validate(QString &, int &) const;
 
@@ -109,7 +109,7 @@ class MyBoolValidator : public QValidator
 
 public:
   //! Inherited method.
-  MyBoolValidator(QObject * parent, const char *name = 0);
+  MyBoolValidator(QObject * parent, QString const& name = QString());
   //! Inherited method.
   QValidator::State validate(QString &, int &) const;
 

@@ -40,7 +40,7 @@ CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QTreeWidgetItem * _parentItem,
 				     QTreeWidgetItem * _pre,
 				     QObject * _parent,
-				     const char * _name) :
+				     QString const& _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   type_(_type)
 {
@@ -55,7 +55,7 @@ CompoundParameter::CompoundParameter(Miro::CFG::Type const& _type,
 				     QTreeWidget * _list,
 				     QTreeWidgetItem * _pre,
 				     QObject * _parent,
-				     const char * _name) :
+				     QString const& _name) :
   Super(_node, _list, _pre, _parent, _name),
   type_(_type)
 {
@@ -81,13 +81,13 @@ CompoundParameter::init()
       ParameterXML * newParam = NULL;
       if (!e.hasAttribute(ParameterXML::XML_ATTRIBUTE_KEY))
 	throw Miro::Exception(QString("Parameter tag without name in compound (" +
-				      type_.fullName() + ") " + name()));
+				      type_.fullName() + ") " + objectName()).toStdString());
 
       QString p = e.attribute(ParameterXML::XML_ATTRIBUTE_KEY);
       QString pLower = p;
 
       // we need a lower case first letter version for comparison
-      pLower[0] = p[0].lower();
+      pLower[0] = p[0].toLower();
       Miro::CFG::ParameterVector::const_iterator i, last = params.end();
       for (i = params.begin(); i != last; ++i) {
 	if (i->name_ == pLower) {
@@ -96,19 +96,19 @@ CompoundParameter::init()
       }
       if (i == last)
 	throw Miro::Exception(QString("Parameter " + p + " unknown in compound (" + 
-				      type_.fullName() + ") " + name()));
+				      type_.fullName() + ") " + objectName()).toStdString());
 
       if (SimpleParameter::typeFromName(i->type_) != 
 	  SimpleParameter::NONE) {
-	QTreeWidgetItem * const  pTreeWidgetItem = treeWidgetItem();
+	QTreeWidgetItem * pTreeWidgetItem = treeWidgetItem();
 	assert(pTreeWidgetItem != NULL);
 	newParam = new SimpleParameter(*i, n, pTreeWidgetItem, pre, this, p);
       }
       else if (ParameterList::typeFromName(i->type_) !=
 	       ParameterList::NONE) {
-	QTreeWidgetItem * const pTreeWidgetItem = treeWidgetItem();
+	QTreeWidgetItem * pTreeWidgetItem = treeWidgetItem();
 	assert(pTreeWidgetItem != NULL);
-	newParam = new ParameterList(*i, n, pTreeWidgetItem, pre, this, p);
+  newParam = new ParameterList(*i, n, pTreeWidgetItem, pre, this, p);
       }
       else {
 	Miro::CFG::Type const * const t = 
@@ -122,7 +122,7 @@ CompoundParameter::init()
 	else
 	  throw Miro::Exception(QString("Type " + i->type_ + " of parameter " + p +
 					" unknown in compound (" + 
-					type_.fullName() + ") " + name()));
+					type_.fullName() + ") " + objectName()).toStdString());
       }
       if (newParam != NULL)
 	newParam->init();
@@ -137,7 +137,7 @@ CompoundParameter::setParameters()
   ParameterDialog dialog(type_,
 			 node_.parentNode(), node_, 
 			 NULL, this,
-			 NULL, name());
+			 NULL, objectName());
       
   int rc = dialog.exec();
   if (rc == QDialog::Accepted) {
@@ -162,7 +162,7 @@ CompoundParameter::type(QDomNode const& _node,
   
   if (parameterType == NULL) {
     throw Miro::Exception(QString("Parameter description for " + typeName +
-				  " not found.\nCheck whether the relevant description file is loaded (5)."));
+				  " not found.\nCheck whether the relevant description file is loaded (5).").toStdString());
   }
   return *parameterType;
 }

@@ -54,7 +54,7 @@ public:
 			QDomNode const& _node,
 			ItemXML * _parentItem,
 			ItemXML * _item,
-			QWidget * _parent, const char * _name);
+			QWidget * _parent, QString const& _name);
 
   //! Inherited method.
   virtual void setXML();

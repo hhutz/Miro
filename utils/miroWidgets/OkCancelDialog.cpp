@@ -34,16 +34,16 @@
 // The C++ Standard Library
 #include <cassert>
 
-OkCancelDialog::OkCancelDialog(QWidget * _parent, const char * _name, bool _modal) :
-  Super(_parent, _name, _modal),
+OkCancelDialog::OkCancelDialog(QWidget * _parent, QString const& _name, bool _modal) :
+  Super(_parent/*, _name, _modal*/),
   frame_(NULL),
   modified_(false),
   accept_(0)
 {
   // Capitalize the _name member variable and use this as the caption
   QString n = _name;
-  n[0] = n[0].upper();
-  setCaption(n);
+  n[0] = n[0].toUpper();
+  setWindowTitle(n);
 
   QVBoxLayout * const pTopBoxLayout = createLayout();
   createFrame();

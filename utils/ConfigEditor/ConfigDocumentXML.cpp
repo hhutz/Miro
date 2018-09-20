@@ -46,7 +46,7 @@ const QString ConfigDocumentXML::XML_TAG("config");
 
 ConfigDocumentXML::ConfigDocumentXML(QDomDocument const& _document,
 				     QTreeWidget * _treeWidget,
-				     QObject * _parent, const char * _name) :
+				     QObject * _parent, QString const& _name) :
   Super(_document, _treeWidget, _parent, _name),
   menuAddSection_(NULL)
 {
@@ -124,21 +124,22 @@ ConfigDocumentXML::contextMenu(QMenu& _menu)
     // This class doesn't have a handle to any window.
     QWidget * const pActionParent = NULL;
     QAction * const pAction = new QAction(name, pActionParent);
-    connect(pAction, SIGNAL(activated(int)), this, SLOT(onAddSection(int)));
     // Add the Action to the Menu
     menuAddSection_->addAction(pAction);
   }
+  connect(menuAddSection_, SIGNAL(triggered(QAction *)), this, SLOT(onAddSection(QAction *)));
 }
 
 //----------------------------------------------------------------------------  
 // public slots
 
 void 
-ConfigDocumentXML::onAddSection(int _n)
+ConfigDocumentXML::onAddSection(QAction * _action)
 {
+  QString actionText = _action->text();
   QDomElement config = document_.documentElement();
   QDomElement e = document_.createElement(Section::XML_TAG);
-  e.setAttribute(Section::XML_ATTRIBUTE_KEY, menuAddSection_->text(_n));
+  e.setAttribute(Section::XML_ATTRIBUTE_KEY, actionText);
 
   QDomNode n = config.firstChild();
   QDomNode newChild; 
@@ -154,7 +155,7 @@ ConfigDocumentXML::onAddSection(int _n)
 	      treeWidgetItem(), // QTreeWidget for the ConfigDocumentXML
 	      NULL, 
 	      this, // parent QObject
-	      menuAddSection_->text(_n));
+	      actionText);
   setModified();
 }
 

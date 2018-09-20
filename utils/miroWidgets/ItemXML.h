@@ -77,7 +77,7 @@ public:
 	  QTreeWidgetItem * _parentItem,
 	  QTreeWidgetItem * _pre = NULL,
 	  QObject * _parent = NULL,
-	  const char * _name = NULL);
+	  QString const& _name = QString());
 
   /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
@@ -95,7 +95,7 @@ public:
 	  QTreeWidget * _view,
 	  QTreeWidgetItem * _pre = NULL,
 	  QObject * _parent = NULL,
-	  const char * _name = NULL);
+	  QString const& _name = QString());
 
   /**
    * Virtual destructor.

@@ -64,7 +64,7 @@ public:
 			Miro::CFG::Parameter const& _parameter,
 			QDomNode& _parentNode, QDomNode& _node,
 			ItemXML * _parentItem, ItemXML * _item,
-			QWidget * _parent, const char * _name);
+			QWidget * _parent, QString const& _name);
 
   //! Inherited method.
   virtual void setXML();

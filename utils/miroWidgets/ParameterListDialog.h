@@ -78,7 +78,7 @@ public:
 		      ItemXML * _parentItem,
 		      ItemXML * _item,
 		      QWidget * _parent,
-		      const char * _name = NULL);
+		      QString const& _name = QString());
 
   void setXML();
 
