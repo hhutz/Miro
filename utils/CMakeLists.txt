@@ -8,6 +8,6 @@ add_subdirectory( miroWidgets )
 add_subdirectory( ConfigEditor )
 
 if ( TAO_FOUND )
-  add_build_swithc( LogPlayer MIRO_BUILD_WITH_QT4 )
+  add_build_switch( LogPlayer MIRO_BUILD_WITH_QT4 )
 endif ( TAO_FOUND )
 
