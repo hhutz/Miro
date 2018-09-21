@@ -4,9 +4,11 @@ include_directories(
   ${PROJECT_SOURCE_DIR}/utils
 )
 
-link_libraries(
-  ${QT_QTGUI_LIBRARY}
-)
+if (MIRO_BUILD_WITH_QT4)
+  link_libraries(
+    ${QT_QTGUI_LIBRARY}
+  )
+endif (MIRO_BUILD_WITH_QT4)
 
 add_subdirectory( miroWidgets )
 add_subdirectory( ConfigEditor )
