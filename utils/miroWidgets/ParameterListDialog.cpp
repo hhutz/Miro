@@ -47,10 +47,10 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 					 ItemXML * _parentItem,
 					 ItemXML * _item,
 					 QWidget * _parent,
-					 const char * _name) :
+					 QString const& _name) :
   Super(_parentNode, _node, 
 	_parentItem, _item,
-	_parent, _name, TRUE),       // TRUE = modal dialog
+	_parent, _name, true),       // TRUE = modal dialog
   type_(_type),
   parameter_(_parameter),
   nestedCompound_(true),
@@ -68,7 +68,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
   tmpDocument_.appendChild(tmpParentNode_);
 
   QDomElement e = tmpDocument_.createElement(ParameterXML::XML_TAG);
-  e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, name());
+  e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, objectName());
   tmpNode_ = e;
   if (!node_.isNull())
     tmpNode_ = node_.cloneNode();
@@ -150,7 +150,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
     if (nestedType_ == NULL) {
       throw Miro::Exception(QString("Parameter description for " + 
 				    parameter_.type_ +
-				    " not found.\nCheck whether the relevant description file is loaded (1)."));
+				    " not found.\nCheck whether the relevant description file is loaded (1).").toStdString());
     }
     // It is a CompoundParameter
   }
@@ -179,7 +179,7 @@ ParameterListDialog::ParameterListDialog(ParameterList::Type _type,
 	// The <parameter> tag must have a "value" attribute
 	if (!e.hasAttribute(SimpleParameter::XML_ATTRIBUTE_VALUE))
 	  throw Miro::Exception(QString("Parameter tag without value in (" + 
-					parameter_.type_ + ") " + name()));
+					parameter_.type_ + ") " + objectName()).toStdString());
 
 	/// @todo This variable is not used; remove it
 	QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);
@@ -269,7 +269,7 @@ ParameterListDialog::setXML()
     assert(!parentNode_.ownerDocument().isNull());
     QDomElement e = parentNode_.ownerDocument().createElement(ParameterXML::XML_TAG);
 
-    e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, name());
+    e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, objectName());
     node_ = parentNode_.appendChild(e);
 
     assert(!node_.isNull());
@@ -429,12 +429,12 @@ ParameterListDialog::add()
   if (!nestedCompound_) {
     dialog = new SingleParameterDialog(parameter_,
 				       newChild,
-				       item_, NULL, NULL, name());
+				       item_, NULL, NULL, objectName());
   }
   else {
     dialog = new ParameterDialog(*nestedType_,
 				 newChild.parentNode(), newChild, 
-				 item_, NULL, NULL, name());
+				 item_, NULL, NULL, objectName());
   }
   int rc = dialog->exec();
   if (rc == QDialog::Accepted) {

@@ -29,6 +29,7 @@
 
 // Forward declarations
 class QTreeWidgetItem;
+class QAction;
 
 /**
  * A Section is a partition of a document, used for organizing. Sections are
@@ -63,7 +64,7 @@ public:
 	  QTreeWidgetItem * _parentItem,
 	  QTreeWidgetItem * _pre,
 	  QObject * _parent,
-	  const char * _name);
+	  QString const& _name);
 
   //----------------------------------------------------------------------------  
   // inherited public methods
@@ -95,7 +96,7 @@ protected slots:
    * QMessageBox with a warning message.
    * @param[in] _n a serial enumerator that becomes the DOM tree node's key
    */
-  void onAddInstance(int _n);
+  void onAddInstance(QAction * _action);
 
   /**
    * Add a default instance of a parameter.
@@ -105,7 +106,7 @@ protected slots:
    * QMessageBox with a warning message.
    * @param[in] _n a serial enumerator that becomes the DOM tree node's key
    */
-  void onAddParameter(int _n);
+  void onAddParameter(QAction * _action);
 
 protected:
 

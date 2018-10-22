@@ -55,7 +55,7 @@ SimpleSurveyParameters readJson(const string& jsonName)
   Json::Reader reader;
   bool success = reader.parse(jsonStream, root);
   if (!success) {
-    cerr << reader.getFormatedErrorMessages() << endl;
+    cerr << reader.getFormattedErrorMessages() << endl;
     exit(1);
   }
   jsonStream.close();

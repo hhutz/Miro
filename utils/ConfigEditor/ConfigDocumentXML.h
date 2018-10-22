@@ -26,6 +26,7 @@
 
 // forward declarations
 class QTreeWidget;
+class QAction;
 
 /** The document Item for a ConfigEditor document. */
 class ConfigDocumentXML : public DocumentXML
@@ -51,7 +52,7 @@ public:
   ConfigDocumentXML(QDomDocument const& _document,
 		    QTreeWidget * _treeWidget,
 		    QObject * _parent = NULL,
-		    const char * _name = NULL);
+		    QString const& _name = QString());
 
   /** The destructor has nothing to do. */
   virtual ~ConfigDocumentXML();
@@ -88,7 +89,7 @@ public slots:
    * menu.
    * Create the Section and insert it before the clicked Section, if any.
    */
-  void onAddSection(int);
+  void onAddSection(QAction * _action);
 
 protected:
   //----------------------------------------------------------------------------  

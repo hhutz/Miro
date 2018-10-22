@@ -22,16 +22,20 @@
 
 #include <cmath>
 
-MyIntValidator::MyIntValidator(QObject * parent, const char *name) :
-  Super(parent, name),
+MyIntValidator::MyIntValidator(QObject * parent, QString const& name) :
+  Super(parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 MyIntValidator::MyIntValidator(int bottom, int top,
-			       QObject * parent, const char *name) :
-  Super(bottom, top, parent, name),
+			       QObject * parent, QString const& name) :
+  Super(bottom, top, parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 QValidator::State 
 MyIntValidator::validate( QString & input, int & pos) const
@@ -46,17 +50,21 @@ MyIntValidator::validate( QString & input, int & pos) const
   return s;
 }
 
-MyFloatValidator::MyFloatValidator(QObject * parent, const char *name) :
+MyFloatValidator::MyFloatValidator(QObject * parent, QString const& name) :
 
-  Super(parent, name),
+  Super(parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 MyFloatValidator::MyFloatValidator(float bottom, float top, int decimals,
-				   QObject * parent, const char *name) :
-  Super(bottom, top, decimals, parent, name),
+				   QObject * parent, QString const& name) :
+  Super(bottom, top, decimals, parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 QValidator::State 
 MyFloatValidator::validate( QString & input, int & pos) const
@@ -72,16 +80,20 @@ MyFloatValidator::validate( QString & input, int & pos) const
   return s;
 }
 
-MyDoubleValidator::MyDoubleValidator(QObject * parent, const char *name) :
-  Super(parent, name),
+MyDoubleValidator::MyDoubleValidator(QObject * parent, QString const& name) :
+  Super(parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 MyDoubleValidator::MyDoubleValidator(double bottom, double top, int decimals,
-				     QObject * parent, const char *name) :
-  Super(bottom, top, decimals, parent, name),
+                                     QObject * parent, QString const& name) :
+  Super(bottom, top, decimals, parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 QValidator::State 
 MyDoubleValidator::validate( QString & input, int & pos) const
@@ -97,10 +109,12 @@ MyDoubleValidator::validate( QString & input, int & pos) const
   return s;
 }
 
-MyBoolValidator::MyBoolValidator(QObject * parent, const char *name) :
-  Super(parent, name),
+MyBoolValidator::MyBoolValidator(QObject * parent, QString const& name) :
+  Super(parent),
   accepted_(true)
-{}
+{
+  setObjectName(name);
+}
 
 QValidator::State 
 MyBoolValidator::validate( QString & input, int &) const

@@ -28,7 +28,7 @@ ParameterSingleton::ParameterSingleton(QTreeWidgetItem * _treeWidgetItem,
 				       QTreeWidgetItem * _pre,
 				       QDomNode const& _node,
 				       QObject * _parent,
-				       const char * _name) :
+				       QString const& _name) :
   Super(type(_node, XML_ATTRIBUTE_KEY),
 	_node, 
 	_treeWidgetItem, _pre, _parent, _name)

@@ -100,7 +100,7 @@ main(int argc, char * argv[])
     if (argc == 2)
       mainWindow.view()->openDocument(argv[1]);
     
-    app.setMainWidget(&mainWindow);
+//    app.setMainWidget(&mainWindow);
     mainWindow.show();
     app.exec();
   }

@@ -37,14 +37,14 @@ FileListDialog::FileListDialog(QWidget* parent,
 			       QString const& _dialogTitle,
 			       QString const& _listTitle,
 			       char const * _filters[]) :
-  QDialog(parent, "FileListDialog", TRUE),       // TRUE = modal dialog
+  QDialog(parent/*, QString("FileListDialog"), true*/),       // TRUE = modal dialog
   list_(NULL),
   delButton_(NULL),
   fileDialog_(NULL),
   modified_(false)
 {
   resize(300, 200);
-  setCaption(_dialogTitle);
+  setWindowTitle(_dialogTitle);
 
   // Create and configure the layout for the FileListDialog
   QVBoxLayout * const pFileListDialogLayout = createLayout();

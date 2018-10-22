@@ -42,12 +42,12 @@ const QString Section::XML_TAG("section");
 
 Section::Section(QDomNode const& _node,
 		 QTreeWidgetItem * _parentItem, QTreeWidgetItem * _pre,
-		 QObject * _parent, const char * _name) :
+		 QObject * _parent, QString const& _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   menuAddParameter_(NULL),
   menuAddInstance_(NULL)
 {
-  treeWidgetItem()->setText(2, className());
+  treeWidgetItem()->setText(2, metaObject()->className());
 
   assert(!node_.isNull());
 
@@ -120,19 +120,19 @@ Section::contextMenu(QMenu& _menu)
     std::sort(instanceList.begin(), instanceList.end());
     QStringVector::const_iterator first, last = paramsList.end();
     for (first = paramsList.begin(); first != last; ++first) {
-      menuAddParameter_->insertItem(*first);
+      menuAddParameter_->addAction(*first);
     }
     last = instanceList.end();
     for (first = instanceList.begin(); first != last; ++first) {
-      menuAddInstance_->insertItem(*first);
+      menuAddInstance_->addAction(*first);
     }
   }
 
 
-  connect(menuAddInstance_, SIGNAL(activated(int)), 
-	  this, SLOT(onAddInstance(int)));
-  connect(menuAddParameter_, SIGNAL(activated(int)), 
-	  this, SLOT(onAddParameter(int)));
+  connect(menuAddInstance_, SIGNAL(triggered(QAction *)),
+	  this, SLOT(onAddInstance(QAction *)));
+  connect(menuAddParameter_, SIGNAL(triggered(QAction *)),
+	  this, SLOT(onAddParameter(QAction *)));
 
   _menu.addSeparator();
 
@@ -153,19 +153,19 @@ Section::contextMenu(QMenu& _menu)
 }
 
 void
-Section::onAddInstance(int _n)
+Section::onAddInstance(QAction * _action)
 {
   bool ok = false;
-  QString name = QInputDialog::getText(tr( "Parameter Instance" ),
+  QString name = QInputDialog::getText(NULL, tr( "Parameter Instance" ),
 					    tr( "Instance name:" ),
-					    QLineEdit::Normal, NULL, &ok, NULL );
+					    QLineEdit::Normal, NULL, &ok);
   if ( ok && !name.isEmpty()) {
     
     QDomDocument document = node_.ownerDocument();
     QDomElement e = document.createElement(ParameterInstance::XML_TAG);
     e.setAttribute(ParameterInstance::XML_ATTRIBUTE_KEY, name);
     e.setAttribute(ParameterInstance::XML_ATTRIBUTE_TYPE,
-		   menuAddInstance_->text(_n));
+		   _action->text());
     
     QDomNode n = node_.firstChild();
     QDomNode newChild = node_.insertBefore(e, n);
@@ -185,11 +185,12 @@ Section::onAddInstance(int _n)
 }
 
 void
-Section::onAddParameter(int _n)
+Section::onAddParameter(QAction * _action)
 {
+  QString actionText = _action->text();
   QDomDocument document = node_.ownerDocument();
   QDomElement e = document.createElement(ParameterXML::XML_TAG);
-  e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, menuAddParameter_->text(_n));
+  e.setAttribute(ParameterXML::XML_ATTRIBUTE_KEY, actionText);
 
   QDomNode n = node_.firstChild();
   QDomNode newChild = node_.insertBefore(e, n);
@@ -197,7 +198,7 @@ Section::onAddParameter(int _n)
   assert(!newChild.isNull());
   try {
     new ParameterSingleton(treeWidgetItem(), NULL, newChild,
-			   this,  menuAddParameter_->text(_n));
+			   this,  actionText);
   }
   catch (QString const& e) {
     QMessageBox::warning(NULL, 

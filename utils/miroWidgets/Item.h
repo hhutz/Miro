@@ -70,13 +70,13 @@ public:
   Item(QTreeWidgetItem * _parentItem,
        QTreeWidgetItem * _pre = NULL,
        QObject * _parent = NULL,
-       const char * _name = NULL);
+       QString const& _name = NULL);
 
   //! Initializing constructor, creating a QTreeWidget toplevel item.
   Item(QTreeWidget * _view,
        QTreeWidgetItem * _pre = NULL,
        QObject * _parent = NULL,
-       const char * _name = NULL);
+       QString const& _name = NULL);
 
   //! Virtual destructor.
   virtual ~Item();

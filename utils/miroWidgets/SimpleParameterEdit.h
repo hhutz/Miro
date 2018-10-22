@@ -63,7 +63,7 @@ public:
 		      ItemXML * _parentItem,
 		      ItemXML * _item,
 		      QWidget * _parent,
-		      const char * _name);
+		      QString const& _name);
 
   //! Inherited interface.
   virtual void setXML();

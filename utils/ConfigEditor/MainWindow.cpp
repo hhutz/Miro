@@ -51,7 +51,7 @@ namespace
 }
 
 MainWindow::MainWindow() :
-  Super(NULL, "MainWindow"),
+  Super(NULL),
   config_(ConfigFile::instance()),
   view_(new DocumentView(this, "config_list")),
   document_(QDomDocument(ConfigDocumentXML::XML_DOCTYPE), view_),

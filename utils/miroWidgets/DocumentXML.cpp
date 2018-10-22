@@ -39,8 +39,8 @@
 DocumentXML::DocumentXML(QDomDocument const& _document,
 			 QTreeWidget * _treeWidget, 
 			 QObject * _parent,
-			 const char * _name) :
-  Super(_document, _treeWidget, NULL, _parent, ""),
+			 QString const& _name) :
+  Super(_document, _treeWidget, NULL, _parent, _name),
   document_(_document)
 {}
 
@@ -86,7 +86,7 @@ DocumentXML::initXML(QString const& _xml)
     QString l, c;
     l.setNum(line);
     c.setNum(column);
-    throw Miro::Exception(QString("XML parsing error!\n" + error + "in line " + l + ", column " + c));
+    throw Miro::Exception(QString("XML parsing error!\n" + error + "in line " + l + ", column " + c).toStdString());
   }
 
   const bool modified = false;
@@ -117,8 +117,8 @@ DocumentXML::clear()
 void
 DocumentXML::setName(const QString& _name)
 {
-  if (name() != _name) {
-    Super::setName(_name);
+  if (objectName() != _name) {
+    Super::setObjectName(_name);
     setModified(true);
   }
 }
@@ -131,21 +131,21 @@ DocumentXML::loadXML(const QString& _name)
 
   QFile f(_name);
   if (!f.open(QIODevice::ReadOnly)) {
-    throw Miro::Exception(QString("DocumentXML::loadXML: Error: file not found!"));
+    throw Miro::Exception(QString("DocumentXML::loadXML: Error: file not found!").toStdString());
   }
   if (!document_.setContent(&f)) {
-    throw Miro::Exception(QString("DocumentXML::loadXML: Error: XML parsing error!"));
+    throw Miro::Exception(QString("DocumentXML::loadXML: Error: XML parsing error!").toStdString());
   }
-  Super::setName(_name);
+  Super::setObjectName(_name);
 }
 
 
 void
 DocumentXML::saveXML()
 {
-  QFile f(name() );
+  QFile f(objectName() );
   if (!f.open(QIODevice::WriteOnly)) {
-    throw Miro::Exception(QString("DocumentXML::loadXML: Error: file error!"));
+    throw Miro::Exception(QString("DocumentXML::loadXML: Error: file error!").toStdString());
   }
   QTextStream ts(&f);
   document_.save(ts, 2);

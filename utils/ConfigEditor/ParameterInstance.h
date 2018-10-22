@@ -61,7 +61,7 @@ public:
 		    QTreeWidgetItem * _pre,
 		    QDomNode const& _node,
 		    QObject * _parent,
-		    const char * _name);
+		    QString const& _name);
 
   //----------------------------------------------------------------------------
   // public inherited methods

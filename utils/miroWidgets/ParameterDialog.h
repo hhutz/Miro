@@ -64,7 +64,7 @@ public:
 		  ItemXML * _parentItem,
 		  ItemXML * _item,
 		  QWidget * _parent,
-		  const char * _name);
+		  QString const& _name);
 
   //! Update the xml tree according to the dialog entries.
   virtual void setXML();

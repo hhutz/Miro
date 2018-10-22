@@ -23,7 +23,7 @@
 
 DialogXML::DialogXML(QDomNode const& _parentNode, QDomNode const& _node,
 		     ItemXML * _parentItem, ItemXML * _item,
-		     QWidget * _parent, const char * _name, bool _modal) :
+		     QWidget * _parent, QString const& _name, bool _modal) :
   Super(_parent, _name, _modal),
   parentNode_(_parentNode),
   node_(_node),

@@ -48,7 +48,7 @@ ParameterDialog::ParameterDialog(Miro::CFG::Type const& _parameterType,
 				 QDomNode const& _node,
 				 ItemXML * _parentItem,
 				 ItemXML * _item,
-				 QWidget * _parent, const char * _name) :
+				 QWidget * _parent, QString const& _name) :
   Super(_parentNode, _node, _parentItem, _item, _parent, _name),
   config_(ConfigFile::instance()),
   parameterType_(_parameterType),
@@ -133,7 +133,7 @@ ParameterDialog::initDialog()
     // Add the label to the Layout
     QLabel * name = new QLabel(frame_);
     QString n = first->name_;
-    n[0] = n[0].upper();
+    n[0] = n[0].toUpper();
     name->setText(n);
     gridLayout->addWidget(name, i, 0);
 
@@ -193,13 +193,13 @@ ParameterDialog::initDialog()
 				      item_,
 				      childItem,
 				      frame_,
-				      n.latin1());
+				      n);
 
       // add measure
       QLabel * measure = new QLabel(frame_);
       if (!first->measure_.isEmpty()) {
 	measure->setText(first->measure_);
-	QToolTip::add(measure, (first->type_ != "angle")? first->type_ : QString("double"));
+  measure->setToolTip((first->type_ != "angle")? first->type_ : QString("double"));
       }
       else
 	measure->setText(first->type_);
@@ -216,7 +216,7 @@ ParameterDialog::initDialog()
 					item_,
 					childItem,
 					frame_,
-					n.latin1());
+					n);
     }
 
     gridLayout->addWidget(value->editWidget(), i, 1);

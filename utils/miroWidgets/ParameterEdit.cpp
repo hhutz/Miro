@@ -39,8 +39,8 @@ ParameterEdit::ParameterEdit(Miro::CFG::Parameter const& _parameter,
 			     ItemXML * _parentItem,
 			     ItemXML * _item,
 			     QWidget * _parent,
-			     const char * _name) :
-  Super(_parent, _name),
+			     QString const& _name) :
+  Super(_parent),
   parameter_(_parameter),
   parentNode_(_parentNode),
   node_(_node),
@@ -48,4 +48,5 @@ ParameterEdit::ParameterEdit(Miro::CFG::Parameter const& _parameter,
   item_(_item)
 {
   assert(!parentNode_.isNull());
+  setObjectName(_name);
 }

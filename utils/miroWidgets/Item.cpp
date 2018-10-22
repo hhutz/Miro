@@ -34,29 +34,31 @@ Item::ItemMap Item::itemMap_;
 Item::Item(QTreeWidgetItem * _parentItem,
 	   QTreeWidgetItem * _pre,
 	   QObject * _parent,
-	   const char * _name) :
-  Super(_parent, _name),
+	   QString const& _name) :
+  Super(_parent),
   treeWidgetItem_(new QTreeWidgetItem(_parentItem, _pre))
 {
+  setObjectName(_name);
   // Label the QTreeWidgetItem with the Item's name
-  treeWidgetItem()->setText(0, name());
+  treeWidgetItem()->setText(0, _name);
   // Map the QTreeWidgetItem to the Item that it represents
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
 Item::Item(QTreeWidget * _view, QTreeWidgetItem * _pre,
-	   QObject * _parent, const char * _name) :
-  Super(_parent, _name),
+	   QObject * _parent, QString const& _name) :
+  Super(_parent),
   treeWidgetItem_(new QTreeWidgetItem(_view, _pre))
 {
-  treeWidgetItem()->setText(0, name());
+  setObjectName(_name);
+  treeWidgetItem()->setText(0, _name);
   // Map the QTreeWidgetItem to the Item that it represents
   itemMap_.insert(std::make_pair(treeWidgetItem_, this));
 }
 
 Item::~Item()
 {
-  //  cout << name() << " deleting children" << endl;
+  //  cout << objectName() << " deleting children" << endl;
 
   if (!children().isEmpty()) {
     QObjectList childList = children();
@@ -65,13 +67,13 @@ Item::~Item()
     }
   }
 
-  //  cout << name() << " deleting listviewitem" << endl;
+  //  cout << objectName() << " deleting listviewitem" << endl;
 
   delete treeWidgetItem_;
   // Remove the QTreeWidgetItem from the map to Item
   itemMap_.erase(treeWidgetItem_);
 
-  //  cout << name() << " deleting" << endl;
+  //  cout << objectName() << " deleting" << endl;
 }
 
 void
