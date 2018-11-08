@@ -48,30 +48,26 @@ namespace Miro
    * There's a paper about the singleton pattern and
    * double checked locking on the ACE web pages.
    */
-  template < class TYPE,
-  class LOCK = ACE_Recursive_Thread_Mutex,
-  template<class TYPE, class LOCK> class ACE_SINGLETON = ACE_Singleton >
+  template < class TYPE>
   class Singleton
   {
   public:
     //! Access operator to the global variable.
     TYPE * operator()();
     //! Public type for friend declarations.
-    typedef ACE_SINGLETON<TYPE, LOCK> ACE_Singleton_Type;
+    typedef ACE_Singleton<TYPE, ACE_Recursive_Thread_Mutex> ACE_Singleton_Type;
   };
 
   //--------------------------------------------------------------------------
   // Inlined methods
   //--------------------------------------------------------------------------
-  template < class TYPE,
-  class LOCK,
-  template<class TYPE, class LOCK> class ACE_SINGLETON >
+  template < class TYPE>
   inline
   TYPE *
-  Singleton<TYPE, LOCK, ACE_SINGLETON>::operator()()
+  Singleton<TYPE>::operator()()
   {
 
-    return ACE_SINGLETON<TYPE, LOCK>::instance();
+    return ACE_Singleton<TYPE, ACE_Recursive_Thread_Mutex>::instance();
   }
 }
 
