@@ -24,7 +24,9 @@
 
 namespace Miro
 {
-  Singleton<NamingRepository> NamingRepository::instance = Singleton<NamingRepository>();
+  Singleton<NamingRepository, ACE_SYNCH_RECURSIVE_MUTEX> 
+  NamingRepository::instance = 
+    Singleton<NamingRepository, ACE_SYNCH_RECURSIVE_MUTEX>();
 
 
   /**

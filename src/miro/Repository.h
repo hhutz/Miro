@@ -271,7 +271,7 @@ namespace Miro
     // private types
     //--------------------------------------------------------------------------
     typedef T Type;
-    typedef Singleton<Self> SingletonType;
+    typedef Singleton<Self, ACE_Recursive_Thread_Mutex, ACE_Unmanaged_Singleton> SingletonType;
 
     //--------------------------------------------------------------------------
     // public methods
