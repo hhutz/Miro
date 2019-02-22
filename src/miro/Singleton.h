@@ -50,7 +50,7 @@ namespace Miro
    */
   template < class TYPE,
   class LOCK = ACE_Recursive_Thread_Mutex,
-  template<class TYPE, class LOCK> class ACE_SINGLETON = ACE_Singleton >
+  template<class T, class L> class ACE_SINGLETON = ACE_Singleton >
   class Singleton
   {
   public:
@@ -65,7 +65,7 @@ namespace Miro
   //--------------------------------------------------------------------------
   template < class TYPE,
   class LOCK,
-  template<class TYPE, class LOCK> class ACE_SINGLETON >
+  template<class T, class L> class ACE_SINGLETON >
   inline
   TYPE *
   Singleton<TYPE, LOCK, ACE_SINGLETON>::operator()()
