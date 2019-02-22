@@ -137,6 +137,7 @@ if( TAO_INCLUDE_DIR AND TAO_LIBRARY_DIR AND TAO_IDL_COMMAND )
     TAO_DynamicInterface
     TAO_ETCL
     TAO_Messaging
+    TAO_Notify_Service
     TAO_PI
     TAO_PI_Server
     TAO_PortableServer
