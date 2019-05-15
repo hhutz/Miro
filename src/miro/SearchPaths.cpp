@@ -131,3 +131,5 @@ namespace Miro
     return string();
   }
 }
+
+ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, Miro::SearchPaths::StringList, ACE_SYNCH_RECURSIVE_MUTEX);

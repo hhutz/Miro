@@ -154,7 +154,7 @@ main(int argc, char * argv[])
         QString headerFilename(baseName + "." + headerExtension);
         ofstream headerFile(qPrintable(headerFilename));
 
-        generator.generateSource(sourceFile);
+        generator.generateSource(sourceFile, exportDirective);
         generator.generateHeader(headerFile, exportDirective);
       }
       else {

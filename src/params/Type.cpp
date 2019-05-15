@@ -337,6 +337,43 @@ namespace Miro
     }
 
     void
+    Type::generateSingletonSource(std::ostream& ostr, unsigned int indent,
+                                   QString const& namespaceQualifier) const
+    {
+      // add instance declarations
+
+      switch (instance_) {
+      case INSTANCE_MANAGED:
+        ostr << spaces.left (indent)
+             << "ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, "
+             << namespaceQualifier << name_
+             << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
+        break;
+
+      case INSTANCE_UNMANAGED:
+        ostr << spaces.left (indent)
+             << "ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Unmanaged_Singleton, "
+              << namespaceQualifier << name_
+             << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
+        break;
+
+      case INSTANCE_USER:
+        ostr << spaces.left (indent)
+             << "ACE_SINGLETON_TEMPLATE_INSTANTIATION(" << userSingleton_ << "< "
+             << namespaceQualifier << name_
+             << "Parameters >);" << std::endl;
+        break;
+
+      case INSTANCE_DLL:
+      case INSTANCE_NONE:
+        break;
+      }
+
+    }
+
+
+
+    void
     Type::generateSource(std::ostream& ostr, unsigned int _indent) const
     {
       //   if(name_.isEmpty())
