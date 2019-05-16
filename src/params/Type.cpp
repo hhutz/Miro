@@ -345,21 +345,21 @@ namespace Miro
       switch (instance_) {
       case INSTANCE_MANAGED:
         ostr << spaces.left (indent)
-             << "ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, "
+             << "MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, "
              << namespaceQualifier << name_
              << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
         break;
 
       case INSTANCE_UNMANAGED:
         ostr << spaces.left (indent)
-             << "ACE_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Unmanaged_Singleton, "
+             << "MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Unmanaged_Singleton, "
               << namespaceQualifier << name_
              << "Parameters, ACE_SYNCH_RECURSIVE_MUTEX);" << std::endl;
         break;
 
       case INSTANCE_USER:
         ostr << spaces.left (indent)
-             << "ACE_SINGLETON_TEMPLATE_INSTANTIATION(" << userSingleton_ << "< "
+             << "MIRO_SINGLETON_TEMPLATE_INSTANTIATION(" << userSingleton_ << "< "
              << namespaceQualifier << name_
              << "Parameters >);" << std::endl;
         break;

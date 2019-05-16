@@ -24,6 +24,22 @@
 #include <ace/Synch.h>
 #include <ace/Singleton.h>
 
+#ifdef ACE_SINGLETON_TEMPLATE_INSTANTIATE
+#  define MIRO_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK) \
+            ACE_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK)
+#else
+#define  MIRO_SINGLETON_TEMPLATE_INSTANTIATE(SINGLETON_TYPE, CLASS, LOCK) \
+   template class SINGLETON_TYPE < CLASS, LOCK >;
+#endif
+
+   #ifdef ACE_SINGLETON_TEMPLATE_INSTANTIATION
+#  define MIRO_SINGLETON_TEMPLATE_INSTANTIATION(T) \
+   ACE_SINGLETON_TEMPLATE_INSTANTIATION(T)
+#else
+   #  define MIRO_SINGLETON_TEMPLATE_INSTANTIATION(T) \
+   template class T;
+#endif
+
 namespace Miro
 {
   //! Templated implementation of the singleton pattern.
