@@ -467,6 +467,7 @@ namespace Miro
             type_.setUnmanagedInstance();
           }
           if (instance_ && userSingleton_) {
+            generator_.addInclude("miro/Singleton.h"); // MIRO_SINGLETON_INSTANCE macros
             type_.setUserInstance(userSingletonName_);
           }
           if (string_)

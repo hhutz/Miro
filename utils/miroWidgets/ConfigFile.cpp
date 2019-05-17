@@ -210,3 +210,5 @@ ConfigFile::parseDescriptionFiles()
     //    cout << *generator_ << endl;
   }
 }
+
+MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, ConfigFile, ACE_SYNCH_RECURSIVE_MUTEX);
