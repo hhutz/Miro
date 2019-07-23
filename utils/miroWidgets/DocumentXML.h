@@ -61,7 +61,7 @@ public:
   DocumentXML(QDomDocument const& _document,
 	      QTreeWidget * _treeWidget,
 	      QObject * _parent = NULL,
-	      const char * _name = NULL);
+	      QString const& _name = QString());
 
   /**
    * Virtual destructor.

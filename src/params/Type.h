@@ -120,6 +120,8 @@ namespace Miro
       void generateSingleton(std::ostream& ostr, unsigned int _indent,
                              QString const& namespaceQualifier,
                              QString const& exportDirective) const;
+      void generateSingletonSource(std::ostream& ostr, unsigned int indent,
+                                   QString const& namespaceQualifier) const;
       //! Generate source file code.
       void generateSource(std::ostream& ostr, unsigned int _indent) const;
 

@@ -40,7 +40,7 @@ namespace
   };
 }
 
-DocumentView::DocumentView(QWidget * _parent, char const * _name, Qt::WFlags _f) :
+DocumentView::DocumentView(QWidget * _parent, char const * _name) :
   Super(_parent),
   titleBar_(NULL),
   statusBar_(NULL),
@@ -103,7 +103,7 @@ DocumentView::saveIfModified()
     
     int rc = QMessageBox::warning(this, 
 				  "Save if Modified", 
-				  QString("The document ") + document_->name() + " has been modified\n" + 
+				  QString("The document ") + document_->objectName() + " has been modified\n" +
 				  "Do you want to save it?",
 				  "&Save...", "&Dont't Save", "&Cancel", 0, 2);
     
@@ -148,7 +148,7 @@ DocumentView::openDocument(const QString& _name)
     document_->parse();
     
     // set new caption and status bar
-    setTitle(document_->name());
+    setTitle(document_->objectName());
     QString message(_name + " opened.");
     setMessage(message, 3000);
     update();
@@ -192,12 +192,12 @@ DocumentView::saveDocument()
   assert(document_ != NULL);
 
   bool procede = true;
-  if (QString(document_->name()).isEmpty()) {
+  if (QString(document_->objectName()).isEmpty()) {
     procede = saveDocumentAs();
   }
   if (procede) {
     document_->saveXML();
-    QString message(QString(document_->name()) + " saved.");
+    QString message(QString(document_->objectName()) + " saved.");
     setMessage(message, 3000);
   }
   return procede;
@@ -228,7 +228,7 @@ DocumentView::saveDocumentAs()
 
     // append file extension if none is given
     QFileInfo file(filename);
-    if (file.extension(false).isEmpty()) {
+    if (file.suffix().isEmpty()) {
       filename.append(".xml");
       file.setFile(filename);
     }
@@ -364,12 +364,12 @@ void
 DocumentView::setMessage(QString const& _message, int _ms)
 {
   if (statusBar_)
-    statusBar_->message(_message, _ms);
+    statusBar_->showMessage(_message, _ms);
 }
 
 void 
 DocumentView::setTitle(QString const& _title)
 {
   if (titleBar_)
-    titleBar_->setCaption(_title);
+    titleBar_->setWindowTitle(_title);
 }

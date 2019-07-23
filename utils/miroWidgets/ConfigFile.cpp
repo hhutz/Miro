@@ -170,7 +170,7 @@ ConfigFile::parseDescriptionFiles()
 	// Always remove the pathname of the nonexistent file.
 	// Do this unconditionally before calling writeConfigFile() and
 	// before break;
-	descriptionFiles_.remove(first);
+	descriptionFiles_.erase(first);
 	// For why this QMessageBox is built in this way, see
 	// http://qt-project.org/doc/qt-4.8/qmessagebox.html#the-property-based-api
 	// where it says: "Using the property-based API is recommended."
@@ -187,7 +187,7 @@ ConfigFile::parseDescriptionFiles()
 	}
 	break;
       }
-      QXmlInputSource source( xmlFile );
+      QXmlInputSource source( &xmlFile );
       QXmlSimpleReader reader;
       Miro::CFG::TextErrorHandler errorHandler;
       
@@ -199,7 +199,7 @@ ConfigFile::parseDescriptionFiles()
 			 fileName + "\n" +
 			 errorHandler.errorString());
 	QMessageBox::information(0, "Policy Editor", infoText);
-	descriptionFiles_.remove(first);
+	descriptionFiles_.erase(first);
 	break;
       }
     }
@@ -210,3 +210,5 @@ ConfigFile::parseDescriptionFiles()
     //    cout << *generator_ << endl;
   }
 }
+
+MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, ConfigFile, ACE_SYNCH_RECURSIVE_MUTEX);

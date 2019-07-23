@@ -93,7 +93,7 @@ public:
 		  QTreeWidgetItem * _parentItem,
 		  QTreeWidgetItem * _pre,
 		  QObject * _parent,
-		  const char * _name);
+		  QString const& _name);
 
   /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
@@ -114,7 +114,7 @@ public:
 		  QTreeWidget * _list,
 		  QTreeWidgetItem * _pre,
 		  QObject * _parent,
-		  const char * _name);
+		  QString const& _name);
 
   //----------------------------------------------------------------------------
   // public inherited methods

@@ -63,7 +63,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QTreeWidgetItem * _parentItem,
 			     QTreeWidgetItem * _pre,
 			     QObject * _parent,
-			     const char * _name) :
+			     QString const& _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param),
   type_(typeFromName(_param.type_))
@@ -89,7 +89,7 @@ ParameterList::ParameterList(Miro::CFG::Parameter const& _param,
 			     QDomNode const& _node,
 			     QTreeWidget * _list,
 			     QTreeWidgetItem * _pre,
-			     QObject * _parent, const char * _name) :
+			     QObject * _parent, QString const& _name) :
   Super(_node, _list, _pre, _parent, _name),
   param_(_param),
   type_(typeFromName(_param.type_))
@@ -127,7 +127,7 @@ ParameterList::init()
     if (nestedType == NULL) {
       throw Miro::Exception(QString("Parameter description for " + 
 				    nestedTypeName_ +
-				    " not found.\nCheck whether the relevant description file is loaded (2)."));
+				    " not found.\nCheck whether the relevant description file is loaded (2).").toStdString());
     }
   }
   
@@ -157,7 +157,7 @@ ParameterList::init()
 
 	if (!e.hasAttribute(SimpleParameter::XML_ATTRIBUTE_VALUE))
 	  throw Miro::Exception(QString("Parameter tag without value in (" + 
-					param_.type_ + ") " + name()));
+					param_.type_ + ") " + objectName()).toStdString());
 
 	
 	QString value = e.attribute(SimpleParameter::XML_ATTRIBUTE_VALUE);

@@ -71,7 +71,7 @@ namespace Miro
     us.setNum(lhs.usec());
     QString all = s + "." + zero.left(6 - us.length()) + us;
 #if QT_VERSION >= 0x040000
-    _node = std::string(all.toAscii());
+    _node = std::string(all.toLatin1());
 #else
     _node = std::string(all.latin1());
 #endif

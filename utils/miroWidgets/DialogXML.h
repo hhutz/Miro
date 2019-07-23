@@ -50,7 +50,7 @@ public:
   //! Initializing constructor.
   DialogXML(QDomNode const& _parentNode, QDomNode const& _node,
 	    ItemXML * _parentItem, ItemXML * _item,
-	    QWidget * _parent, const char * _name, bool _modal = true);
+	    QWidget * _parent, QString const& _name, bool _modal = true);
 
   virtual void setXML() = 0;
 

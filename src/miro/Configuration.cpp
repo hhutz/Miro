@@ -99,3 +99,5 @@ namespace Miro
     initialized = true;
   }
 }
+
+MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, Miro::ConfigDocument, ACE_SYNCH_RECURSIVE_MUTEX);

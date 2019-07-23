@@ -96,7 +96,7 @@ DeferredParameterEdit::DeferredParameterEdit(EditType _type,
 					     ItemXML * _parentItem,
 					     ItemXML * _item,
 					     QWidget * _parent, 
-					     const char * _name) :
+					     QString const& _name) :
   Super(_parameter, _parentNode, _node, 
 	_parentItem, _item,
 	_parent, _name),
@@ -104,7 +104,7 @@ DeferredParameterEdit::DeferredParameterEdit(EditType _type,
   modified_(false),
   tmpDocument_("MiroConfigDocument")
 {
-  editWidget_ = new QPushButton(_parameter.type_, _parent, "edit button");
+  editWidget_ = new QPushButton(_parameter.type_, _parent);
   connect(editWidget_, SIGNAL(clicked()), this, SLOT(deferredEdit()));
 
   // create a copy of the parameters xml tree
@@ -112,7 +112,7 @@ DeferredParameterEdit::DeferredParameterEdit(EditType _type,
   tmpDocument_.appendChild(tmpParentNode_);
 
   QDomElement e = tmpDocument_.createElement(XML_TAG_PARAMETER);
-  e.setAttribute(XML_ATTRIBUTE_KEY, name());
+  e.setAttribute(XML_ATTRIBUTE_KEY, objectName());
   QDomNode tmpNode = e;
   if (!node_.isNull()) {
     tmpNode = node_.cloneNode();
@@ -143,7 +143,7 @@ DeferredParameterEdit::deferredEdit()
     dialog = new ParameterDialog(*parameterType,
 				 tmpParentNode_, tmpNode, 
 				 NULL, NULL,
-				 NULL, name());
+				 NULL, objectName());
   }
   else if (type_ == VECTOR) {
 
@@ -162,7 +162,6 @@ DeferredParameterEdit::deferredEdit()
     parameter.fullDefault_ = "";
     parameter.measure_ = parameter_.measure_;
     parameter.description_ = parameter_.description_;
-
 
     dialog = new ParameterListDialog(ParameterList::VECTOR,
 				     parameter,
@@ -188,12 +187,11 @@ DeferredParameterEdit::deferredEdit()
     parameter.measure_ = parameter_.measure_;
     parameter.description_ = parameter_.description_;
 
-
     dialog = new ParameterListDialog(ParameterList::SET,
 				     parameter,
 				     tmpParentNode_, tmpNode, 
 				     NULL, NULL,
-				     NULL, parameter.name_);
+             NULL, parameter.name_);
   }
 
   printElements(tmpParentNode_, 0);
@@ -241,7 +239,7 @@ DeferredParameterEdit::setXML()
     assert(!parentNode_.ownerDocument().isNull());
     QDomElement e = parentNode_.ownerDocument().createElement(XML_TAG_PARAMETER);
 
-    e.setAttribute(XML_ATTRIBUTE_KEY, name());
+    e.setAttribute(XML_ATTRIBUTE_KEY, objectName());
     node_ = parentNode_.appendChild(e);
 
     assert(!node_.isNull());
@@ -291,14 +289,14 @@ DeferredParameterEdit::setXML()
       if (parameterType == NULL) {
 	// The Item is a CompoundParameter
 	throw Miro::Exception(QString("Parameter description for " + typeName +
-				      " not found.\nCheck whether the relevant description file is loaded (4)."));
+				      " not found.\nCheck whether the relevant description file is loaded (4).").toStdString());
       }
     
       pParameterXML =
 	      new CompoundParameter(*parameterType,
 				    node,
 				    parentItem_->treeWidgetItem(), pre,
-				    parentItem_, name());
+                              parentItem_, objectName());
       assert(pParameterXML != 0);
     }
     else if (type_ == VECTOR ||
@@ -308,7 +306,7 @@ DeferredParameterEdit::setXML()
 	      new ParameterList(parameter_, 
 				node,
 				parentItem_->treeWidgetItem(), pre,
-				parentItem_, name());
+                          parentItem_, objectName());
       assert(pParameterXML != 0);
     }
     else

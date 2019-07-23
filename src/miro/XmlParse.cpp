@@ -134,7 +134,7 @@ namespace Miro
       throwException(node, value, "char");
 
 #if QT_VERSION >= 0x040000
-    lhs = value[0].toAscii();
+    lhs = value[0].toLatin1();
 #else
     lhs = value[0].latin1();
 #endif
@@ -250,7 +250,7 @@ namespace Miro
 	QString value = e.text();
 	Miro::Robot::substitute(value);
 
-        lhs = string(value.toAscii());
+        lhs = string(value.toLatin1());
       }
     }
   }

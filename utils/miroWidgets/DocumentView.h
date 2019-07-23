@@ -59,7 +59,7 @@ public:
   //----------------------------------------------------------------------------
 
   //! Initializing constructor.
-  DocumentView(QWidget * _parent = 0, char const * _name = 0, Qt::WFlags _f = 0);
+  DocumentView(QWidget * _parent = 0, char const * _name = 0);
   //! Virtual destructor.
   virtual ~DocumentView();
 

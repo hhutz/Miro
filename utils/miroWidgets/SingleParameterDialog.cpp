@@ -50,7 +50,7 @@ SingleParameterDialog(Miro::CFG::Parameter const& _parameter,
 		      QDomNode const& _node,
 		      ItemXML * _parentItem,
 		      ItemXML * _item,
-		      QWidget * _parent, const char * _name) :
+		      QWidget * _parent, QString const& _name) :
   Super(_node.parentNode(), _node,
 	_parentItem, _item,
 	_parent, _name),
@@ -69,7 +69,7 @@ SingleParameterDialog(Miro::CFG::Parameter const& _parameter,
   // add parameter struct:
   QLabel * name = new QLabel(frame_);
   QString n = parameter_.name_;
-  n[0] = n[0].upper();
+  n[0] = n[0].toUpper();
   name->setText(n);
   gridLayout->addWidget(name, 0, 0);
 
@@ -100,13 +100,13 @@ SingleParameterDialog(Miro::CFG::Parameter const& _parameter,
 				  parentItem_,
 				  item_,
 				  frame_,
-				  n.latin1());
+				  n);
   
   // add measure
   QLabel * measure = new QLabel(frame_);
   if (!parameter_.measure_.isEmpty()) {
     measure->setText(parameter_.measure_);
-    QToolTip::add(measure, (parameter_.type_ != "angle")? parameter_.type_ : QString("double"));
+    measure->setToolTip((parameter_.type_ != "angle")? parameter_.type_ : QString("double"));
   }
   else
     measure->setText(parameter_.type_);

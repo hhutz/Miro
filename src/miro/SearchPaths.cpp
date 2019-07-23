@@ -115,14 +115,14 @@ namespace Miro
     {
       QFileInfo f(name.c_str());
       if (m_currentPath && f.exists())
-        return f.absoluteFilePath().toAscii().data();
+        return f.absoluteFilePath().toLatin1().data();
     }
 
     for (first = m_paths.rbegin(); first != last; ++first) {
       fullName = *first + "/" + name;
       QFileInfo f(fullName.c_str());
       if (f.exists())
-        return f.absoluteFilePath().toAscii().data();
+        return f.absoluteFilePath().toLatin1().data();
     }
 
     for (first = m_paths.rbegin(); first != last; ++first) {
@@ -131,3 +131,5 @@ namespace Miro
     return string();
   }
 }
+
+MIRO_SINGLETON_TEMPLATE_INSTANTIATE(ACE_Singleton, Miro::SearchPaths::StringList, ACE_SYNCH_RECURSIVE_MUTEX);

@@ -235,7 +235,7 @@ namespace Miro
     }
 
     void
-    Generator::generateSource(std::ostream& ostr) const
+    Generator::generateSource(std::ostream& ostr, const QString& exportDirective)
     {
       if (fileName_.isEmpty())
         throw QString("No file name specified.");
@@ -293,6 +293,21 @@ namespace Miro
         ostr << spaces.left(indent) << "}" << std::endl;
       }
 
+      if (!exportDirective.isEmpty()) {
+        QString namespaceQualifier;
+        QStringVector::const_iterator f, l = namespace_.end();
+        for (f = namespace_.begin(); f != l; ++f) {
+          namespaceQualifier += *f;
+          namespaceQualifier += "::";
+        }
+        TypeVector::const_iterator first, last = type_.end();
+        for (first = type_.begin(); first != last; ++first) {
+          if (first != type_.begin())
+            ostr << std::endl;
+          if (!first->isDummy())
+            first->generateSingletonSource(ostr, indent, namespaceQualifier);
+        }
+      }
     }
 
     QStringVector

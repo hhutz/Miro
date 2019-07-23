@@ -28,7 +28,9 @@
 #include "params/Generator.h"
 #include "params/TextErrorHandler.h"
 
-#include <qstring.h>
+#include <QApplication>
+
+#include <QString>
 #include <qfile.h>
 #include <qxml.h>
 
@@ -152,7 +154,7 @@ main(int argc, char * argv[])
         QString headerFilename(baseName + "." + headerExtension);
         ofstream headerFile(qPrintable(headerFilename));
 
-        generator.generateSource(sourceFile);
+        generator.generateSource(sourceFile, exportDirective);
         generator.generateHeader(headerFile, exportDirective);
       }
       else {

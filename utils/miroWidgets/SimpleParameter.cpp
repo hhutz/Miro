@@ -83,7 +83,7 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
 				 QTreeWidgetItem * _parentItem,
 				 QTreeWidgetItem * _pre,
-				 QObject * _parent, const char * _name) :
+				 QObject * _parent, QString const& _name) :
   Super(_node, _parentItem, _pre, _parent, _name),
   param_(_param)
 {
@@ -113,7 +113,7 @@ SimpleParameter::SimpleParameter(Miro::CFG::Parameter const& _param,
 				 QDomNode const& _node,
 				 QTreeWidget * _list,
 				 QTreeWidgetItem * _pre,
-				 QObject * _parent, const char * _name) :
+				 QObject * _parent, QString const& _name) :
   Super(_node, _list, _pre, _parent, _name),
   param_(_param)
 {
@@ -143,7 +143,7 @@ SimpleParameter::setParameters()
 {
   SingleParameterDialog dialog(param_,
 			       node_,
-			       NULL, this, NULL, name());
+			       NULL, this, NULL, objectName());
   int rc = dialog.exec();
   if (rc == QDialog::Accepted) {
     dialog.setXML();

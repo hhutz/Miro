@@ -72,7 +72,7 @@ public:
 		    QTreeWidgetItem * _treeWidgetItem,
 		    QTreeWidgetItem * _pre,
 		    QObject * _parent,
-		    const char * _name);
+		    QString const& _name);
  /**
    * Initializing constructor used when the parent of the QTreeWidgetItem is
    * a QTreeWidget (top level).
@@ -90,7 +90,7 @@ public:
   CompoundParameter(Miro::CFG::Type const& _type,
 		    QDomNode const& _node,
 		    QTreeWidget * _list, QTreeWidgetItem * _pre,
-		    QObject * _parent, const char * _name);
+		    QObject * _parent, QString const& _name);
 
   //----------------------------------------------------------------------------
   // public inherited methods
