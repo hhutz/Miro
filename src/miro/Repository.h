@@ -88,11 +88,11 @@ namespace Miro
     //! Empty the repository.
     void clear() throw();
     //! Register an instance at the repository.
-    void add(std::string const& name, Type * type) throw(EAlreadyRegistered);
+    void add(std::string const& name, Type * type);// throw(EAlreadyRegistered);
     //! Look up an instance by name.
-    Type * get(std::string const& name) throw(ENotRegistered);
+    Type * get(std::string const& name);// throw(ENotRegistered);
     //! Remove instance from the repository, deleting it.
-    void remove(std::string const& name) throw(ENotRegistered);
+    void remove(std::string const& name);// throw(ENotRegistered);
     //! Get read-only access to the whole repository.
     InstanceMap const& getMap() const throw() {
       return instances_;
@@ -181,7 +181,7 @@ namespace Miro
   template<class T>
   void
   Repository<T>::add(std::string const& _name, T * _instance)
-  throw(EAlreadyRegistered)
+  //throw(EAlreadyRegistered)
   {
     if (instances_.find(_name) == instances_.end()) {
       instances_.insert(std::make_pair(_name, _instance));
@@ -197,7 +197,7 @@ namespace Miro
    */
   template<class T>
   T *
-  Repository<T>::get(const std::string& _name) throw(ENotRegistered)
+  Repository<T>::get(const std::string& _name) //throw(ENotRegistered)
   {
     typename InstanceMap::const_iterator i = instances_.find(_name);
     if (i != instances_.end())
@@ -211,7 +211,7 @@ namespace Miro
    */
   template<class T>
   void
-  Repository<T>::remove(const std::string& _name) throw(ENotRegistered)
+  Repository<T>::remove(const std::string& _name) //throw(ENotRegistered)
   {
     typename InstanceMap::iterator i = instances_.find(_name);
     if (i != instances_.end()) {
@@ -280,12 +280,12 @@ namespace Miro
     //! Clean up the repository.
     ~UnmanagedRepository() throw();
     //! Register an instance at the repository.
-    void add(std::string const& name, Type * type) throw(EAlreadyRegistered);
+    void add(std::string const& name, Type * type);// throw(EAlreadyRegistered);
     //! Look up an instance by name.
-    Type * get(std::string const& name) throw(ENotRegistered);
+    Type * get(std::string const& name);// throw(ENotRegistered);
     //! Remove instance from the repository, deleting it.
     /** An empty repository will delete itself. */
-    void remove(std::string const& name) throw(ENotRegistered);
+    void remove(std::string const& name);// throw(ENotRegistered);
 
     //--------------------------------------------------------------------------
     // public data
@@ -361,7 +361,7 @@ namespace Miro
   template<class T>
   void
   UnmanagedRepository<T>::add(std::string const& _name, T * _instance)
-  throw(EAlreadyRegistered)
+  //throw(EAlreadyRegistered)
   {
     if (instances_.find(_name) == instances_.end()) {
       instances_.insert(std::make_pair(_name, _instance));
@@ -377,7 +377,7 @@ namespace Miro
    */
   template<class T>
   T *
-  UnmanagedRepository<T>::get(const std::string& _name) throw(ENotRegistered)
+  UnmanagedRepository<T>::get(const std::string& _name) //throw(ENotRegistered)
   {
     typename InstanceMap::const_iterator i = instances_.find(_name);
     if (i != instances_.end())
@@ -391,7 +391,7 @@ namespace Miro
    */
   template<class T>
   void
-  UnmanagedRepository<T>::remove(const std::string& _name) throw(ENotRegistered)
+  UnmanagedRepository<T>::remove(const std::string& _name) //throw(ENotRegistered)
   {
     typename InstanceMap::iterator i = instances_.find(_name);
     if (i != instances_.end()) {

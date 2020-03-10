@@ -49,9 +49,9 @@ namespace Miro
     ~ConfigDocument();
 
     void init(std::string const& _defaultName = std::string(""),
-              SearchPaths const& _paths = SearchPaths())
-    throw(Exception);
-    void init(QDomDocument * _document) throw(Exception);
+              SearchPaths const& _paths = SearchPaths());
+    //throw(Exception);
+    void init(QDomDocument * _document);// throw(Exception);
 
     void fini();
 
