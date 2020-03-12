@@ -41,22 +41,22 @@ namespace Miro
 
     typedef std::vector<std::string> StringVector;
 
-    EnumerationMultiple(std::string const& _enum, std::string const& _values)
-    throw(EInvalid, EDuplicates);
-    EnumerationMultiple(std::vector<std::string> const& _enum, std::vector<std::string> const& _values)
-    throw(EInvalid, EDuplicates);
+    EnumerationMultiple(std::string const& _enum, std::string const& _values);
+    //throw(EInvalid, EDuplicates);
+    EnumerationMultiple(std::vector<std::string> const& _enum, std::vector<std::string> const& _values);
+    //throw(EInvalid, EDuplicates);
 
-    void value(std::string const& _value) throw(EInvalid, EDuplicates);
-    void value(std::vector<std::string> const& _value) throw(EInvalid, EDuplicates);
+    void value(std::string const& _value); //throw(EInvalid, EDuplicates);
+    void value(std::vector<std::string> const& _value); //throw(EInvalid, EDuplicates);
 
     std::vector<std::string> const& value() const throw();
     std::vector<std::string> const& assortment() const throw();
 
   private:
 
-    static void makeSet(std::vector<std::string>& v) throw(EDuplicates);
+    static void makeSet(std::vector<std::string>& v); //throw(EDuplicates);
     static std::vector<std::string> tokenizer(std::string const& _values);
-    void checkAvailability(std::vector<std::string> const& v) throw(EInvalid);
+    void checkAvailability(std::vector<std::string> const& v); //throw(EInvalid);
 
     std::vector<std::string> enum_;
     std::vector<std::string> values_;
