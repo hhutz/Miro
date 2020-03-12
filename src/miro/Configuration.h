@@ -38,7 +38,7 @@ namespace Miro
      * Loading the document from default location if not overridden
      * by command line parameter -MiroConfigFile (-MCF).
      */
-    static void init(int& argc, char * argv[], const std::string& etcPath = "") throw(Exception);
+    static void init(int& argc, char * argv[], const std::string& etcPath = "");// throw(Exception);
     //! Singleton accesor for the robots configuation document.
     static Singleton<ConfigDocument> document;
   };
