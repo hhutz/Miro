@@ -48,7 +48,7 @@ namespace Miro
 {
   Singleton<ConfigDocument> Configuration::document;
 
-  void Configuration::init(int& argc, char * argv[], const std::string& etcPath) throw(Exception)
+  void Configuration::init(int& argc, char * argv[], const std::string& etcPath) //throw(Exception)
   {
     if (initialized)
       return;

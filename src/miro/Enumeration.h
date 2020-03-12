@@ -41,17 +41,17 @@ namespace Miro
 
     typedef std::vector<std::string> StringVector;
 
-    Enumeration(std::string const& _enum, std::string const& _values)
-    throw(EInvalid, EDuplicates);
-    Enumeration(std::string const &_enum, std::vector<std::string> const& _values)
-    throw(EInvalid, EDuplicates);
+    Enumeration(std::string const& _enum, std::string const& _values);
+    //throw(EInvalid, EDuplicates);
+    Enumeration(std::string const &_enum, std::vector<std::string> const& _values);
+    //throw(EInvalid, EDuplicates);
 
-    void value(std::string const& _value) throw(EInvalid, EDuplicates);
+    void value(std::string const& _value); //throw(EInvalid, EDuplicates);
     std::string const& value() const throw();
     StringVector const& assortment() const throw();
 
   private:
-    void makeSet() throw(EDuplicates);
+    void makeSet(); //throw(EDuplicates);
 
     StringVector::const_iterator enum_;
     StringVector values_;

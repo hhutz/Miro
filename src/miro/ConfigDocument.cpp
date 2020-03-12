@@ -57,7 +57,7 @@ namespace Miro
     delete document_;
   }
 
-  void ConfigDocument::init(QDomDocument * _document) throw(Exception)
+  void ConfigDocument::init(QDomDocument * _document) //throw(Exception)
   {
     delete document_;
     document_ = _document;
@@ -65,7 +65,7 @@ namespace Miro
 
   void ConfigDocument::init(std::string const& _fileName,
                             SearchPaths const& _paths)
-  throw(Exception)
+  //throw(Exception)
   {
     delete document_;
     document_ = NULL;
