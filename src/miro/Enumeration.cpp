@@ -27,7 +27,7 @@ namespace Miro
 {
   using namespace std;
 
-  Enumeration::Enumeration(string const& _enum, string const& _values) throw(EInvalid, EDuplicates)
+  Enumeration::Enumeration(string const& _enum, string const& _values) //throw(EInvalid, EDuplicates)
   {
     // tokenize input values
     int pos = 0;
@@ -46,15 +46,15 @@ namespace Miro
   }
 
 
-  Enumeration::Enumeration(string const& _enum, vector<string> const& _values) throw(EInvalid, EDuplicates) :
-      values_(_values)
+  Enumeration::Enumeration(string const& _enum, vector<string> const& _values) //throw(EInvalid, EDuplicates) 
+  : values_(_values)
   {
     makeSet();
     value(_enum);
   }
 
   void
-  Enumeration::value(string const& _value) throw(EInvalid, EDuplicates)
+  Enumeration::value(string const& _value) //throw(EInvalid, EDuplicates)
   {
     StringVector::const_iterator i;
 
@@ -66,7 +66,7 @@ namespace Miro
   }
 
   void
-  Enumeration::makeSet() throw(EDuplicates)
+  Enumeration::makeSet() //throw(EDuplicates)
   {
     sort(values_.begin(), values_.end());
     StringVector::iterator i = unique(values_.begin(), values_.end());

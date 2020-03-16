@@ -32,8 +32,8 @@ namespace Miro
 {
   EnumerationMultiple::EnumerationMultiple(string const& _enum,
       string const& _values)
-  throw(EInvalid, EDuplicates) :
-      enum_(tokenizer(_enum)),
+  //throw(EInvalid, EDuplicates) :
+  :   enum_(tokenizer(_enum)),
       values_(tokenizer(_values))
   {
     makeSet(enum_);
@@ -44,8 +44,8 @@ namespace Miro
 
   EnumerationMultiple::EnumerationMultiple(vector<string> const& _enum,
       vector<string> const& _values)
-  throw(EInvalid, EDuplicates) :
-      enum_(_enum),
+  //throw(EInvalid, EDuplicates) :
+  :   enum_(_enum),
       values_(_values)
   {
     makeSet(enum_);
@@ -55,7 +55,7 @@ namespace Miro
 
 
   void
-  EnumerationMultiple::value(string const& _value) throw(EInvalid, EDuplicates)
+  EnumerationMultiple::value(string const& _value) //throw(EInvalid, EDuplicates)
   {
     StringVector v(tokenizer(_value));
     makeSet(v);
@@ -66,7 +66,7 @@ namespace Miro
 
 
   void
-  EnumerationMultiple::value(vector<string> const& _value) throw(EInvalid, EDuplicates)
+  EnumerationMultiple::value(vector<string> const& _value) //throw(EInvalid, EDuplicates)
   {
     StringVector v(_value);
     makeSet(v);
@@ -94,7 +94,7 @@ namespace Miro
   }
 
   void
-  EnumerationMultiple::makeSet(vector<string>& v) throw(EDuplicates)
+  EnumerationMultiple::makeSet(vector<string>& v) //throw(EDuplicates)
   {
     sort(v.begin(), v.end());
     StringVector::iterator i = unique(v.begin(), v.end());
@@ -103,7 +103,7 @@ namespace Miro
   }
 
   void
-  EnumerationMultiple::checkAvailability(vector<string> const& v)  throw(EInvalid)
+  EnumerationMultiple::checkAvailability(vector<string> const& v)  //throw(EInvalid)
   {
     if (!includes(values_.begin(), values_.end(), v.begin(), v.end())) {
       throw EInvalid("Enumeration: tried to set value not in list of available values");
